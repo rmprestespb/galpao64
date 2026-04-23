@@ -1,4 +1,4 @@
-import { Flame, ChevronRight } from "lucide-react";
+import { Flame, ChevronRight, Disc3 } from "lucide-react";
 import { toast } from "sonner";
 import ferrariRedline from "@/assets/car-ferrari-redline.jpg";
 import camaroPurple from "@/assets/car-camaro-purple.jpg";
@@ -69,7 +69,7 @@ const Logo = () => (
       fill="hsl(var(--primary))"
     />
     <span className="text-primary font-extrabold tracking-[0.18em] text-sm sm:text-base">
-      HOT WHEELS <span className="font-black">LUXURY</span>
+      GALPÃO <span className="font-black">64</span>
     </span>
   </a>
 );
@@ -181,9 +181,20 @@ const Footer = () => (
   <footer id="sobre" className="border-t border-border/40 py-10 mt-10">
     <div className="container flex flex-col sm:flex-row items-center justify-between gap-4">
       <Logo />
-      <p className="text-xs text-muted-foreground tracking-wider">
-        © {new Date().getFullYear()} HOT WHEELS LUXURY · Vitrine de Miniaturas
+      <p className="text-xs text-muted-foreground tracking-wider text-center">
+        © {new Date().getFullYear()} GALPÃO 64 · Vitrine de Miniaturas
       </p>
+      <a
+        href="/admin/login"
+        aria-label="Acesso administrativo"
+        title="Acesso administrativo"
+        className="group inline-flex h-12 w-12 items-center justify-center rounded-full border border-border/60 bg-card transition-all hover:border-accent hover:shadow-glow-cyan"
+      >
+        <Disc3
+          className="h-7 w-7 text-muted-foreground transition-all group-hover:text-accent group-hover:rotate-180 duration-500"
+          strokeWidth={2}
+        />
+      </a>
     </div>
   </footer>
 );
