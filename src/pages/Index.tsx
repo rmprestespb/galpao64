@@ -1,4 +1,4 @@
-import { Flame, ChevronRight } from "lucide-react";
+import { Flame, ChevronRight, Disc3 } from "lucide-react";
 import { toast } from "sonner";
 import ferrariRedline from "@/assets/car-ferrari-redline.jpg";
 import camaroPurple from "@/assets/car-camaro-purple.jpg";
@@ -69,7 +69,7 @@ const Logo = () => (
       fill="hsl(var(--primary))"
     />
     <span className="text-primary font-extrabold tracking-[0.18em] text-sm sm:text-base">
-      HOT WHEELS <span className="font-black">LUXURY</span>
+      GALPÃO <span className="font-black">64</span>
     </span>
   </a>
 );
