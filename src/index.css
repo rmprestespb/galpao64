@@ -6,6 +6,35 @@
 All colors MUST be HSL.
 */
 
+/* Splash screen — logo entrance: blur to focus + soft pulse */
+@keyframes splash-logo-in {
+  0% {
+    opacity: 0;
+    filter: blur(24px);
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+@keyframes splash-logo-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 30px rgba(201, 169, 106, 0.25));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 70px rgba(201, 169, 106, 0.55));
+    transform: scale(1.015);
+  }
+}
+.splash-logo-enter {
+  animation:
+    splash-logo-in 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both,
+    splash-logo-pulse 3.6s ease-in-out 1.2s infinite;
+}
+
 @layer base {
   :root {
     /* Hot Wheels Luxury — Permanent dark theme */
