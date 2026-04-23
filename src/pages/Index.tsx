@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import { ChevronRight, Disc3, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import ferrariRedline from "@/assets/car-ferrari-redline.jpg";
 import camaroPurple from "@/assets/car-camaro-purple.jpg";
 import bumblebee from "@/assets/car-bumblebee.jpg";
@@ -11,6 +18,11 @@ import garageBg from "@/assets/luxury-garage-bg.jpg";
 import datsunBlue from "@/assets/car-datsun-blue.jpg";
 import porscheGreen from "@/assets/car-porsche-green.jpg";
 import skylineWhite from "@/assets/car-skyline-white.jpg";
+import lamboBlack from "@/assets/car-lambo-black.jpg";
+import mustangOrange from "@/assets/car-mustang-orange.jpg";
+import mclarenSilver from "@/assets/car-mclaren-silver.jpg";
+import gtrGrey from "@/assets/car-gtr-grey.jpg";
+import kombiRed from "@/assets/car-kombi-red.jpg";
 
 type Product = {
   id: string;
