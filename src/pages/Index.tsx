@@ -134,8 +134,8 @@ const ProductCard = ({ product }: { product: Product }) => {
     <article className="group flex flex-col rounded-lg bg-card border border-border/60 overflow-hidden transition-all duration-300 hover:border-accent/60 hover:-translate-y-1 hover:shadow-glow-cyan">
       <div className="relative aspect-square overflow-hidden bg-black">
         <img
-          src={product.image}
-          alt={product.alt}
+          src={product.images[0]}
+          alt={product.alt ?? product.title}
           width={768}
           height={768}
           loading="lazy"
@@ -148,13 +148,13 @@ const ProductCard = ({ product }: { product: Product }) => {
         </h3>
         <div className="space-y-1.5 text-xs font-semibold tracking-wider">
           <p className="text-muted-foreground">
-            SÉR: <span className="text-muted-foreground/90">{product.series}</span>
+            SÉR: <span className="text-muted-foreground/90">{product.series ?? "—"}</span>
           </p>
           <p className="text-accent">
-            RARIDADE: <span className="font-bold">{product.rarity}%</span>
+            RARIDADE: <span className="font-bold">{product.rarity ?? 0}%</span>
           </p>
           <p className="text-primary text-sm">
-            PREÇO: <span className="font-extrabold">{product.price}</span>
+            PREÇO: <span className="font-extrabold">{formatBRL(product.price_cents)}</span>
           </p>
         </div>
         <button
@@ -170,17 +170,52 @@ const ProductCard = ({ product }: { product: Product }) => {
   );
 };
 
-const Collection = () => (
-  <section id="colecao" className="py-12 sm:py-20">
-    <div className="container">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-        {products.map((p) => (
-          <ProductCard key={p.id} product={p} />
-        ))}
+const Collection = () => {
+  const [products, setProducts] = useState<Product[]>(fallbackProducts);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase
+      .from("products")
+      .select("id, title, series, rarity, price_cents, images")
+      .eq("is_published", true)
+      .order("display_order", { ascending: true })
+      .order("created_at", { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data && data.length > 0) {
+          setProducts(
+            data.map((d) => ({
+              id: d.id,
+              title: d.title,
+              series: d.series,
+              rarity: d.rarity,
+              price_cents: d.price_cents,
+              images: d.images?.length ? d.images : [ferrariRedline],
+            })),
+          );
+        }
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <section id="colecao" className="py-12 sm:py-20">
+      <div className="container">
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-accent" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+            {products.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        )}
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 const Footer = () => (
   <footer id="sobre" className="border-t border-border/40 py-10 mt-10">
