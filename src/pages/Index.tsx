@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Flame, ChevronRight, Disc3, Loader2 } from "lucide-react";
+import { ChevronRight, Disc3, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import ferrariRedline from "@/assets/car-ferrari-redline.jpg";
@@ -85,7 +85,7 @@ const Header = () => {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
   return (
-    <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur border-b border-border/40">
+    <header className="sticky top-0 z-50 w-full bg-background/70 backdrop-blur-md border-b border-border/40">
       <div className="container flex h-16 items-center justify-between">
         <Logo />
         <nav className="hidden md:flex items-center gap-8">
@@ -128,7 +128,7 @@ const ProductCard = ({ product }: { product: Product }) => {
     });
   };
   return (
-    <article className="group flex flex-col rounded-lg bg-card border border-border/60 overflow-hidden transition-all duration-300 hover:border-accent/60 hover:-translate-y-1 hover:shadow-glow-cyan">
+    <article className="group flex flex-col rounded-lg bg-card/85 backdrop-blur-sm border border-border/60 overflow-hidden transition-all duration-300 hover:border-accent/60 hover:-translate-y-1 hover:shadow-glow-cyan">
       <div className="relative aspect-square overflow-hidden bg-black">
         <img
           src={product.images[0]}
