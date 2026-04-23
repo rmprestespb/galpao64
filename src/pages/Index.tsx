@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import { ChevronRight, Disc3, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import ferrariRedline from "@/assets/car-ferrari-redline.jpg";
 import camaroPurple from "@/assets/car-camaro-purple.jpg";
 import bumblebee from "@/assets/car-bumblebee.jpg";
@@ -11,6 +18,11 @@ import garageBg from "@/assets/luxury-garage-bg.jpg";
 import datsunBlue from "@/assets/car-datsun-blue.jpg";
 import porscheGreen from "@/assets/car-porsche-green.jpg";
 import skylineWhite from "@/assets/car-skyline-white.jpg";
+import lamboBlack from "@/assets/car-lambo-black.jpg";
+import mustangOrange from "@/assets/car-mustang-orange.jpg";
+import mclarenSilver from "@/assets/car-mclaren-silver.jpg";
+import gtrGrey from "@/assets/car-gtr-grey.jpg";
+import kombiRed from "@/assets/car-kombi-red.jpg";
 
 type Product = {
   id: string;
@@ -108,45 +120,156 @@ const Header = () => {
   );
 };
 
-const coveted = [
-  { src: datsunBlue, alt: "Hot Wheels RLC Datsun 240Z azul candy com rodas douradas" },
-  { src: porscheGreen, alt: "Hot Wheels Super Treasure Hunt Porsche 911 GT3 RS verde menta" },
-  { src: skylineWhite, alt: "Hot Wheels RLC Nissan Skyline GT-R R34 branca pérola" },
+type Coveted = {
+  src: string;
+  alt: string;
+  name: string;
+  brand: "Hot Wheels" | "Mini GT" | "Matchbox" | "Miniaturas";
+  story: string;
+};
+
+const coveted: Coveted[] = [
+  {
+    src: datsunBlue,
+    alt: "Hot Wheels RLC Datsun 240Z azul candy com rodas douradas",
+    name: "Datsun 240Z — RLC",
+    brand: "Hot Wheels",
+    story:
+      "A Hot Wheels nasceu em 1968 nos Estados Unidos, criada por Elliot Handler na Mattel para revolucionar o mundo dos diecast com rodas Redline ultrarrápidas. O Red Line Club (RLC) é o programa de membros mais cobiçado da marca: tiragens limitadas, numeração individual e acabamentos Spectraflame que tornam cada peça uma relíquia para colecionadores no mundo todo.",
+  },
+  {
+    src: porscheGreen,
+    alt: "Hot Wheels Super Treasure Hunt Porsche 911 GT3 RS verde menta",
+    name: "Porsche 911 GT3 RS — STH",
+    brand: "Hot Wheels",
+    story:
+      "Os Super Treasure Hunt são o santo graal do segmento mainline da Hot Wheels: pintura Spectraflame, Real Riders com pneus de borracha e o icônico símbolo da chama em círculo. Encontrar um STH em loja é raríssimo — em média, 1 a cada milhares de blisters — o que faz colecionadores caçarem cada peg pelo Brasil em busca dessa raridade.",
+  },
+  {
+    src: skylineWhite,
+    alt: "Hot Wheels RLC Nissan Skyline GT-R R34 branca pérola",
+    name: "Nissan Skyline GT-R R34",
+    brand: "Hot Wheels",
+    story:
+      "Eternizado pelo cinema e pela cultura JDM, o Skyline GT-R R34 é uma das licenças mais disputadas da Hot Wheels. As versões RLC trazem detalhes de tampografia, faróis pintados e rodas em escala fiel — peças que valorizam ano após ano e formam o núcleo de qualquer coleção JDM séria.",
+  },
+  {
+    src: lamboBlack,
+    alt: "Mini GT Lamborghini Aventador SVJ preto fosco",
+    name: "Lamborghini Aventador SVJ",
+    brand: "Mini GT",
+    story:
+      "A Mini GT, da TSM Models, levou o 1:64 a outro patamar a partir de 2018: rodas com freios pintados, faróis transparentes, vidros de verdade e proporções de modelo de resina em escala de bolso. É a escolha de quem busca realismo de prateleira sem abrir mão da escala clássica do diecast.",
+  },
+  {
+    src: mustangOrange,
+    alt: "Matchbox Ford Mustang Boss 429 laranja com listras pretas",
+    name: "Ford Mustang Boss 429",
+    brand: "Matchbox",
+    story:
+      "A Matchbox nasceu em Londres em 1953, anterior à própria Hot Wheels, e ficou famosa pelas caixinhas de fósforo que cabiam no bolso de qualquer criança. Hoje a linha Moving Parts e os Matchbox Collectors resgatam clássicos americanos e europeus com fidelidade impressionante e foco em modelos reais.",
+  },
+  {
+    src: mclarenSilver,
+    alt: "Hot Wheels Super Treasure Hunt McLaren F1 GTR prata",
+    name: "McLaren F1 GTR",
+    brand: "Hot Wheels",
+    story:
+      "O McLaren F1 GTR é uma lenda das 24 Horas de Le Mans de 1995 e, no universo diecast, virou peça de desejo absoluto. Em versão Super Treasure Hunt, ganha pintura premium e Real Riders, transformando uma miniatura de R$ 15 numa peça que pode valer centenas no mercado de colecionadores.",
+  },
+  {
+    src: gtrGrey,
+    alt: "Mini GT Liberty Walk Nissan GT-R R35 grafite com kit widebody",
+    name: "LB★Works Nissan GT-R R35",
+    brand: "Mini GT",
+    story:
+      "As parcerias da Mini GT com a Liberty Walk trouxeram para o 1:64 os widebodies mais emblemáticos do tuning japonês. Cada lançamento esgota em minutos nas pré-vendas e se tornou referência de qualidade entre colecionadores que valorizam estilo agressivo e acabamento de catálogo.",
+  },
+  {
+    src: kombiRed,
+    alt: "Matchbox Volkswagen Kombi T1 vermelha e branca clássica",
+    name: "VW Kombi T1 Classic",
+    brand: "Miniaturas",
+    story:
+      "O universo das miniaturas vai além das marcas: ele guarda a memória afetiva do automobilismo. Da Kombi de família aos hipercarros modernos, cada peça em escala 1:64 conta uma história — e o Galpão 64 nasce justamente para reunir essas histórias num só lugar, com curadoria e raridade.",
+  },
 ];
 
-const Hero = () => (
-  <section id="top" className="relative pt-4 pb-4 sm:pt-6 sm:pb-6">
-    <h1 className="sr-only">Galpão 64 — A Arte do Diecast</h1>
-    <div className="container grid grid-cols-2 items-center gap-4 sm:gap-8">
-      <div className="flex justify-start">
-        <img
-          src={galpaoLogo}
-          alt="Logotipo Galpão 64 — A Arte do Diecast"
-          width={1100}
-          height={1100}
-          className="w-[80%] max-w-[220px] sm:max-w-[280px] h-auto drop-shadow-[0_20px_60px_rgba(0,0,0,0.85)] animate-fade-in"
-        />
+const Hero = () => {
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState<Coveted | null>(null);
+
+  const handleSelect = (item: Coveted) => {
+    setActive(item);
+    setOpen(true);
+  };
+
+  return (
+    <section id="top" className="relative pt-4 pb-4 sm:pt-6 sm:pb-6">
+      <h1 className="sr-only">Galpão 64 — A Arte do Diecast</h1>
+      <div className="container grid grid-cols-1 md:grid-cols-[auto_1fr] items-center gap-6 md:gap-10">
+        <div className="flex justify-center md:justify-start">
+          <img
+            src={galpaoLogo}
+            alt="Logotipo Galpão 64 — A Arte do Diecast"
+            width={1100}
+            height={1100}
+            className="w-[55%] max-w-[200px] md:w-auto md:max-w-[240px] h-auto drop-shadow-[0_20px_60px_rgba(0,0,0,0.85)] animate-fade-in"
+          />
+        </div>
+        <div className="grid grid-cols-4 gap-2 sm:gap-3">
+          {coveted.map((c) => (
+            <button
+              key={c.src}
+              onClick={() => handleSelect(c)}
+              aria-label={`Ver história de ${c.name}`}
+              className="group relative aspect-square overflow-hidden rounded-lg bg-black border border-border/60 shadow-[0_8px_24px_rgba(0,0,0,0.6)] transition-all duration-300 hover:border-accent/60 hover:shadow-glow-cyan hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              <img
+                src={c.src}
+                alt={c.alt}
+                width={768}
+                height={768}
+                loading="lazy"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+              <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                {c.brand}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
-        {coveted.map((c) => (
-          <div
-            key={c.src}
-            className="group relative aspect-square overflow-hidden rounded-lg bg-black border border-border/60 shadow-[0_8px_24px_rgba(0,0,0,0.6)] transition-all duration-300 hover:border-accent/60 hover:shadow-glow-cyan hover:-translate-y-0.5"
-          >
-            <img
-              src={c.src}
-              alt={c.alt}
-              width={768}
-              height={768}
-              loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-);
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-md border-border/60">
+          {active && (
+            <>
+              <div className="aspect-video w-full overflow-hidden rounded-md bg-black">
+                <img
+                  src={active.src}
+                  alt={active.alt}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <DialogHeader>
+                <p className="text-xs font-bold tracking-[0.25em] text-accent uppercase">
+                  {active.brand}
+                </p>
+                <DialogTitle className="text-2xl font-extrabold">
+                  {active.name}
+                </DialogTitle>
+                <DialogDescription className="text-sm leading-relaxed text-muted-foreground">
+                  {active.story}
+                </DialogDescription>
+              </DialogHeader>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
+};
 
 const ProductCard = ({ product }: { product: Product }) => {
   const handleBuy = () => {
