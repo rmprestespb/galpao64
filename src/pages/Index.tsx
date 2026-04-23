@@ -238,13 +238,18 @@ const Footer = () => (
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Header />
-      <main>
-        <Hero />
-        <Collection />
-      </main>
-      <Footer />
+    <div
+      className="relative min-h-screen text-foreground bg-background bg-fixed bg-center bg-cover before:content-[''] before:absolute before:inset-0 before:bg-background/75 before:pointer-events-none"
+      style={{ backgroundImage: `url(${garageBg})` }}
+    >
+      <div className="relative z-10">
+        <Header />
+        <main>
+          <Hero />
+          <Collection />
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 };
