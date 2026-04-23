@@ -108,7 +108,7 @@ const Header = () => {
 const Hero = () => (
   <section
     id="top"
-    className="relative flex items-center justify-center pt-16 pb-20 sm:pt-24 sm:pb-28"
+    className="relative flex items-center justify-center pt-8 pb-6 sm:pt-10 sm:pb-8"
   >
     <h1 className="sr-only">Galpão 64 — A Arte do Diecast</h1>
     <img
@@ -116,7 +116,7 @@ const Hero = () => (
       alt="Logotipo Galpão 64 — A Arte do Diecast"
       width={1100}
       height={1100}
-      className="relative z-10 w-[78%] max-w-[560px] h-auto drop-shadow-[0_20px_60px_rgba(0,0,0,0.85)] animate-fade-in"
+      className="relative z-10 w-[42%] max-w-[280px] sm:max-w-[320px] h-auto drop-shadow-[0_20px_60px_rgba(0,0,0,0.85)] animate-fade-in"
     />
   </section>
 );
