@@ -8,6 +8,9 @@ import bumblebee from "@/assets/car-bumblebee.jpg";
 import ferrariVintage from "@/assets/car-ferrari-vintage.jpg";
 import galpaoLogo from "@/assets/galpao64-logo.png";
 import garageBg from "@/assets/luxury-garage-bg.jpg";
+import datsunBlue from "@/assets/car-datsun-blue.jpg";
+import porscheGreen from "@/assets/car-porsche-green.jpg";
+import skylineWhite from "@/assets/car-skyline-white.jpg";
 
 type Product = {
   id: string;
@@ -105,19 +108,43 @@ const Header = () => {
   );
 };
 
+const coveted = [
+  { src: datsunBlue, alt: "Hot Wheels RLC Datsun 240Z azul candy com rodas douradas" },
+  { src: porscheGreen, alt: "Hot Wheels Super Treasure Hunt Porsche 911 GT3 RS verde menta" },
+  { src: skylineWhite, alt: "Hot Wheels RLC Nissan Skyline GT-R R34 branca pérola" },
+];
+
 const Hero = () => (
-  <section
-    id="top"
-    className="relative flex items-center justify-center pt-8 pb-6 sm:pt-10 sm:pb-8"
-  >
+  <section id="top" className="relative pt-4 pb-4 sm:pt-6 sm:pb-6">
     <h1 className="sr-only">Galpão 64 — A Arte do Diecast</h1>
-    <img
-      src={galpaoLogo}
-      alt="Logotipo Galpão 64 — A Arte do Diecast"
-      width={1100}
-      height={1100}
-      className="relative z-10 w-[42%] max-w-[280px] sm:max-w-[320px] h-auto drop-shadow-[0_20px_60px_rgba(0,0,0,0.85)] animate-fade-in"
-    />
+    <div className="container grid grid-cols-2 items-center gap-4 sm:gap-8">
+      <div className="flex justify-start">
+        <img
+          src={galpaoLogo}
+          alt="Logotipo Galpão 64 — A Arte do Diecast"
+          width={1100}
+          height={1100}
+          className="w-[80%] max-w-[220px] sm:max-w-[280px] h-auto drop-shadow-[0_20px_60px_rgba(0,0,0,0.85)] animate-fade-in"
+        />
+      </div>
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        {coveted.map((c) => (
+          <div
+            key={c.src}
+            className="group relative aspect-square overflow-hidden rounded-lg bg-black border border-border/60 shadow-[0_8px_24px_rgba(0,0,0,0.6)] transition-all duration-300 hover:border-accent/60 hover:shadow-glow-cyan hover:-translate-y-0.5"
+          >
+            <img
+              src={c.src}
+              alt={c.alt}
+              width={768}
+              height={768}
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+          </div>
+        ))}
+      </div>
+    </div>
   </section>
 );
 
@@ -196,7 +223,7 @@ const Collection = () => {
   }, []);
 
   return (
-    <section id="colecao" className="py-12 sm:py-20">
+    <section id="colecao" className="pt-4 pb-12 sm:pt-6 sm:pb-20">
       <div className="container">
         {loading ? (
           <div className="flex justify-center py-20">
