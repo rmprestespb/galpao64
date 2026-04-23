@@ -1,5 +1,7 @@
-import { Flame, ChevronRight, Disc3 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Flame, ChevronRight, Disc3, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import ferrariRedline from "@/assets/car-ferrari-redline.jpg";
 import camaroPurple from "@/assets/car-camaro-purple.jpg";
 import bumblebee from "@/assets/car-bumblebee.jpg";
@@ -8,21 +10,21 @@ import ferrariVintage from "@/assets/car-ferrari-vintage.jpg";
 type Product = {
   id: string;
   title: string;
-  series: string;
-  rarity: number;
-  price: string;
-  image: string;
-  alt: string;
+  series: string | null;
+  rarity: number | null;
+  price_cents: number;
+  images: string[];
+  alt?: string;
 };
 
-const products: Product[] = [
+const fallbackProducts: Product[] = [
   {
     id: "redline",
     title: "Red Line Club Exclusive",
     series: "Red Line Club",
     rarity: 98,
-    price: "R$ 2.600",
-    image: ferrariRedline,
+    price_cents: 260000,
+    images: [ferrariRedline],
     alt: "Miniatura Ferrari vermelha Red Line Club Exclusive",
   },
   {
@@ -30,8 +32,8 @@ const products: Product[] = [
     title: "Super Treasure Hunt Purple",
     series: "Super Treasure Hunt",
     rarity: 95,
-    price: "R$ 3.200",
-    image: camaroPurple,
+    price_cents: 320000,
+    images: [camaroPurple],
     alt: "Miniatura Camaro roxo Super Treasure Hunt",
   },
   {
@@ -39,8 +41,8 @@ const products: Product[] = [
     title: "Bumblebee Transformers",
     series: "Transformers",
     rarity: 99,
-    price: "R$ 5.000",
-    image: bumblebee,
+    price_cents: 500000,
+    images: [bumblebee],
     alt: "Miniatura Camaro Bumblebee amarelo Transformers",
   },
   {
@@ -48,11 +50,14 @@ const products: Product[] = [
     title: "Vintage Treasure",
     series: "Vintage Collection",
     rarity: 92,
-    price: "R$ 1.800",
-    image: ferrariVintage,
+    price_cents: 180000,
+    images: [ferrariVintage],
     alt: "Miniatura Ferrari vermelha vintage clássica",
   },
 ];
+
+const formatBRL = (cents: number) =>
+  (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 const navLinks = [
   { label: "COLEÇÃO", href: "#colecao" },
