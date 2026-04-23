@@ -6,6 +6,8 @@ import ferrariRedline from "@/assets/car-ferrari-redline.jpg";
 import camaroPurple from "@/assets/car-camaro-purple.jpg";
 import bumblebee from "@/assets/car-bumblebee.jpg";
 import ferrariVintage from "@/assets/car-ferrari-vintage.jpg";
+import galpaoLogo from "@/assets/galpao64-logo.png";
+import garageBg from "@/assets/luxury-garage-bg.jpg";
 
 type Product = {
   id: string;
@@ -68,14 +70,11 @@ const navLinks = [
 
 const Logo = () => (
   <a href="#top" className="flex items-center gap-2 group">
-    <Flame
-      className="h-6 w-6 text-primary transition-transform group-hover:scale-110"
-      strokeWidth={2.5}
-      fill="hsl(var(--primary))"
+    <img
+      src={galpaoLogo}
+      alt="Galpão 64 — A Arte do Diecast"
+      className="h-10 w-auto transition-transform group-hover:scale-105 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
     />
-    <span className="text-primary font-extrabold tracking-[0.18em] text-sm sm:text-base">
-      GALPÃO <span className="font-black">64</span>
-    </span>
   </a>
 );
 
@@ -107,20 +106,18 @@ const Header = () => {
 };
 
 const Hero = () => (
-  <section id="top" className="relative pt-20 pb-16 sm:pt-28 sm:pb-20 text-center bg-stage">
-    <div className="container">
-      <p className="text-xs sm:text-sm font-semibold tracking-[0.4em] text-muted-foreground mb-6">
-        EXCLUSIVIDADE · RARIDADE · COLECIONÁVEL
-      </p>
-      <h1 className="font-display font-black uppercase leading-[0.95] tracking-tight text-4xl sm:text-6xl md:text-7xl lg:text-8xl">
-        <span className="block text-foreground">VITRINE DE</span>
-        <span className="block text-accent text-glow-cyan">MINIATURAS</span>
-      </h1>
-      <p className="mt-8 max-w-xl mx-auto text-base sm:text-lg text-muted-foreground">
-        Peças raras Hot Wheels para colecionadores exigentes. Curadoria de edições
-        limitadas, treasure hunts e exclusivos do Red Line Club.
-      </p>
-    </div>
+  <section
+    id="top"
+    className="relative flex items-center justify-center pt-16 pb-20 sm:pt-24 sm:pb-28"
+  >
+    <h1 className="sr-only">Galpão 64 — A Arte do Diecast</h1>
+    <img
+      src={galpaoLogo}
+      alt="Logotipo Galpão 64 — A Arte do Diecast"
+      width={1100}
+      height={1100}
+      className="relative z-10 w-[78%] max-w-[560px] h-auto drop-shadow-[0_20px_60px_rgba(0,0,0,0.85)] animate-fade-in"
+    />
   </section>
 );
 
