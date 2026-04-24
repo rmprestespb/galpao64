@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Flame, Loader2, LogOut, Plus, Trash2, Printer, FileText, ArrowLeft } from "lucide-react";
+import { Flame, Loader2, LogOut, Plus, Trash2, Printer, FileText, ArrowLeft, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -118,7 +118,7 @@ const Receipts = () => {
     window.print();
   };
 
-  const sendWhatsApp = () => {
+  const buildWhatsAppMessage = () => {
     const lines = [
       `*GALPÃO 64 — Recibo ${receiptNumber}*`,
       `Data: ${formatDateBR(date)}`,
@@ -144,12 +144,36 @@ const Receipts = () => {
     ]
       .filter(Boolean)
       .join("\n");
+    return lines;
+  };
 
+  const sendWhatsApp = () => {
+    const message = buildWhatsAppMessage();
     const phoneDigits = phone.replace(/\D/g, "");
     const url = phoneDigits
-      ? `https://wa.me/55${phoneDigits}?text=${encodeURIComponent(lines)}`
-      : `https://wa.me/?text=${encodeURIComponent(lines)}`;
+      ? `https://wa.me/55${phoneDigits}?text=${encodeURIComponent(message)}`
+      : `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
+  };
+
+  const sendToClientWhatsApp = () => {
+    if (!client.trim()) {
+      toast.error("Informe o nome do cliente");
+      return;
+    }
+    const phoneDigits = phone.replace(/\D/g, "");
+    if (!phoneDigits) {
+      toast.error("Informe o telefone (WhatsApp) do cliente");
+      return;
+    }
+    if (items.every((i) => !i.description.trim())) {
+      toast.error("Adicione ao menos um item com descrição");
+      return;
+    }
+    const message = buildWhatsAppMessage();
+    const url = `https://wa.me/55${phoneDigits}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+    toast.success("Abrindo WhatsApp do cliente...");
   };
 
   const handleLogout = async () => {
@@ -401,6 +425,12 @@ const Receipts = () => {
         <div className="flex flex-wrap gap-3">
           <Button onClick={generate} className="font-bold tracking-wider">
             <FileText className="h-4 w-4" /> GERAR RECIBO
+          </Button>
+          <Button
+            onClick={sendToClientWhatsApp}
+            className="font-bold tracking-wider bg-[#25D366] hover:bg-[#1ebe5a] text-white"
+          >
+            <MessageCircle className="h-4 w-4" /> ENVIAR PARA WHATSAPP DO CLIENTE
           </Button>
           <Button onClick={clearForm} variant="outline">
             Limpar Campos
