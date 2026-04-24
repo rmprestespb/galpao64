@@ -15,6 +15,7 @@ import bumblebee from "@/assets/car-bumblebee.jpg";
 import ferrariVintage from "@/assets/car-ferrari-vintage.jpg";
 import galpaoLogo from "@/assets/galpao64-logo.png";
 import garageBg from "@/assets/luxury-garage-bg.jpg";
+import aboutMiniature from "@/assets/about-miniature.jpg";
 import datsunBlue from "@/assets/car-datsun-blue.jpg";
 import porscheGreen from "@/assets/car-porsche-green.jpg";
 import skylineWhite from "@/assets/car-skyline-white.jpg";
@@ -365,7 +366,7 @@ const Collection = () => {
 };
 
 const Footer = () => (
-  <footer id="sobre" className="border-t border-border/40 py-10 mt-10">
+  <footer className="border-t border-border/40 py-10 mt-10">
     <div className="container flex flex-col sm:flex-row items-center justify-between gap-4">
       <Logo />
       <p className="text-xs text-muted-foreground tracking-wider text-center">
