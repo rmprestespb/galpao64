@@ -79,7 +79,7 @@ const formatBRL = (cents: number) =>
 
 const navLinks = [
   { label: "GARAGEM", href: "#colecao" },
-  { label: "RARIDADES", href: "#raridades" },
+  { label: "DIECAST", href: "/diecast" },
   { label: "SOBRE", href: "#sobre" },
   { label: "ÁLBUM/RESERVAS", href: "/album" },
 ];
