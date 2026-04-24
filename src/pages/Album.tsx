@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Loader2, MapPin, PackageCheck, Search, Warehouse } from "lucide-react";
+import { ArrowLeft, HelpCircle, Loader2, MapPin, PackageCheck, Search, Warehouse } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,12 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import galpaoLogo from "@/assets/galpao64-logo.png";
 
 type ReservationStatus = "na_garagem" | "aguardando_envio";
@@ -224,6 +230,86 @@ const Album = () => {
             ))}
           </div>
         )}
+
+        {/* FAQ */}
+        <section className="mt-20 md:mt-28">
+          <div className="mb-10 md:mb-14 max-w-2xl">
+            <p className="text-xs font-semibold tracking-[0.3em] text-accent mb-3 inline-flex items-center gap-2">
+              <HelpCircle className="h-3.5 w-3.5" />
+              FAQ
+            </p>
+            <h2 className="font-display text-3xl md:text-5xl font-bold leading-[1.05] mb-3">
+              🏎️ Dúvidas Frequentes
+            </h2>
+            <p className="text-sm md:text-base text-muted-foreground">
+              Tudo o que você precisa saber sobre a Garagem do Galpão 64 — armazenamento,
+              prazos e envio das suas miniaturas.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm px-5 md:px-8">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="q1" className="border-border/60">
+                <AccordionTrigger className="text-left font-display text-base md:text-lg hover:no-underline hover:text-accent">
+                  Como funciona a "Garagem"?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-sm md:text-base leading-relaxed">
+                  A Garagem é um benefício exclusivo para nossos clientes. Você pode comprar
+                  suas miniaturas e, em vez de pagar o frete a cada compra, nós as guardamos
+                  com total segurança. Isso permite que você acumule vários modelos e pague
+                  um único frete quando decidir receber tudo em casa.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q2" className="border-border/60">
+                <AccordionTrigger className="text-left font-display text-base md:text-lg hover:no-underline hover:text-accent">
+                  Qual o prazo máximo de armazenamento?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-sm md:text-base leading-relaxed">
+                  Você tem até <span className="text-foreground font-semibold">90 dias de carência</span>{" "}
+                  (armazenamento gratuito) a partir da data da compra do primeiro item. Após
+                  esse período, entraremos em contato para combinar o envio.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q3" className="border-border/60">
+                <AccordionTrigger className="text-left font-display text-base md:text-lg hover:no-underline hover:text-accent">
+                  Por que minha garagem é pública?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-sm md:text-base leading-relaxed">
+                  Nosso álbum de reservas serve como uma vitrine de transparência e
+                  comunidade. Assim, todos os colecionadores podem ver as raridades que
+                  estão passando pelo Galpão, criando um histórico real de nossas
+                  negociações. Exibimos apenas seu primeiro nome e cidade para preservar
+                  sua privacidade.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q4" className="border-border/60">
+                <AccordionTrigger className="text-left font-display text-base md:text-lg hover:no-underline hover:text-accent">
+                  Como solicito o envio das minhas miniaturas?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-sm md:text-base leading-relaxed">
+                  A qualquer momento! Basta clicar no botão{" "}
+                  <span className="text-foreground font-semibold">"Solicitar Envio"</span>{" "}
+                  dentro do seu box no site ou entrar em contato direto pelo nosso WhatsApp.
+                  Calcularemos o frete com base no peso total e volume da sua caixa.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q5" className="border-b-0">
+                <AccordionTrigger className="text-left font-display text-base md:text-lg hover:no-underline hover:text-accent">
+                  Posso adicionar novos itens a uma garagem já aberta?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-sm md:text-base leading-relaxed">
+                  Com certeza! Cada nova compra é adicionada ao seu box atual
+                  automaticamente. O prazo de 90 dias continua contando a partir da data de
+                  entrada do primeiro item guardado.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </section>
       </main>
 
       {/* Garage detail */}
