@@ -335,14 +335,15 @@ const AboutSection = () => (
         </h2>
         <div className="space-y-4 text-base sm:text-lg leading-relaxed text-muted-foreground max-w-xl">
           <p>
-            O <span className="text-foreground font-semibold">Galpão 64</span> nasceu da paixão
-            de quem entende que cada miniatura é uma obra de engenharia em escala — pintura
-            impecável, rodas Real Riders e tampografias que respeitam o original.
+            Bem-vindo ao <span className="text-foreground font-semibold">Galpão 64</span>, o
+            destino definitivo para colecionadores de diecast de alto nível. Especializados na
+            escala 1:64, oferecemos uma seleção rigorosa de modelos raros, importados e
+            clássicos que definem gerações.
           </p>
           <p>
-            Aqui você encontra peças raras, edições limitadas e clássicos que atravessam
-            gerações. De Skylines lendários a Ferraris de coleção, curamos cada item com
-            olhar de garagem e alma de colecionador.
+            Nossa missão é facilitar o acesso a peças exclusivas e garantir que cada miniatura
+            entregue em suas mãos carregue a história e a qualidade que você procura. Se você
+            busca raridade, integridade e paixão por carros, você encontrou o seu lugar.
           </p>
         </div>
         <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4">
