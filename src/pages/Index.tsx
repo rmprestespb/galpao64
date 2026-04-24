@@ -81,7 +81,7 @@ const navLinks = [
   { label: "COLEÇÃO", href: "#colecao" },
   { label: "RARIDADES", href: "#raridades" },
   { label: "SOBRE", href: "#sobre" },
-  { label: "ÁLBUM/RESERVAS", href: "#album" },
+  { label: "ÁLBUM/RESERVAS", href: "/album" },
 ];
 
 const Logo = () => (
@@ -96,6 +96,7 @@ const Logo = () => (
 
 const Header = () => {
   const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("/")) return; // let browser navigate to route
     e.preventDefault();
     const el = document.querySelector(href);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
