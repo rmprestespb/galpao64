@@ -375,7 +375,7 @@ const AboutSection = () => (
           />
           <img
             src={aboutMiniature}
-            alt="Miniatura Nissan Skyline GT-R R34 azul em escala 1:64 sobre piso de garagem industrial"
+            alt="Coleção de miniaturas em escala 1:64 expostas em galpão industrial com reflexo no piso, estilo evento de colecionadores"
             width={1024}
             height={1024}
             loading="lazy"
