@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Flame, Loader2, LogOut, Plus, Pencil, Trash2, Upload, X, Film } from "lucide-react";
+import { Flame, Loader2, LogOut, Plus, Pencil, Trash2, Upload, X, Film, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -227,10 +227,17 @@ const Admin = () => {
               <span className="ml-2 text-muted-foreground font-semibold">/ ADMIN</span>
             </span>
           </Link>
-          <Button variant="ghost" size="sm" onClick={handleLogout}>
-            <LogOut className="h-4 w-4" />
-            Sair
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10">
+              <Link to="/admin/recibos">
+                <FileText className="h-4 w-4" /> Recibos
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleLogout}>
+              <LogOut className="h-4 w-4" />
+              Sair
+            </Button>
+          </div>
         </div>
       </header>
 
