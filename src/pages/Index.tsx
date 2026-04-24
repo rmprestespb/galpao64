@@ -318,10 +318,6 @@ const ProductCard = ({ product }: { product: Product }) => {
   );
 };
 
-const Collection = () => {
-  return null as never;
-};
-
 const AboutSection = () => (
   <section
     id="sobre"
@@ -390,7 +386,7 @@ const AboutSection = () => (
   </section>
 );
 
-const CollectionReal = () => {
+const Collection = () => {
   const [products, setProducts] = useState<Product[]>(fallbackProducts);
   const [loading, setLoading] = useState(true);
 
