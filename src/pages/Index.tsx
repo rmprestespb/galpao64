@@ -478,6 +478,7 @@ const Index = () => {
         <Header />
         <main>
           <Hero />
+          <AboutSection />
           <Collection />
         </main>
         <Footer />
