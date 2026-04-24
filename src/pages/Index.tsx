@@ -78,7 +78,7 @@ const formatBRL = (cents: number) =>
   (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 const navLinks = [
-  { label: "COLEÇÃO", href: "#colecao" },
+  { label: "GARAGEM", href: "#colecao" },
   { label: "RARIDADES", href: "#raridades" },
   { label: "SOBRE", href: "#sobre" },
   { label: "ÁLBUM/RESERVAS", href: "/album" },
