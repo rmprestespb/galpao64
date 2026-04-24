@@ -11,6 +11,7 @@ import Admin from "./pages/Admin.tsx";
 import Aura from "./pages/Aura.tsx";
 import Album from "./pages/Album.tsx";
 import Receipts from "./pages/Receipts.tsx";
+import Diecast from "./pages/Diecast.tsx";
 import SplashScreen from "./components/SplashScreen.tsx";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => {
             <Route path="/admin/recibos" element={<Receipts />} />
             <Route path="/aura" element={<Aura />} />
             <Route path="/album" element={<Album />} />
+            <Route path="/diecast" element={<Diecast />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
