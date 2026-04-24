@@ -383,6 +383,19 @@ const Footer = () => (
         />
       </a>
     </div>
+    <div className="container mt-6 flex justify-center">
+      <p className="text-[11px] tracking-[0.2em] uppercase text-muted-foreground/80">
+        Criado por{" "}
+        <a
+          href="https://www.kaeth.com.br/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-foreground/90 hover:text-accent transition-colors underline-offset-4 hover:underline"
+        >
+          Agência Kaeth
+        </a>
+      </p>
+    </div>
   </footer>
 );
 
