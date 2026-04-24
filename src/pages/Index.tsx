@@ -319,6 +319,78 @@ const ProductCard = ({ product }: { product: Product }) => {
 };
 
 const Collection = () => {
+  return null as never;
+};
+
+const AboutSection = () => (
+  <section
+    id="sobre"
+    className="relative py-16 sm:py-24 bg-gradient-to-b from-black via-[hsl(0_0%_6%)] to-black border-y border-border/40"
+  >
+    <div className="container grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
+      <div className="text-left order-2 md:order-1">
+        <p className="text-xs font-bold tracking-[0.3em] text-accent uppercase mb-4">
+          Nossa Essência
+        </p>
+        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold uppercase leading-[0.95] tracking-tight text-foreground mb-6">
+          A Arte do <span className="text-primary">Diecast</span>
+          <br />
+          em Escala 1:64
+        </h2>
+        <div className="space-y-4 text-base sm:text-lg leading-relaxed text-muted-foreground max-w-xl">
+          <p>
+            O <span className="text-foreground font-semibold">Galpão 64</span> nasceu da paixão
+            de quem entende que cada miniatura é uma obra de engenharia em escala — pintura
+            impecável, rodas Real Riders e tampografias que respeitam o original.
+          </p>
+          <p>
+            Aqui você encontra peças raras, edições limitadas e clássicos que atravessam
+            gerações. De Skylines lendários a Ferraris de coleção, curamos cada item com
+            olhar de garagem e alma de colecionador.
+          </p>
+        </div>
+        <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4">
+          <div>
+            <p className="text-3xl font-extrabold text-accent">+500</p>
+            <p className="text-muted-foreground text-[11px] uppercase tracking-[0.2em] font-bold mt-1">
+              Peças catalogadas
+            </p>
+          </div>
+          <div>
+            <p className="text-3xl font-extrabold text-accent">100%</p>
+            <p className="text-muted-foreground text-[11px] uppercase tracking-[0.2em] font-bold mt-1">
+              Curadoria própria
+            </p>
+          </div>
+          <div>
+            <p className="text-3xl font-extrabold text-accent">1:64</p>
+            <p className="text-muted-foreground text-[11px] uppercase tracking-[0.2em] font-bold mt-1">
+              Escala oficial
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="order-1 md:order-2 flex justify-center md:justify-end">
+        <div className="relative w-full max-w-md aspect-square">
+          <div
+            aria-hidden="true"
+            className="absolute -inset-6 rounded-full bg-primary/10 blur-3xl"
+          />
+          <img
+            src={aboutMiniature}
+            alt="Miniatura Nissan Skyline GT-R R34 azul em escala 1:64 sobre piso de garagem industrial"
+            width={1024}
+            height={1024}
+            loading="lazy"
+            className="relative w-full h-full object-cover rounded-2xl border border-border/60 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.95)]"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+const CollectionReal = () => {
   const [products, setProducts] = useState<Product[]>(fallbackProducts);
   const [loading, setLoading] = useState(true);
 
