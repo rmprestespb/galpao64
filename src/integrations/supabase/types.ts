@@ -59,6 +59,74 @@ export type Database = {
         }
         Relationships: []
       }
+      reservation_collectors: {
+        Row: {
+          city: string
+          created_at: string
+          display_name: string
+          display_order: number
+          id: string
+          state: string
+          status: Database["public"]["Enums"]["reservation_status"]
+          updated_at: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          display_name: string
+          display_order?: number
+          id?: string
+          state: string
+          status?: Database["public"]["Enums"]["reservation_status"]
+          updated_at?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          display_name?: string
+          display_order?: number
+          id?: string
+          state?: string
+          status?: Database["public"]["Enums"]["reservation_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reservation_items: {
+        Row: {
+          collector_id: string
+          created_at: string
+          display_order: number
+          id: string
+          image_url: string
+          title: string
+        }
+        Insert: {
+          collector_id: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url: string
+          title: string
+        }
+        Update: {
+          collector_id?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservation_items_collector_id_fkey"
+            columns: ["collector_id"]
+            isOneToOne: false
+            referencedRelation: "reservation_collectors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -95,6 +163,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      reservation_status: "na_garagem" | "aguardando_envio"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -223,6 +292,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      reservation_status: ["na_garagem", "aguardando_envio"],
     },
   },
 } as const
