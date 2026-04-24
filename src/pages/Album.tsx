@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Loader2, MapPin, PackageCheck, Search, Warehouse } from "lucide-react";
+import { ArrowLeft, HelpCircle, Loader2, MapPin, PackageCheck, Search, Warehouse } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,12 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import galpaoLogo from "@/assets/galpao64-logo.png";
 
 type ReservationStatus = "na_garagem" | "aguardando_envio";
