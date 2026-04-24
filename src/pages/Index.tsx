@@ -318,8 +318,107 @@ const ProductCard = ({ product }: { product: Product }) => {
   );
 };
 
-const AboutSection = () => (
-  <section
+type CarHotspot = {
+  id: string;
+  name: string;
+  brand: string;
+  story: string;
+  // normalized 0-1 coords (relative to image)
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+const carHotspots: CarHotspot[] = [
+  // Front row (4 cars)
+  {
+    id: "skyline-blue",
+    name: "Nissan Skyline GT-R R34",
+    brand: "Hot Wheels RLC",
+    story:
+      "Eternizado pelo cinema e pela cultura JDM, o R34 em azul Bayside é um dos modelos mais cobiçados do mundo diecast. A versão RLC traz pintura Spectraflame, faróis pintados e Real Riders — uma peça que valoriza a cada lançamento.",
+    x: 0.0, y: 0.55, w: 0.30, h: 0.22,
+  },
+  {
+    id: "ferrari-f40",
+    name: "Ferrari F40",
+    brand: "Hot Wheels Premium",
+    story:
+      "A última Ferrari aprovada pessoalmente por Enzo Ferrari. Em escala 1:64, o F40 vermelho Rosso Corsa é um símbolo absoluto do colecionismo: linhas agressivas, asa traseira icônica e o V8 biturbo que marcou os anos 80.",
+    x: 0.22, y: 0.55, w: 0.28, h: 0.20,
+  },
+  {
+    id: "lambo-purple",
+    name: "Lamborghini Aventador",
+    brand: "Mini GT",
+    story:
+      "O Aventador em viola metálico é um dos lançamentos mais celebrados da Mini GT. Rodas com freios pintados, vidros transparentes e proporções fiéis fazem dele referência absoluta de realismo no segmento 1:64.",
+    x: 0.46, y: 0.55, w: 0.26, h: 0.20,
+  },
+  {
+    id: "mclaren-white",
+    name: "McLaren GT",
+    brand: "Mini GT",
+    story:
+      "O McLaren branco pérola representa o auge do GT moderno britânico. Cada detalhe — das entradas de ar laterais às portas dihedral — foi reproduzido com precisão de joalheria, transformando a peça num objeto de desejo de prateleira.",
+    x: 0.70, y: 0.55, w: 0.28, h: 0.22,
+  },
+  // Back row (5 cars)
+  {
+    id: "lambo-black",
+    name: "Lamborghini Diablo",
+    brand: "Hot Wheels",
+    story:
+      "O Diablo preto fosco evoca a brutalidade dos supercarros dos anos 90. Versão raríssima de mainline com tampografia premium, é um clássico que sempre desaparece dos pegs em segundos.",
+    x: 0.04, y: 0.45, w: 0.18, h: 0.13,
+  },
+  {
+    id: "porsche-silver",
+    name: "Porsche 911 GT3",
+    brand: "Mini GT",
+    story:
+      "O 911 prata Liquid Chrome traz a essência do esporte alemão para o 1:64. Pintura espelhada, asa traseira fixa e rodas centrais — uma peça que combina engenharia e arte em escala reduzida.",
+    x: 0.20, y: 0.43, w: 0.16, h: 0.13,
+  },
+  {
+    id: "lambo-orange",
+    name: "Lamborghini Countach",
+    brand: "Hot Wheels Premium",
+    story:
+      "O Countach laranja Arancio é puro DNA dos anos 80: portas tesoura, cunha agressiva e escapamentos quádruplos. Lançamento da linha Premium com Real Riders, é o sonho de qualquer colecionador retrô.",
+    x: 0.34, y: 0.42, w: 0.18, h: 0.14,
+  },
+  {
+    id: "lambo-yellow",
+    name: "Lamborghini Huracán",
+    brand: "Hot Wheels STH",
+    story:
+      "Um Super Treasure Hunt em amarelo Giallo Orion. Encontrar essa peça em loja é praticamente impossível — pintura Spectraflame, símbolo da chama em círculo e Real Riders fazem dela uma das mais valiosas da linha.",
+    x: 0.50, y: 0.45, w: 0.18, h: 0.13,
+  },
+  {
+    id: "lambo-violet",
+    name: "Lamborghini Aventador SVJ",
+    brand: "Mini GT Liberty Walk",
+    story:
+      "Edição Liberty Walk em violeta cromático. As parcerias da Mini GT com a LB★Works esgotam em minutos nas pré-vendas e definem o padrão de tuning japonês aplicado aos hipercarros italianos.",
+    x: 0.72, y: 0.42, w: 0.20, h: 0.14,
+  },
+];
+
+const AboutSection = () => {
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState<CarHotspot | null>(null);
+
+  const handleSelect = (car: CarHotspot) => {
+    setActive(car);
+    setOpen(true);
+  };
+
+  return (
+    <>
+      <section
     id="sobre"
     className="relative py-16 sm:py-24 bg-gradient-to-b from-black via-[hsl(0_0%_6%)] to-black border-y border-border/40"
   >
@@ -381,11 +480,52 @@ const AboutSection = () => (
             loading="lazy"
             className="relative w-full h-full object-cover rounded-2xl border border-border/60 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.95)]"
           />
+          {carHotspots.map((car) => (
+            <button
+              key={car.id}
+              onClick={() => handleSelect(car)}
+              aria-label={`Ver história do ${car.name}`}
+              className="group absolute rounded-md border border-transparent transition-all duration-300 hover:border-accent hover:bg-accent/10 hover:shadow-glow-cyan focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-black"
+              style={{
+                left: `${car.x * 100}%`,
+                top: `${car.y * 100}%`,
+                width: `${car.w * 100}%`,
+                height: `${car.h * 100}%`,
+              }}
+            >
+              <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-7 whitespace-nowrap rounded-full bg-black/90 border border-accent/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent opacity-0 group-hover:opacity-100 transition-opacity">
+                {car.name}
+              </span>
+            </button>
+          ))}
+          <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.25em] font-bold text-foreground/70 bg-black/60 backdrop-blur px-3 py-1 rounded-full border border-border/60">
+            Clique em um carro
+          </p>
         </div>
       </div>
     </div>
-  </section>
-);
+      </section>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-lg bg-card/95 backdrop-blur-md border-border/60">
+          {active && (
+            <DialogHeader>
+              <p className="text-xs font-bold tracking-[0.25em] text-accent uppercase">
+                {active.brand}
+              </p>
+              <DialogTitle className="text-2xl font-extrabold">
+                {active.name}
+              </DialogTitle>
+              <DialogDescription className="text-sm leading-relaxed text-muted-foreground pt-2">
+                {active.story}
+              </DialogDescription>
+            </DialogHeader>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
 
 const Collection = () => {
   const [products, setProducts] = useState<Product[]>(fallbackProducts);
