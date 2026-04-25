@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import cyberHex from "@/assets/cyber-garage-hex.jpg";
+import showroomSplash from "@/assets/galpao-showroom-splash.jpg";
 
 interface SplashScreenProps {
   onEnter: () => void;
@@ -277,44 +277,49 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
           opening ? "opacity-0" : "opacity-100"
         }`}
       >
-        {/* Splash artwork — only the central badge/logo. Sized so the
-            full emblem is always visible on both short mobile screens
-            and large desktops, never clipped. */}
-        <div className="splash-logo-enter flex justify-center items-center w-full">
-          <img
-            src={galpaoLogo}
-            alt="Logotipo Galpão 64 — A Arte do Diecast, fundado em 2024"
-            className="object-contain"
-            style={{
-              width: "min(82vw, 460px)",
-              height: "auto",
-              maxHeight: "min(58vh, 460px)",
-              // Stronger glow + subtle dark backdrop boosts contrast of
-              // the badge against the black doors for better legibility.
-              filter:
-                "drop-shadow(0 0 24px rgba(0,0,0,0.85)) drop-shadow(0 0 70px rgba(201,169,106,0.55))",
-            }}
-          />
+        {/* Full-bleed showroom artwork: rustic wooden garage at night with
+            the doors open revealing legendary 1:64 diecast classics inside.
+            The 'GALPÃO 64 — A ARTE DO DIECAST' metal sign is part of the
+            artwork itself, integrated above the garage doors. */}
+        <img
+          src={showroomSplash}
+          alt="Galpão 64 — galpão de madeira com portas abertas exibindo coleção de miniaturas diecast 1:64 lendárias: Ford Mustang verde, Chevrolet Opala vermelho e Porsche 911 preto"
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{
+            objectPosition: "center 40%",
+          }}
+        />
+
+        {/* Subtle warm vignette to deepen the cinematic mood and ensure
+            the CTA reads cleanly over the lower portion of the artwork. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse at center 35%, transparent 35%, rgba(0,0,0,0.35) 75%, rgba(0,0,0,0.75) 100%)",
+          }}
+        />
+
+        {/* CTA stack pinned to the lower-center of the splash */}
+        <div className="relative z-10 mt-auto mb-[10vh] flex w-full flex-col items-center gap-3 px-4">
+          <button
+            type="button"
+            onClick={handleEnter}
+            aria-label="Clique para entrar no showroom Galpão 64"
+            className="group relative inline-flex items-center justify-center rounded-md border-2 border-[#F5D896]/80 bg-black/65 px-8 sm:px-12 py-3.5 sm:py-4 text-xs sm:text-sm font-bold tracking-[0.32em] text-white shadow-[0_0_30px_rgba(245,216,150,0.35)] backdrop-blur-sm transition-all duration-500 hover:bg-[#F5D896] hover:text-black hover:shadow-[0_0_50px_rgba(245,216,150,0.85)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#F5D896] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            style={{ fontFamily: "'Montserrat', sans-serif" }}
+          >
+            CLIQUE PARA ENTRAR NO SHOWROOM
+          </button>
+
+          <p
+            className="text-[10px] sm:text-[11px] uppercase tracking-[0.32em] sm:tracking-[0.4em] text-white/85 text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]"
+            style={{ fontFamily: "'Montserrat', sans-serif" }}
+          >
+            Conheça nossa curadoria de miniaturas lendárias 1:64
+          </p>
         </div>
-
-        <button
-          type="button"
-          onClick={handleEnter}
-          aria-label="Entrar no site Galpão 64"
-          className="group relative inline-flex items-center justify-center border-2 border-[#F5D896] bg-black/70 px-8 py-3 text-xs sm:text-sm font-semibold tracking-[0.5em] text-[#FFE6A8] transition-all duration-500 hover:bg-[#F5D896] hover:text-black hover:shadow-[0_0_40px_rgba(245,216,150,0.7)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#F5D896] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
-        >
-          <span aria-hidden="true" className="absolute -left-6 top-1/2 h-px w-4 bg-[#F5D896] transition-all duration-500 group-hover:w-6" />
-          CLIQUE PARA ENTRAR
-          <span aria-hidden="true" className="absolute -right-6 top-1/2 h-px w-4 bg-[#F5D896] transition-all duration-500 group-hover:w-6" />
-        </button>
-
-        <p
-          className="text-[11px] uppercase tracking-[0.5em] sm:tracking-[0.6em] text-white/80 text-center"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
-        >
-          Acelere para entrar no galpão
-        </p>
       </div>
     </div>
   );
