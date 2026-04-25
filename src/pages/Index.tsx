@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import GarageProCard from "@/components/GarageProCard";
+import ProductGarageCard from "@/components/ProductGarageCard";
 import ferrariRedline from "@/assets/car-ferrari-redline.jpg";
 import camaroPurple from "@/assets/car-camaro-purple.jpg";
 import bumblebee from "@/assets/car-bumblebee.jpg";
@@ -31,11 +31,11 @@ type Product = {
   id: string;
   title: string;
   series: string | null;
+  description?: string | null;
   rarity: number | null;
   price_cents: number;
   images: string[];
-  sale_image_original_url?: string | null;
-  sale_image_processed_url?: string | null;
+  video_url?: string | null;
   alt?: string;
   status?: "disponivel" | "reservado" | "vendido";
 };
@@ -584,7 +584,7 @@ const Collection = () => {
   useEffect(() => {
     supabase
       .from("products")
-      .select("id, title, series, rarity, price_cents, images, sale_image_original_url, sale_image_processed_url, status")
+      .select("id, title, series, description, rarity, price_cents, images, video_url, status")
       .eq("is_published", true)
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: false })
@@ -595,11 +595,11 @@ const Collection = () => {
               id: d.id,
               title: d.title,
               series: d.series,
+              description: (d as any).description ?? null,
               rarity: d.rarity,
               price_cents: d.price_cents,
               images: d.images?.length ? d.images : [ferrariRedline],
-              sale_image_original_url: d.sale_image_original_url,
-              sale_image_processed_url: d.sale_image_processed_url,
+              video_url: (d as any).video_url ?? null,
               status: (d as any).status ?? "disponivel",
             })),
           );
@@ -618,17 +618,16 @@ const Collection = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {products.map((p) => (
-              <GarageProCard
+              <ProductGarageCard
                 key={p.id}
                 product={{
                   id: p.id,
                   title: p.title,
                   series: p.series,
-                  rarity: p.rarity,
+                  description: p.description,
                   price_cents: p.price_cents,
                   images: p.images,
-                  sale_image_original_url: p.sale_image_original_url,
-                  sale_image_processed_url: p.sale_image_processed_url,
+                  video_url: p.video_url,
                   alt: p.alt,
                   status: p.status,
                 }}
