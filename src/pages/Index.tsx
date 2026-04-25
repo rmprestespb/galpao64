@@ -443,7 +443,7 @@ const AboutSection = () => {
         <p className="text-xs font-bold tracking-[0.3em] text-accent uppercase mb-4">
           Nossa Essência
         </p>
-        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold uppercase leading-[0.95] tracking-tight text-foreground mb-6">
+        <h2 className="neon-title text-4xl sm:text-5xl lg:text-6xl font-extrabold uppercase leading-[0.95] tracking-tight text-foreground mb-8">
           A Arte do <span className="text-primary">Diecast</span>
           <br />
           em Escala 1:64
