@@ -80,11 +80,27 @@ const fallbackProducts: Product[] = [
 const formatBRL = (cents: number) =>
   (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-const navLinks = [
-  { label: "GARAGEM", href: "#colecao" },
-  { label: "DIECAST", href: "/diecast" },
-  { label: "SOBRE", href: "#sobre" },
-  { label: "ÁLBUM/RESERVAS", href: "/album" },
+const navLinks: Array<{ label: string; href: string; ariaLabel: string }> = [
+  {
+    label: "GARAGEM",
+    href: "#colecao",
+    ariaLabel: "Ir para a seção Garagem — coleção de diecast",
+  },
+  {
+    label: "DIECAST",
+    href: "/diecast",
+    ariaLabel: "Abrir página Diecast — raridades em destaque",
+  },
+  {
+    label: "SOBRE",
+    href: "#sobre",
+    ariaLabel: "Ir para a seção Sobre o Galpão 64",
+  },
+  {
+    label: "ÁLBUM/RESERVAS",
+    href: "/album",
+    ariaLabel: "Abrir Álbum e Reservas",
+  },
 ];
 
 const Logo = () => (
@@ -109,28 +125,39 @@ const Header = () => {
     <header className="sticky top-0 z-50 w-full bg-background/70 backdrop-blur-md border-b border-border/40">
       <div className="container flex h-16 items-center justify-between">
         <Logo />
-        <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={(e) => {
-                if (link.href === "/album") markSeen();
-                handleNav(e, link.href);
-              }}
-              className="neon-link text-xs font-semibold tracking-[0.2em] text-foreground/90"
-            >
-              {link.label}
-              {link.href === "/album" && newCount > 0 && (
-                <span
-                  aria-label={`${newCount} novas reservas`}
-                  className="absolute -top-2 -right-3 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] font-bold leading-[18px] text-center shadow-[0_0_10px_rgba(239,68,68,0.85)] animate-pulse ring-2 ring-background"
-                >
-                  {newCount > 9 ? "9+" : newCount}
-                </span>
-              )}
-            </a>
-          ))}
+        <nav
+          className="hidden md:flex items-center gap-8"
+          aria-label="Navegação principal"
+        >
+          {navLinks.map((link) => {
+            const isAlbum = link.href === "/album";
+            const ariaLabel =
+              isAlbum && newCount > 0
+                ? `${link.ariaLabel} (${newCount} ${newCount === 1 ? "nova reserva" : "novas reservas"})`
+                : link.ariaLabel;
+            return (
+              <a
+                key={link.href}
+                href={link.href}
+                aria-label={ariaLabel}
+                onClick={(e) => {
+                  if (isAlbum) markSeen();
+                  handleNav(e, link.href);
+                }}
+                className="neon-link relative text-xs font-semibold tracking-[0.2em] text-foreground/90 rounded-sm focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--neon-color))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                {link.label}
+                {isAlbum && newCount > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -top-2 -right-3 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] font-bold leading-[18px] text-center shadow-[0_0_10px_rgba(239,68,68,0.85)] animate-pulse ring-2 ring-background"
+                  >
+                    {newCount > 9 ? "9+" : newCount}
+                  </span>
+                )}
+              </a>
+            );
+          })}
         </nav>
       </div>
     </header>
