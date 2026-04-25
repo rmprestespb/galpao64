@@ -103,20 +103,33 @@ export const generateZoomCrops = async (
   const w = img.naturalWidth;
   const h = img.naturalHeight;
 
-  // 3 sample regions: front-left, center, back-right
-  const regions: Array<{ sx: number; sy: number; s: number }> = [];
-  const baseSide = Math.min(w, h) * 0.45;
+  // Smart zoom regions tuned for a die-cast car shot (typical 3/4 front view):
+  // 1. Front wheel / headlight (lower-left area)
+  // 2. Side chassis (horizontal mid-band, centered)
+  // 3. Roof / interior (upper portion)
+  const small = Math.min(w, h) * 0.28;
+  const wide = Math.min(w, h) * 0.34;
 
-  regions.push({ sx: w * 0.05, sy: h * 0.45, s: baseSide });
-  regions.push({ sx: (w - baseSide) / 2, sy: (h - baseSide) / 2, s: baseSide });
-  regions.push({ sx: w * 0.55, sy: h * 0.2, s: baseSide });
+  const regions: Array<{ sx: number; sy: number; sw: number; sh: number }> = [
+    // Front wheel + headlight — bottom-left quadrant
+    { sx: w * 0.06, sy: h * 0.55, sw: small, sh: small },
+    // Side chassis — wide horizontal slice across the middle
+    { sx: w * 0.18, sy: h * 0.42, sw: wide * 1.4, sh: wide * 0.7 },
+    // Roof / interior — upper-center
+    { sx: w * 0.28, sy: h * 0.12, sw: small * 1.2, sh: small },
+  ];
 
   return regions.slice(0, count).map((r) => {
     const c = document.createElement("canvas");
     c.width = size;
     c.height = size;
     const ctx = c.getContext("2d")!;
-    ctx.drawImage(img, r.sx, r.sy, r.s, r.s, 0, 0, size, size);
+    // clamp to image bounds
+    const sx = Math.max(0, Math.min(w - 1, r.sx));
+    const sy = Math.max(0, Math.min(h - 1, r.sy));
+    const sw = Math.max(1, Math.min(w - sx, r.sw));
+    const sh = Math.max(1, Math.min(h - sy, r.sh));
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, size, size);
     return c.toDataURL("image/png");
   });
 };
