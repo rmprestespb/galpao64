@@ -93,7 +93,7 @@ const CollectibleLightbox = ({
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 animate-fade-in"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-premium-fade-in"
     >
       {/* Overlay (click outside to close) */}
       <button
@@ -116,23 +116,31 @@ const CollectibleLightbox = ({
       {/* Content shell */}
       <div
         className={cn(
-          "relative z-[105] w-full max-w-3xl max-h-[88vh]",
-          "grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]",
+          "relative z-[105] w-[90vw] max-w-6xl h-auto md:h-[80vh] max-h-[80vh]",
+          "grid grid-cols-1 md:grid-cols-2",
           "rounded-2xl overflow-hidden",
           "bg-[hsl(0_0%_5%)]/80 backdrop-blur-2xl border border-white/15",
           "ring-1 ring-white/5",
           "shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]",
-          "animate-scale-in",
+          "animate-premium-slide-up",
         )}
       >
         {/* Media side */}
-        <div className="relative bg-gradient-to-br from-black via-black to-neutral-900 flex items-center justify-center p-4 sm:p-5 min-h-[36vh] md:min-h-[48vh] md:max-h-[88vh]">
+        <div className="relative overflow-hidden bg-gradient-to-br from-black via-black to-neutral-900 flex items-center justify-center p-6 sm:p-8 min-h-[40vh] md:min-h-full md:h-full">
+          {/* Soft glow behind media */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 flex items-center justify-center"
+          >
+            <div className="h-[70%] w-[70%] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,210,122,0.18),rgba(0,229,255,0.08)_45%,transparent_70%)] blur-3xl" />
+          </div>
+
           {current.type === "image" ? (
             <img
               key={current.src}
               src={current.src}
               alt={current.alt ?? title}
-              className="max-h-[34vh] md:max-h-[46vh] max-w-full object-contain animate-fade-in rounded-lg drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
+              className="relative z-10 max-h-[38vh] md:max-h-[68vh] max-w-full object-contain animate-premium-fade-in rounded-lg drop-shadow-[0_30px_60px_rgba(0,0,0,0.7)]"
             />
           ) : (
             <video
@@ -140,7 +148,7 @@ const CollectibleLightbox = ({
               src={current.src}
               controls
               autoPlay
-              className="max-h-[34vh] md:max-h-[46vh] max-w-full rounded-lg"
+              className="relative z-10 max-h-[38vh] md:max-h-[68vh] max-w-full rounded-lg"
             />
           )}
 
@@ -193,7 +201,7 @@ const CollectibleLightbox = ({
         </div>
 
         {/* Info side */}
-        <aside className="relative bg-black/60 backdrop-blur-xl border-t md:border-t-0 md:border-l border-white/10 p-5 sm:p-6 flex flex-col gap-4 overflow-y-auto">
+        <aside className="relative bg-black/60 backdrop-blur-xl border-t md:border-t-0 md:border-l border-white/10 p-6 sm:p-8 flex flex-col gap-5 overflow-y-auto md:h-full">
           {series && (
             <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-accent">
               {series}
