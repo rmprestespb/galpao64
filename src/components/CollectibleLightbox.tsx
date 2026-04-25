@@ -251,10 +251,11 @@ const CollectibleLightbox = ({
               Ficha técnica
             </p>
             <dl className="grid grid-cols-2 gap-2 text-sm">
-              {specRows.map((row) => (
+              {specRows.map((row, i) => (
                 <div
                   key={row.label}
-                  className="rounded-lg border border-white/10 bg-white/[0.03] backdrop-blur-sm p-3"
+                  className="rounded-lg border border-white/10 bg-white/[0.03] backdrop-blur-sm p-3 animate-spec-stagger-in"
+                  style={{ animationDelay: `${0.25 + i * 0.07}s` }}
                 >
                   <dt className="text-[10px] uppercase tracking-wider text-white/50">
                     {row.label}
@@ -265,7 +266,10 @@ const CollectibleLightbox = ({
                 </div>
               ))}
               {typeof rarity === "number" && (
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] backdrop-blur-sm p-3">
+                <div
+                  className="rounded-lg border border-white/10 bg-white/[0.03] backdrop-blur-sm p-3 animate-spec-stagger-in"
+                  style={{ animationDelay: `${0.25 + specRows.length * 0.07}s` }}
+                >
                   <dt className="text-[10px] uppercase tracking-wider text-white/50">
                     Raridade
                   </dt>
