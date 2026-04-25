@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Play, X } from "lucide-react";
+import { Play, X, ShoppingBag, MessageCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export type CollectibleCardData = {
@@ -27,12 +30,39 @@ type Props = {
   product: CollectibleCardData;
   onAction?: (product: CollectibleCardData) => void;
   actionLabel?: string;
+  whatsappNumber?: string;
 };
 
-const CollectibleCard = ({ product, onAction, actionLabel = "Reservar" }: Props) => {
+const CollectibleCard = ({
+  product,
+  onAction,
+  actionLabel = "Comprar",
+  whatsappNumber = "5546999350070",
+}: Props) => {
   const [activeImage, setActiveImage] = useState(product.images[0]);
   const [videoOpen, setVideoOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const hasGallery = product.images.length > 1;
+
+  const handleBuyClick = () => {
+    onAction?.(product);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = () => {
+    const message = encodeURIComponent(
+      `Olá! Tenho interesse em comprar:\n\n` +
+        `• ${product.title}\n` +
+        (product.series ? `• Série: ${product.series}\n` : "") +
+        `• Valor: ${formatBRL(product.price_cents)}\n\n` +
+        `Pode me passar as próximas etapas?`,
+    );
+    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
+    toast.success("Pedido iniciado", {
+      description: `Continue a conversa no WhatsApp para finalizar.`,
+    });
+    setConfirmOpen(false);
+  };
 
   const description =
     product.description ??
@@ -161,7 +191,7 @@ const CollectibleCard = ({ product, onAction, actionLabel = "Reservar" }: Props)
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between gap-3 px-4 py-3 bg-[hsl(0_0%_4%)]">
+        <div className="flex flex-col gap-3 px-4 py-3 bg-[hsl(0_0%_4%)]">
           <div className="min-w-0">
             <h3
               className="truncate text-sm font-semibold tracking-tight text-white"
@@ -178,17 +208,75 @@ const CollectibleCard = ({ product, onAction, actionLabel = "Reservar" }: Props)
           </div>
           <button
             type="button"
-            onClick={() => onAction?.(product)}
+            onClick={handleBuyClick}
+            aria-label={`Comprar ${product.title}`}
             className={cn(
-              "shrink-0 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em]",
-              "bg-white/5 border border-white/15 text-white/90",
-              "hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all",
+              "w-full inline-flex items-center justify-center gap-2",
+              "rounded-full px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.2em]",
+              "bg-primary text-primary-foreground",
+              "border border-primary/60",
+              "shadow-[0_8px_24px_-8px_rgba(255,140,0,0.55)]",
+              "hover:brightness-110 hover:shadow-[0_10px_30px_-6px_rgba(255,140,0,0.75)]",
+              "active:scale-[0.98] transition-all",
             )}
           >
+            <ShoppingBag className="h-4 w-4" strokeWidth={2.5} />
             {actionLabel}
           </button>
         </div>
       </article>
+
+      {/* Confirmação de compra */}
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent className="max-w-md bg-card/95 backdrop-blur-md border-border/60">
+          <DialogHeader>
+            <p className="text-[11px] font-bold tracking-[0.25em] text-accent uppercase">
+              Confirmar Compra
+            </p>
+            <DialogTitle className="text-xl font-extrabold leading-tight">
+              {product.title}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              {product.series ? `${product.series} · ` : ""}
+              Você será encaminhado ao WhatsApp do Galpão 64 para finalizar a reserva.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex items-center gap-4 rounded-lg border border-border/60 bg-black/40 p-3">
+            <img
+              src={activeImage}
+              alt=""
+              className="h-16 w-16 rounded-md object-cover border border-white/10"
+            />
+            <div className="flex-1">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                Total
+              </p>
+              <p className="text-2xl font-extrabold text-[#FFD27A]">
+                {formatBRL(product.price_cents)}
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <button
+              type="button"
+              onClick={() => setConfirmOpen(false)}
+              className="rounded-md px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirm}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-green-500 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] text-white hover:bg-green-600 transition-colors"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Confirmar no WhatsApp
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {product.videoUrl && (
         <Dialog open={videoOpen} onOpenChange={setVideoOpen}>
