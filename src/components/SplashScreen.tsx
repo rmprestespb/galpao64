@@ -210,7 +210,6 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
     if (triggered.current) return;
     triggered.current = true;
     setPressed(true);
-    playEngineSound();
     // Wait for ignition catch (~0.6s) before opening the doors,
     // so the V8 thump syncs with the reveal.
     window.setTimeout(() => setOpening(true), 600);
