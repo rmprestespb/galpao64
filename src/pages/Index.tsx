@@ -94,6 +94,11 @@ const navLinks: Array<{ label: string; href: string; ariaLabel: string }> = [
     ariaLabel: "Abrir página Diecast — raridades em destaque",
   },
   {
+    label: "SHOWROOM",
+    href: "/showroom",
+    ariaLabel: "Abrir Showroom Interativo — galeria do colecionador",
+  },
+  {
     label: "SOBRE",
     href: "#sobre",
     ariaLabel: "Ir para a seção Sobre o Galpão 64",
