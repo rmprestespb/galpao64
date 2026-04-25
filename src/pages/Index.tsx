@@ -578,12 +578,7 @@ const Collection = () => {
                   images: p.images,
                   alt: p.alt,
                 }}
-                actionLabel="Reservar"
-                onAction={(item) =>
-                  toast.success("Item reservado", {
-                    description: `${item.title} foi adicionado à sua reserva.`,
-                  })
-                }
+                actionLabel="Comprar"
               />
             ))}
           </div>
