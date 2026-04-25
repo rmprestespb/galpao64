@@ -684,6 +684,92 @@ const Receipts = () => {
               </div>
             </div>
 
+            {/* PIX QR — Banco C6 com fundo temático Galpão 64 */}
+            {includePix && pixQrUrl && (
+              <div className="mt-8 rounded-xl overflow-hidden border-2 border-black/80 print:border-black break-inside-avoid">
+                <div className="grid grid-cols-[auto_1fr] gap-0 items-stretch">
+                  {/* Stage temático */}
+                  <div
+                    className="relative flex items-center justify-center p-5"
+                    style={{
+                      background:
+                        "radial-gradient(circle at 30% 30%, #ff7a18 0%, #b53a00 45%, #1a0d05 100%)",
+                    }}
+                  >
+                    {/* Grid sutil */}
+                    <div
+                      className="absolute inset-0 opacity-25"
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(to right, rgba(255,255,255,0.18) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.18) 1px, transparent 1px)",
+                        backgroundSize: "14px 14px",
+                      }}
+                    />
+                    {/* Selo Galpão 64 acima */}
+                    <div className="absolute top-2 left-2 right-2 flex items-center justify-between text-white text-[9px] font-black uppercase tracking-[0.25em] z-10">
+                      <span className="flex items-center gap-1">
+                        <Flame className="h-3 w-3" fill="currentColor" /> GALPÃO 64
+                      </span>
+                      <span className="opacity-80">PIX • C6 BANK</span>
+                    </div>
+                    {/* Moldura branca em torno do QR para garantir leitura */}
+                    <div className="relative z-10 mt-4 rounded-lg bg-white p-3 shadow-[0_8px_24px_rgba(0,0,0,0.5)] ring-2 ring-white">
+                      <img
+                        src={pixQrUrl}
+                        alt="QR Code PIX Galpão 64"
+                        className="h-44 w-44 block"
+                        crossOrigin="anonymous"
+                      />
+                      {/* Logo central sobre o QR (pequeno, fundo branco — não atrapalha leitura) */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="bg-white rounded-md p-1 shadow-md ring-1 ring-black/10">
+                          <img src={logo} alt="" className="h-6 w-6 object-contain" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="absolute bottom-1 left-2 right-2 text-center text-white text-[8px] uppercase tracking-[0.3em] opacity-80 z-10">
+                      A Arte do Diecast
+                    </div>
+                  </div>
+
+                  {/* Dados do PIX */}
+                  <div className="bg-neutral-50 p-4 text-xs text-black">
+                    <div className="text-[10px] uppercase tracking-[0.25em] text-neutral-600 font-bold">
+                      Pagamento via PIX
+                    </div>
+                    <div className="mt-1 text-base font-black tracking-wider">
+                      Banco C6 — Galpão 64
+                    </div>
+                    <div className="mt-3 grid grid-cols-1 gap-1.5">
+                      <div>
+                        <div className="text-[9px] uppercase tracking-[0.2em] text-neutral-500">
+                          Favorecido
+                        </div>
+                        <div className="font-bold">{pixName}</div>
+                      </div>
+                      <div>
+                        <div className="text-[9px] uppercase tracking-[0.2em] text-neutral-500">
+                          Chave PIX
+                        </div>
+                        <div className="font-mono break-all">{pixKey}</div>
+                      </div>
+                      <div>
+                        <div className="text-[9px] uppercase tracking-[0.2em] text-neutral-500">
+                          Valor
+                        </div>
+                        <div className="text-lg font-black tabular-nums text-[#b53a00]">
+                          {formatBRL(total)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 text-[9px] uppercase tracking-[0.2em] text-neutral-500">
+                      Aponte a câmera do app do seu banco para o QR Code ao lado.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="mt-12 grid grid-cols-2 gap-10 text-xs">
               <div className="border-t border-black pt-2 text-center">
                 Assinatura do Cliente
