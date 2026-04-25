@@ -128,7 +128,7 @@ const CollectibleCard = ({
           {/* Discreet price (initial state) */}
           <div
             className={cn(
-              "absolute right-3 top-3 rounded-full px-3 py-1",
+              "pointer-events-none absolute right-3 top-3 rounded-full px-3 py-1",
               "bg-black/55 backdrop-blur-md border border-white/10",
               "text-[13px] font-extrabold tracking-tight",
               "text-[#FFD27A]",
@@ -142,7 +142,7 @@ const CollectibleCard = ({
           {/* Glassmorphism reveal layer */}
           <div
             className={cn(
-              "absolute inset-x-0 bottom-0 p-4 sm:p-5",
+              "absolute inset-x-0 bottom-0 z-10 p-4 sm:p-5 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto",
               "translate-y-4 opacity-0",
               "group-hover:translate-y-0 group-hover:opacity-100",
               "group-focus-within:translate-y-0 group-focus-within:opacity-100",
