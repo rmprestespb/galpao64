@@ -277,27 +277,16 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
           opening ? "opacity-0" : "opacity-100"
         }`}
       >
-        {/* Wrapper crops the bottom of the PNG (which embeds its own
-            "GALPÃO 64" button + "Clique para acelerar" caption) so we
-            don't show duplicates of the external button/caption below.
-            Uses responsive sizes capped by viewport height to avoid
-            cutting off the cars on short mobile screens. */}
-        <div
-          className="overflow-hidden splash-logo-enter flex justify-center"
-          style={{ maxHeight: "min(62vh, 560px)" }}
-        >
+        {/* Splash artwork — show the full image without crops so the
+            cars and badge stay intact on mobile and desktop. */}
+        <div className="splash-logo-enter flex justify-center">
           <img
             src={galpaoLogo}
             alt="Galpão 64 — A Arte do Diecast"
             className="h-auto object-contain"
             style={{
-              width: "min(88vw, 540px)",
-              maxHeight: "min(62vh, 560px)",
-              // Crop more of the bottom to fully hide the embedded
-              // "GALPÃO 64" button + "CLIQUE PARA ACELERAR" caption
-              // baked into the PNG.
-              clipPath: "inset(0 0 30% 0)",
-              marginBottom: "-20%",
+              width: "min(92vw, 620px)",
+              maxHeight: "min(70vh, 620px)",
               filter: "drop-shadow(0 0 60px rgba(201,169,106,0.35))",
             }}
           />
@@ -310,7 +299,7 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
           <span className="absolute -left-6 top-1/2 h-px w-4 bg-[#C9A96A]/60 transition-all duration-500 group-hover:w-6" />
-          GALPÃO 64
+          CLIQUE PARA ENTRAR
           <span className="absolute -right-6 top-1/2 h-px w-4 bg-[#C9A96A]/60 transition-all duration-500 group-hover:w-6" />
         </button>
 
@@ -318,7 +307,7 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
           className="text-[10px] uppercase tracking-[0.5em] sm:tracking-[0.6em] text-white/40 text-center"
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
-          Clique para acelerar
+          Acelere para entrar no galpão
         </p>
       </div>
     </div>
