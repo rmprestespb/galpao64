@@ -518,6 +518,48 @@ const Receipts = () => {
           </div>
         </section>
 
+        {/* PIX (BANCO C6) */}
+        <section className="rounded-lg border border-accent/40 bg-card/60 backdrop-blur-sm p-6 mb-6">
+          <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <QrCode className="h-5 w-5 text-accent" />
+              <h2 className="text-xs uppercase tracking-[0.3em] text-accent font-bold">
+                PIX no Recibo — Banco C6
+              </h2>
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer text-xs uppercase tracking-wider">
+              <Checkbox
+                checked={includePix}
+                onCheckedChange={(v) => setIncludePix(v === true)}
+              />
+              <span>Incluir QR Code no recibo</span>
+            </label>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-[0.2em] text-primary">Chave PIX (C6)</Label>
+              <Input
+                value={pixKey}
+                onChange={(e) => setPixKey(e.target.value)}
+                placeholder="email, CPF ou aleatória"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-[0.2em] text-primary">Favorecido</Label>
+              <Input value={pixName} onChange={(e) => setPixName(e.target.value)} maxLength={25} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-[0.2em] text-primary">Cidade</Label>
+              <Input value={pixCity} onChange={(e) => setPixCity(e.target.value)} maxLength={15} />
+            </div>
+          </div>
+
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            O QR Code será gerado automaticamente com o valor total <span className="text-accent font-bold">{formatBRL(total)}</span> e impresso no recibo com fundo temático Galpão 64.
+          </p>
+        </section>
+
         {/* ACTIONS */}
         <div className="flex flex-wrap gap-3">
           <Button onClick={generate} className="font-bold tracking-wider">
