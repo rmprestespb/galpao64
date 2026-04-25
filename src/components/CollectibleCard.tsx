@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Play, X } from "lucide-react";
+import { Play, X, ShoppingBag, MessageCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export type CollectibleCardData = {
@@ -27,12 +30,39 @@ type Props = {
   product: CollectibleCardData;
   onAction?: (product: CollectibleCardData) => void;
   actionLabel?: string;
+  whatsappNumber?: string;
 };
 
-const CollectibleCard = ({ product, onAction, actionLabel = "Reservar" }: Props) => {
+const CollectibleCard = ({
+  product,
+  onAction,
+  actionLabel = "Comprar",
+  whatsappNumber = "5546999350070",
+}: Props) => {
   const [activeImage, setActiveImage] = useState(product.images[0]);
   const [videoOpen, setVideoOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const hasGallery = product.images.length > 1;
+
+  const handleBuyClick = () => {
+    onAction?.(product);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = () => {
+    const message = encodeURIComponent(
+      `Olá! Tenho interesse em comprar:\n\n` +
+        `• ${product.title}\n` +
+        (product.series ? `• Série: ${product.series}\n` : "") +
+        `• Valor: ${formatBRL(product.price_cents)}\n\n` +
+        `Pode me passar as próximas etapas?`,
+    );
+    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
+    toast.success("Pedido iniciado", {
+      description: `Continue a conversa no WhatsApp para finalizar.`,
+    });
+    setConfirmOpen(false);
+  };
 
   const description =
     product.description ??
