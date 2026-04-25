@@ -1,11 +1,27 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, MessageCircle, Play, ShieldCheck, Truck, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  MessageCircle,
+  Play,
+  ShieldCheck,
+  Truck,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type LightboxMedia = {
   type: "image" | "video";
   src: string;
   alt?: string;
+};
+
+export type SpecSheet = {
+  brand?: string | null;
+  series?: string | null;
+  scale?: string | null;
+  color?: string | null;
+  condition?: string | null;
 };
 
 type Props = {
@@ -20,6 +36,7 @@ type Props = {
   initialIndex?: number;
   onBuy?: () => void;
   status?: "disponivel" | "reservado" | "vendido";
+  specs?: SpecSheet;
 };
 
 const CollectibleLightbox = ({
@@ -34,6 +51,7 @@ const CollectibleLightbox = ({
   initialIndex = 0,
   onBuy,
   status = "disponivel",
+  specs,
 }: Props) => {
   const [index, setIndex] = useState(initialIndex);
 
@@ -61,6 +79,14 @@ const CollectibleLightbox = ({
 
   const current = media[index];
   const hasMultiple = media.length > 1;
+
+  const specRows: Array<{ label: string; value: string }> = [
+    { label: "Marca", value: specs?.brand ?? "Hot Wheels" },
+    { label: "Série", value: specs?.series ?? series ?? "—" },
+    { label: "Escala", value: specs?.scale ?? "1:64" },
+    { label: "Cor", value: specs?.color ?? "—" },
+    { label: "Condição", value: specs?.condition ?? "Na cartela" },
+  ];
 
   return (
     <div
@@ -93,7 +119,8 @@ const CollectibleLightbox = ({
           "relative z-[105] w-full max-w-6xl max-h-[92vh]",
           "grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]",
           "rounded-2xl overflow-hidden",
-          "bg-[hsl(0_0%_5%)]/90 backdrop-blur-xl border border-white/10",
+          "bg-[hsl(0_0%_5%)]/80 backdrop-blur-2xl border border-white/15",
+          "ring-1 ring-white/5",
           "shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]",
           "animate-scale-in",
         )}
@@ -179,12 +206,12 @@ const CollectibleLightbox = ({
             {title}
           </h2>
 
-          <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+          <div className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-md p-4 shadow-inner">
             <p className="text-[10px] uppercase tracking-[0.25em] text-white/50">
               Valor
             </p>
             <p
-              className="text-3xl sm:text-4xl font-extrabold text-[#FFD27A] mt-1"
+              className="text-4xl sm:text-5xl font-extrabold text-[#FFD27A] mt-1 drop-shadow-[0_2px_12px_rgba(255,210,122,0.35)]"
               style={{ fontFamily: "Inter, system-ui, sans-serif" }}
             >
               {priceLabel}
@@ -199,8 +226,8 @@ const CollectibleLightbox = ({
             <ShieldCheck className="h-4 w-4 text-accent mt-0.5 shrink-0" />
             <p>
               <span className="font-semibold text-accent">Pagamento via PIX.</span>{" "}
-              Após clicar em reservar, você será atendido pessoalmente para
-              detalhes de envio.
+              Após clicar em garantir, você será atendido pessoalmente para
+              combinar PIX, frete e envio.
             </p>
           </div>
 
@@ -215,27 +242,28 @@ const CollectibleLightbox = ({
             <p className="text-[10px] uppercase tracking-[0.25em] text-white/50 mb-2">
               Ficha técnica
             </p>
-            <dl className="grid grid-cols-2 gap-3 text-sm">
-              <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                <dt className="text-[10px] uppercase tracking-wider text-white/50">Escala</dt>
-                <dd className="text-white font-semibold mt-0.5">1:64</dd>
-              </div>
-              {series && (
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                  <dt className="text-[10px] uppercase tracking-wider text-white/50">Série</dt>
-                  <dd className="text-white font-semibold mt-0.5 truncate">{series}</dd>
+            <dl className="grid grid-cols-2 gap-2 text-sm">
+              {specRows.map((row) => (
+                <div
+                  key={row.label}
+                  className="rounded-lg border border-white/10 bg-white/[0.03] backdrop-blur-sm p-3"
+                >
+                  <dt className="text-[10px] uppercase tracking-wider text-white/50">
+                    {row.label}
+                  </dt>
+                  <dd className="text-white font-semibold mt-0.5 truncate">
+                    {row.value}
+                  </dd>
                 </div>
-              )}
+              ))}
               {typeof rarity === "number" && (
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                  <dt className="text-[10px] uppercase tracking-wider text-white/50">Raridade</dt>
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] backdrop-blur-sm p-3">
+                  <dt className="text-[10px] uppercase tracking-wider text-white/50">
+                    Raridade
+                  </dt>
                   <dd className="text-accent font-semibold mt-0.5">{rarity}%</dd>
                 </div>
               )}
-              <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                <dt className="text-[10px] uppercase tracking-wider text-white/50">Curadoria</dt>
-                <dd className="text-white font-semibold mt-0.5">Galpão 64</dd>
-              </div>
             </dl>
           </div>
 
@@ -255,15 +283,15 @@ const CollectibleLightbox = ({
               type="button"
               onClick={onBuy}
               className={cn(
-                "mt-auto w-full inline-flex items-center justify-center gap-2",
-                "rounded-full px-5 py-3 text-xs font-bold uppercase tracking-[0.22em]",
+                "mt-auto w-full inline-flex items-center justify-center gap-2.5",
+                "rounded-full px-5 py-3.5 text-[13px] font-extrabold uppercase tracking-[0.2em]",
                 "bg-[#25D366] text-black",
-                "shadow-[0_10px_30px_-8px_rgba(37,211,102,0.65)]",
+                "shadow-[0_14px_40px_-10px_rgba(37,211,102,0.75)]",
                 "hover:brightness-110 active:scale-[0.98] transition-all",
               )}
             >
-              <MessageCircle className="h-4 w-4" strokeWidth={2.5} />
-              Reservar no WhatsApp
+              <MessageCircle className="h-4 w-4" strokeWidth={2.75} />
+              Garantir esta peça
             </button>
           ) : null}
         </aside>
