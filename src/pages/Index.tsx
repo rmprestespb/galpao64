@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ChevronRight, Disc3, Loader2, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAlbumBadge } from "@/hooks/useAlbumBadge";
 import {
   Dialog,
   DialogContent,
@@ -96,6 +97,7 @@ const Logo = () => (
 );
 
 const Header = () => {
+  const { newCount, markSeen } = useAlbumBadge();
   const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith("/")) return; // let browser navigate to route
     e.preventDefault();
@@ -111,10 +113,21 @@ const Header = () => {
             <a
               key={link.href}
               href={link.href}
-              onClick={(e) => handleNav(e, link.href)}
-              className="text-xs font-semibold tracking-[0.2em] text-foreground/90 hover:text-accent transition-colors"
+              onClick={(e) => {
+                if (link.href === "/album") markSeen();
+                handleNav(e, link.href);
+              }}
+              className="relative text-xs font-semibold tracking-[0.2em] text-foreground/90 hover:text-accent transition-colors"
             >
               {link.label}
+              {link.href === "/album" && newCount > 0 && (
+                <span
+                  aria-label={`${newCount} novas reservas`}
+                  className="absolute -top-2 -right-3 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] font-bold leading-[18px] text-center shadow-[0_0_10px_rgba(239,68,68,0.85)] animate-pulse ring-2 ring-background"
+                >
+                  {newCount > 9 ? "9+" : newCount}
+                </span>
+              )}
             </a>
           ))}
         </nav>
