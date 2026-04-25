@@ -359,25 +359,49 @@ const Album = () => {
                   Nenhuma miniatura cadastrada nesta garagem.
                 </p>
               ) : (
-                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 max-h-[60vh] overflow-y-auto pr-1">
-                  {active.reservation_items.map((it) => (
-                    <button
-                      key={it.id}
-                      onClick={() => setLightbox(it)}
-                      className="group rounded-lg overflow-hidden border border-border/60 bg-background/40 hover:border-accent/60 transition-colors text-left"
+                <>
+                  <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 max-h-[55vh] overflow-y-auto pr-1">
+                    {active.reservation_items.map((it) => (
+                      <button
+                        key={it.id}
+                        onClick={() => setLightbox(it)}
+                        className="group rounded-lg overflow-hidden border border-border/60 bg-background/40 hover:border-accent/60 transition-colors text-left"
+                      >
+                        <div className="aspect-square overflow-hidden">
+                          <img
+                            src={it.image_url}
+                            alt={it.title}
+                            loading="lazy"
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
+                        <p className="px-3 py-2 text-xs font-medium truncate">{it.title}</p>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Botão fixo no rodapé do diálogo */}
+                  <div className="sticky bottom-0 -mx-6 -mb-6 mt-4 px-6 py-4 bg-card/95 backdrop-blur border-t border-border/60">
+                    <p className="text-[11px] text-muted-foreground mb-2 inline-flex items-center gap-1.5">
+                      <Truck className="h-3.5 w-3.5" />
+                      Frete: A combinar via WhatsApp
+                    </p>
+                    <Button
+                      asChild
+                      size="lg"
+                      className="w-full bg-[#25D366] text-black hover:brightness-110 font-bold tracking-[0.18em] uppercase text-xs"
                     >
-                      <div className="aspect-square overflow-hidden">
-                        <img
-                          src={it.image_url}
-                          alt={it.title}
-                          loading="lazy"
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      </div>
-                      <p className="px-3 py-2 text-xs font-medium truncate">{it.title}</p>
-                    </button>
-                  ))}
-                </div>
+                      <a
+                        href={`https://wa.me/${WHATSAPP_NUMBER}?text=${buildShippingMessage(active)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        Combinar Frete do Álbum
+                      </a>
+                    </Button>
+                  </div>
+                </>
               )}
             </>
           )}
