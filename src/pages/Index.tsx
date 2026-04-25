@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import CollectibleCard from "@/components/CollectibleCard";
+import GarageProCard from "@/components/GarageProCard";
 import ferrariRedline from "@/assets/car-ferrari-redline.jpg";
 import camaroPurple from "@/assets/car-camaro-purple.jpg";
 import bumblebee from "@/assets/car-bumblebee.jpg";
@@ -607,9 +607,9 @@ const Collection = () => {
             <Loader2 className="h-8 w-8 animate-spin text-accent" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {products.map((p) => (
-              <CollectibleCard
+              <GarageProCard
                 key={p.id}
                 product={{
                   id: p.id,
@@ -621,7 +621,6 @@ const Collection = () => {
                   alt: p.alt,
                   status: p.status,
                 }}
-                actionLabel="Reservar no WhatsApp"
               />
             ))}
           </div>
