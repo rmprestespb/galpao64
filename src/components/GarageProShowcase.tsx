@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { generateZoomCrops } from "@/lib/removeBackground";
 import galpaoLogo from "@/assets/galpao64-logo.png";
+import ProductLightbox, { LightboxMedia } from "@/components/ProductLightbox";
 
 export type GarageProShowcaseData = {
   id: string;
@@ -110,6 +111,8 @@ const GarageProShowcase = ({
 
   const [view, setView] = useState<View>("loose");
   const [zooms, setZooms] = useState<string[]>([]);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxStart, setLightboxStart] = useState(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Thumbnails de zoom — sempre da Visão 1 (loose), sem IA
@@ -137,6 +140,31 @@ const GarageProShowcase = ({
   const goLoose = () => setView("loose");
   const goBlister = () => hasBlister && setView("blister");
   const goVideo = () => hasVideo && setView("video");
+
+  // Mídias ordenadas para o lightbox (zoom em tela grande)
+  const lightboxMedia = useMemo<LightboxMedia[]>(() => {
+    const items: LightboxMedia[] = [];
+    if (product.looseImage) items.push({ kind: "image", url: product.looseImage });
+    if (product.blisterImage) items.push({ kind: "image", url: product.blisterImage });
+    if (product.videoUrl) items.push({ kind: "video", url: product.videoUrl });
+    return items;
+  }, [product.looseImage, product.blisterImage, product.videoUrl]);
+
+  const openLightboxAt = (url: string) => {
+    const idx = lightboxMedia.findIndex((m) => m.url === url);
+    setLightboxStart(idx >= 0 ? idx : 0);
+    setLightboxOpen(true);
+  };
+
+  const openCurrentInLightbox = () => {
+    if (view === "blister" && product.blisterImage) {
+      openLightboxAt(product.blisterImage);
+    } else if (view === "video" && product.videoUrl) {
+      openLightboxAt(product.videoUrl);
+    } else if (product.looseImage) {
+      openLightboxAt(product.looseImage);
+    }
+  };
 
   const sendToWhatsApp = () => {
     const message = encodeURIComponent(
@@ -300,7 +328,12 @@ const GarageProShowcase = ({
           )}
 
           {/* Conteúdo do palco */}
-          <div className="absolute inset-0 flex items-center justify-center p-4">
+          <button
+            type="button"
+            onClick={openCurrentInLightbox}
+            aria-label={`Ampliar foto de ${product.title}`}
+            className="absolute inset-0 flex items-center justify-center p-4 cursor-zoom-in focus:outline-none"
+          >
             {view === "video" && product.videoUrl ? (
               <video
                 ref={videoRef}
@@ -324,19 +357,54 @@ const GarageProShowcase = ({
                 }}
               />
             ) : (
-              <img
+              <div
                 key="loose"
-                src={product.looseImage}
-                alt={product.alt ?? `${product.title} loose`}
-                className="max-h-[80%] max-w-[90%] object-contain animate-fade-in"
-                style={{
-                  // Iluminação dramática de estúdio (não remove fundo)
-                  filter:
-                    "brightness(1.08) contrast(1.14) saturate(1.18) drop-shadow(0 2px 0 rgba(255,255,255,0.08)) drop-shadow(0 18px 22px rgba(0,0,0,0.85))",
-                }}
-              />
+                className="relative flex h-[88%] w-[92%] items-center justify-center animate-fade-in"
+              >
+                {/* Foto principal */}
+                <img
+                  src={product.looseImage}
+                  alt={product.alt ?? `${product.title} loose`}
+                  className="relative z-[2] max-h-[72%] max-w-full object-contain"
+                  style={{
+                    filter:
+                      "brightness(1.08) contrast(1.14) saturate(1.18) drop-shadow(0 2px 0 rgba(255,255,255,0.08)) drop-shadow(0 18px 22px rgba(0,0,0,0.85))",
+                  }}
+                />
+                {/* Reflexo espelhado (efeito vidro/piso polido) */}
+                <img
+                  aria-hidden="true"
+                  src={product.looseImage}
+                  alt=""
+                  className="absolute left-1/2 -translate-x-1/2 max-w-full object-contain pointer-events-none select-none"
+                  style={{
+                    top: "calc(50% + 2px)",
+                    maxHeight: "36%",
+                    transform: "translate(-50%, 0) scaleY(-1)",
+                    WebkitMaskImage:
+                      "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.18) 45%, rgba(0,0,0,0) 80%)",
+                    maskImage:
+                      "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.18) 45%, rgba(0,0,0,0) 80%)",
+                    filter: "blur(0.5px) brightness(0.85) saturate(1.1)",
+                    opacity: 0.55,
+                  }}
+                />
+                {/* Linha de horizonte / piso espelhado */}
+                <div
+                  aria-hidden="true"
+                  className="absolute left-1/2 -translate-x-1/2"
+                  style={{
+                    top: "calc(50% + 1px)",
+                    width: "78%",
+                    height: "1px",
+                    background:
+                      "linear-gradient(90deg, transparent 0%, rgba(0,229,255,0.55) 50%, transparent 100%)",
+                    boxShadow: "0 0 10px rgba(0,229,255,0.35)",
+                  }}
+                />
+              </div>
             )}
-          </div>
+          </button>
         </div>
 
         {/* Right zoom thumbs — sempre da Visão 1 (loose) */}
@@ -347,7 +415,10 @@ const GarageProShowcase = ({
               <button
                 key={i}
                 type="button"
-                onClick={goLoose}
+                onClick={() => {
+                  goLoose();
+                  if (product.looseImage) openLightboxAt(product.looseImage);
+                }}
                 aria-label={`Zoom detalhe ${i + 1} (carro loose)`}
                 className={cn(
                   "relative h-14 w-14 rounded-full overflow-hidden",
@@ -368,7 +439,13 @@ const GarageProShowcase = ({
         <div className="flex items-center gap-2 flex-wrap">
           <button
             type="button"
-            onClick={goLoose}
+            onClick={() => {
+              if (view === "loose" && product.looseImage) {
+                openLightboxAt(product.looseImage);
+              } else {
+                goLoose();
+              }
+            }}
             aria-pressed={view === "loose"}
             className={cn(
               "relative h-14 w-14 shrink-0 rounded-md overflow-hidden border-2 transition-all",
@@ -391,7 +468,13 @@ const GarageProShowcase = ({
           {hasBlister && (
             <button
               type="button"
-              onClick={goBlister}
+              onClick={() => {
+                if (view === "blister" && product.blisterImage) {
+                  openLightboxAt(product.blisterImage);
+                } else {
+                  goBlister();
+                }
+              }}
               aria-pressed={view === "blister"}
               className={cn(
                 "relative h-14 w-14 shrink-0 rounded-md overflow-hidden border-2 transition-all",
@@ -415,7 +498,13 @@ const GarageProShowcase = ({
           {hasVideo && (
             <button
               type="button"
-              onClick={goVideo}
+              onClick={() => {
+                if (view === "video" && product.videoUrl) {
+                  openLightboxAt(product.videoUrl);
+                } else {
+                  goVideo();
+                }
+              }}
               aria-pressed={view === "video"}
               className={cn(
                 "relative h-14 w-14 shrink-0 rounded-md overflow-hidden border-2 transition-all bg-black",
@@ -506,6 +595,14 @@ const GarageProShowcase = ({
           Solicitar disponibilidade
         </button>
       </div>
+
+      <ProductLightbox
+        open={lightboxOpen}
+        onOpenChange={setLightboxOpen}
+        media={lightboxMedia}
+        startIndex={lightboxStart}
+        title={product.title}
+      />
     </article>
   );
 };
