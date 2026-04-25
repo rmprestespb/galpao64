@@ -203,11 +203,13 @@ const playEngineSound = () => {
 const SplashScreen = ({ onEnter }: SplashScreenProps) => {
   const [opening, setOpening] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [pressed, setPressed] = useState(false);
   const triggered = useRef(false);
 
   const handleEnter = () => {
     if (triggered.current) return;
     triggered.current = true;
+    setPressed(true);
     playEngineSound();
     // Wait for ignition catch (~0.6s) before opening the doors,
     // so the V8 thump syncs with the reveal.
@@ -284,19 +286,44 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
         <img
           src={showroomSplash}
           alt="Galpão 64 — galpão de madeira com portas abertas exibindo coleção de miniaturas diecast 1:64 lendárias: Ford Mustang verde, Chevrolet Opala vermelho e Porsche 911 preto"
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1400ms] ease-out"
           style={{
             objectPosition: "center 40%",
+            transform: pressed ? "scale(1.08)" : "scale(1)",
+            filter: pressed ? "brightness(1.15) saturate(1.1)" : "brightness(1)",
           }}
         />
+
+        {/* Golden flash overlay — pulses once on click for instant feedback */}
+        <div
+          aria-hidden="true"
+          className={`absolute inset-0 pointer-events-none transition-opacity duration-500 ease-out ${
+            pressed ? "opacity-100" : "opacity-0"
+          }`}
+          style={{
+            background:
+              "radial-gradient(ellipse at center 72%, rgba(245,216,150,0.55) 0%, rgba(245,216,150,0.15) 35%, transparent 65%)",
+          }}
+        />
+
+        {/* Expanding ring anchored over the painted CTA in the artwork */}
+        {pressed && (
+          <div
+            aria-hidden="true"
+            className="absolute left-1/2 top-[72%] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+          >
+            <span className="splash-cta-ring block rounded-full border-2 border-[#F5D896]" />
+          </div>
+        )}
 
         {/* The garage artwork already shows the CTA painted on it; the
             entire splash is clickable to enter the showroom. */}
         <button
           type="button"
           onClick={handleEnter}
+          disabled={pressed}
           aria-label="Clique para entrar no showroom Galpão 64"
-          className="absolute inset-0 h-full w-full cursor-pointer bg-transparent focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-[#F5D896]"
+          className="absolute inset-0 h-full w-full cursor-pointer bg-transparent focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-[#F5D896] disabled:cursor-default"
         />
       </div>
     </div>
