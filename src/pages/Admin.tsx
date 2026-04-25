@@ -858,7 +858,7 @@ const Admin = () => {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSave} disabled={saving || uploading}>
+            <Button onClick={handleSave} disabled={saving || uploading || processingSaleImage || manualProcessing}>
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Salvar
             </Button>
