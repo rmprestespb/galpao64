@@ -283,13 +283,16 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
         <div className="splash-logo-enter flex justify-center items-center w-full">
           <img
             src={galpaoLogo}
-            alt="Galpão 64 — A Arte do Diecast"
+            alt="Logotipo Galpão 64 — A Arte do Diecast, fundado em 2024"
             className="object-contain"
             style={{
               width: "min(82vw, 460px)",
               height: "auto",
               maxHeight: "min(58vh, 460px)",
-              filter: "drop-shadow(0 0 60px rgba(201,169,106,0.35))",
+              // Stronger glow + subtle dark backdrop boosts contrast of
+              // the badge against the black doors for better legibility.
+              filter:
+                "drop-shadow(0 0 24px rgba(0,0,0,0.85)) drop-shadow(0 0 70px rgba(201,169,106,0.55))",
             }}
           />
         </div>
@@ -297,16 +300,17 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
         <button
           type="button"
           onClick={handleEnter}
-          className="group relative inline-flex items-center justify-center border border-[#C9A96A]/70 bg-transparent px-8 py-3 text-[11px] sm:text-xs tracking-[0.5em] text-[#C9A96A] transition-all duration-500 hover:bg-[#C9A96A] hover:text-black hover:shadow-[0_0_40px_rgba(201,169,106,0.55)] focus:outline-none focus:ring-2 focus:ring-[#C9A96A]/60"
+          aria-label="Entrar no site Galpão 64"
+          className="group relative inline-flex items-center justify-center border-2 border-[#F5D896] bg-black/70 px-8 py-3 text-xs sm:text-sm font-semibold tracking-[0.5em] text-[#FFE6A8] transition-all duration-500 hover:bg-[#F5D896] hover:text-black hover:shadow-[0_0_40px_rgba(245,216,150,0.7)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#F5D896] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
-          <span className="absolute -left-6 top-1/2 h-px w-4 bg-[#C9A96A]/60 transition-all duration-500 group-hover:w-6" />
+          <span aria-hidden="true" className="absolute -left-6 top-1/2 h-px w-4 bg-[#F5D896] transition-all duration-500 group-hover:w-6" />
           CLIQUE PARA ENTRAR
-          <span className="absolute -right-6 top-1/2 h-px w-4 bg-[#C9A96A]/60 transition-all duration-500 group-hover:w-6" />
+          <span aria-hidden="true" className="absolute -right-6 top-1/2 h-px w-4 bg-[#F5D896] transition-all duration-500 group-hover:w-6" />
         </button>
 
         <p
-          className="text-[10px] uppercase tracking-[0.5em] sm:tracking-[0.6em] text-white/40 text-center"
+          className="text-[11px] uppercase tracking-[0.5em] sm:tracking-[0.6em] text-white/80 text-center"
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
           Acelere para entrar no galpão
