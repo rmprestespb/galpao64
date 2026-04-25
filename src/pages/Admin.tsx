@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Flame, Loader2, LogOut, Plus, Pencil, Trash2, Upload, X, Film, FileText } from "lucide-react";
+import { CalendarIcon, Flame, Loader2, Lock, LogOut, Pencil, Plus, Trash2, Upload, X, Film, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,6 +12,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +40,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+type ProductStatus = "disponivel" | "reservado" | "vendido";
+
 type Product = {
   id: string;
   title: string;
@@ -39,6 +53,15 @@ type Product = {
   video_url: string | null;
   is_published: boolean;
   display_order: number;
+  status: ProductStatus;
+  reservation_started_at: string | null;
+};
+
+type Collector = {
+  id: string;
+  display_name: string;
+  city: string;
+  state: string;
 };
 
 const productSchema = z.object({
@@ -61,12 +84,22 @@ const emptyForm = {
   is_published: true,
   images: [] as string[],
   video_url: "" as string,
+  status: "disponivel" as ProductStatus,
+  collectorId: "" as string, // "" = não vincular
+  reservationDate: undefined as Date | undefined,
+};
+
+const STATUS_LABEL: Record<ProductStatus, string> = {
+  disponivel: "Disponível",
+  reservado: "Reservado",
+  vendido: "Vendido",
 };
 
 const Admin = () => {
   const navigate = useNavigate();
   const { user, isAdmin, loading: authLoading } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
+  const [collectors, setCollectors] = useState<Collector[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
@@ -93,8 +126,19 @@ const Admin = () => {
     setLoading(false);
   };
 
+  const fetchCollectors = async () => {
+    const { data, error } = await supabase
+      .from("reservation_collectors")
+      .select("id, display_name, city, state")
+      .order("display_name", { ascending: true });
+    if (!error) setCollectors((data ?? []) as Collector[]);
+  };
+
   useEffect(() => {
-    if (user && isAdmin) fetchProducts();
+    if (user && isAdmin) {
+      fetchProducts();
+      fetchCollectors();
+    }
   }, [user, isAdmin]);
 
   const openCreate = () => {
@@ -114,6 +158,9 @@ const Admin = () => {
       is_published: p.is_published,
       images: p.images,
       video_url: p.video_url ?? "",
+      status: p.status ?? "disponivel",
+      collectorId: "",
+      reservationDate: p.reservation_started_at ? new Date(p.reservation_started_at) : undefined,
     });
     setDialogOpen(true);
   };
@@ -168,6 +215,13 @@ const Admin = () => {
       toast.error(parsed.error.issues[0].message);
       return;
     }
+
+    // Se status virou "reservado" sem data, define data atual.
+    const reservationDate =
+      form.status === "reservado"
+        ? form.reservationDate ?? new Date()
+        : null;
+
     setSaving(true);
     const payload = {
       title: parsed.data.title,
@@ -178,6 +232,8 @@ const Admin = () => {
       images: form.images,
       video_url: form.video_url || null,
       is_published: form.is_published,
+      status: form.status,
+      reservation_started_at: reservationDate ? reservationDate.toISOString() : null,
     };
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
@@ -187,6 +243,23 @@ const Admin = () => {
       toast.error("Erro ao salvar", { description: error.message });
       return;
     }
+
+    // Se vinculou a um colecionador, cria o item no álbum dele.
+    if (form.collectorId && form.images[0]) {
+      const { error: itemErr } = await supabase.from("reservation_items").insert({
+        collector_id: form.collectorId,
+        title: parsed.data.title,
+        image_url: form.images[0],
+      });
+      if (itemErr) {
+        toast.warning("Produto salvo, mas falhou ao vincular ao colecionador", {
+          description: itemErr.message,
+        });
+      } else {
+        toast.success("Vinculado ao álbum do colecionador");
+      }
+    }
+
     toast.success(editing ? "Miniatura atualizada" : "Miniatura adicionada");
     setDialogOpen(false);
     fetchProducts();
@@ -289,6 +362,19 @@ const Admin = () => {
                   {!p.is_published && (
                     <span className="absolute top-2 left-2 text-xs bg-background/90 px-2 py-1 rounded">
                       RASCUNHO
+                    </span>
+                  )}
+                  {p.status && p.status !== "disponivel" && (
+                    <span
+                      className={cn(
+                        "absolute bottom-2 left-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded backdrop-blur-md border",
+                        p.status === "reservado"
+                          ? "bg-amber-500/20 text-amber-200 border-amber-400/40"
+                          : "bg-red-500/20 text-red-200 border-red-400/40",
+                      )}
+                    >
+                      <Lock className="h-2.5 w-2.5" />
+                      {STATUS_LABEL[p.status]}
                     </span>
                   )}
                   {p.video_url && (
@@ -450,6 +536,104 @@ const Admin = () => {
                 checked={form.is_published}
                 onCheckedChange={(v) => setForm({ ...form, is_published: v })}
               />
+            </div>
+
+            {/* Reserva / Venda */}
+            <div className="space-y-3 rounded border border-border p-3 bg-muted/20">
+              <div className="flex items-center gap-2">
+                <Lock className="h-4 w-4 text-accent" />
+                <Label className="text-sm font-bold uppercase tracking-wider">
+                  Reserva &amp; Venda
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground -mt-1">
+                Pagamento via PIX direto. Marque o status e (opcionalmente) vincule
+                ao álbum de um colecionador.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select
+                    value={form.status}
+                    onValueChange={(v: ProductStatus) =>
+                      setForm({ ...form, status: v })
+                    }
+                  >
+                    <SelectTrigger id="status">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="disponivel">Disponível</SelectItem>
+                      <SelectItem value="reservado">Reservado</SelectItem>
+                      <SelectItem value="vendido">Vendido</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="reservation-date">
+                    Início da reserva (90 dias)
+                  </Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        id="reservation-date"
+                        variant="outline"
+                        disabled={form.status !== "reservado"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !form.reservationDate && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="h-4 w-4" />
+                        {form.reservationDate
+                          ? format(form.reservationDate, "PPP", { locale: ptBR })
+                          : "Hoje (padrão)"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={form.reservationDate}
+                        onSelect={(d) =>
+                          setForm({ ...form, reservationDate: d })
+                        }
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="collector">Vincular ao álbum (opcional)</Label>
+                <Select
+                  value={form.collectorId || "none"}
+                  onValueChange={(v) =>
+                    setForm({ ...form, collectorId: v === "none" ? "" : v })
+                  }
+                >
+                  <SelectTrigger id="collector">
+                    <SelectValue placeholder="Nenhum colecionador" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Não vincular</SelectItem>
+                    {collectors.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.display_name} — {c.city}/{c.state.toUpperCase()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {form.collectorId && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Ao salvar, esta miniatura será adicionada ao álbum do colecionador
+                    selecionado.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
           <DialogFooter>

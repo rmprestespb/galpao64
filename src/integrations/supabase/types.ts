@@ -24,7 +24,9 @@ export type Database = {
           is_published: boolean
           price_cents: number
           rarity: number | null
+          reservation_started_at: string | null
           series: string | null
+          status: Database["public"]["Enums"]["product_status"]
           title: string
           updated_at: string
           video_url: string | null
@@ -38,7 +40,9 @@ export type Database = {
           is_published?: boolean
           price_cents?: number
           rarity?: number | null
+          reservation_started_at?: string | null
           series?: string | null
+          status?: Database["public"]["Enums"]["product_status"]
           title: string
           updated_at?: string
           video_url?: string | null
@@ -52,7 +56,9 @@ export type Database = {
           is_published?: boolean
           price_cents?: number
           rarity?: number | null
+          reservation_started_at?: string | null
           series?: string | null
+          status?: Database["public"]["Enums"]["product_status"]
           title?: string
           updated_at?: string
           video_url?: string | null
@@ -163,6 +169,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      product_status: "disponivel" | "reservado" | "vendido"
       reservation_status: "na_garagem" | "aguardando_envio"
     }
     CompositeTypes: {
@@ -292,6 +299,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      product_status: ["disponivel", "reservado", "vendido"],
       reservation_status: ["na_garagem", "aguardando_envio"],
     },
   },

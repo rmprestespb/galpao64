@@ -35,6 +35,7 @@ type Product = {
   price_cents: number;
   images: string[];
   alt?: string;
+  status?: "disponivel" | "reservado" | "vendido";
 };
 
 const fallbackProducts: Product[] = [
@@ -549,7 +550,7 @@ const Collection = () => {
   useEffect(() => {
     supabase
       .from("products")
-      .select("id, title, series, rarity, price_cents, images")
+      .select("id, title, series, rarity, price_cents, images, status")
       .eq("is_published", true)
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: false })
@@ -563,6 +564,7 @@ const Collection = () => {
               rarity: d.rarity,
               price_cents: d.price_cents,
               images: d.images?.length ? d.images : [ferrariRedline],
+              status: (d as any).status ?? "disponivel",
             })),
           );
         }
@@ -590,8 +592,9 @@ const Collection = () => {
                   price_cents: p.price_cents,
                   images: p.images,
                   alt: p.alt,
+                  status: p.status,
                 }}
-                actionLabel="Comprar"
+                actionLabel="Reservar no WhatsApp"
               />
             ))}
           </div>

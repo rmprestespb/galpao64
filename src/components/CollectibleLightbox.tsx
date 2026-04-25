@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Play, ShoppingBag, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageCircle, Play, ShieldCheck, Truck, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type LightboxMedia = {
@@ -19,6 +19,7 @@ type Props = {
   media: LightboxMedia[];
   initialIndex?: number;
   onBuy?: () => void;
+  status?: "disponivel" | "reservado" | "vendido";
 };
 
 const CollectibleLightbox = ({
@@ -32,6 +33,7 @@ const CollectibleLightbox = ({
   media,
   initialIndex = 0,
   onBuy,
+  status = "disponivel",
 }: Props) => {
   const [index, setIndex] = useState(initialIndex);
 
@@ -187,6 +189,19 @@ const CollectibleLightbox = ({
             >
               {priceLabel}
             </p>
+            <p className="mt-2 text-[11px] text-white/60 inline-flex items-center gap-1.5">
+              <Truck className="h-3.5 w-3.5" />
+              Frete: A combinar
+            </p>
+          </div>
+
+          <div className="flex items-start gap-2 rounded-lg border border-accent/20 bg-accent/5 p-3 text-[12px] text-white/85">
+            <ShieldCheck className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+            <p>
+              <span className="font-semibold text-accent">Pagamento via PIX.</span>{" "}
+              Após clicar em reservar, você será atendido pessoalmente para
+              detalhes de envio.
+            </p>
           </div>
 
           <div>
@@ -224,22 +239,33 @@ const CollectibleLightbox = ({
             </dl>
           </div>
 
-          {onBuy && (
+          {status !== "disponivel" ? (
+            <div
+              className={cn(
+                "mt-auto w-full inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-xs font-bold uppercase tracking-[0.22em] border",
+                status === "reservado"
+                  ? "bg-amber-500/15 text-amber-200 border-amber-400/40"
+                  : "bg-red-500/15 text-red-200 border-red-400/40",
+              )}
+            >
+              {status === "reservado" ? "Já está reservada" : "Já foi vendida"}
+            </div>
+          ) : onBuy ? (
             <button
               type="button"
               onClick={onBuy}
               className={cn(
                 "mt-auto w-full inline-flex items-center justify-center gap-2",
                 "rounded-full px-5 py-3 text-xs font-bold uppercase tracking-[0.22em]",
-                "bg-primary text-primary-foreground",
-                "shadow-[0_10px_30px_-8px_rgba(255,140,0,0.6)]",
+                "bg-[#25D366] text-black",
+                "shadow-[0_10px_30px_-8px_rgba(37,211,102,0.65)]",
                 "hover:brightness-110 active:scale-[0.98] transition-all",
               )}
             >
-              <ShoppingBag className="h-4 w-4" strokeWidth={2.5} />
-              Comprar agora
+              <MessageCircle className="h-4 w-4" strokeWidth={2.5} />
+              Reservar no WhatsApp
             </button>
-          )}
+          ) : null}
         </aside>
       </div>
     </div>
