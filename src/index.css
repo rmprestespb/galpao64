@@ -360,3 +360,124 @@ All colors MUST be HSL.
 .diecast-scope .di-xray {
   cursor: crosshair;
 }
+
+/* ============================================================
+   NEON UNDERLINE — Menu items + Section titles
+   Cyan glow with subtle flicker when active
+   ============================================================ */
+:root {
+  --neon-color: 188 100% 50%;          /* cyan #00E5FF */
+  --neon-rgb: 0, 229, 255;
+}
+
+/* Base: hover underline that grows from center */
+.neon-link {
+  position: relative;
+  display: inline-block;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+.neon-link::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  height: 2px;
+  width: 0;
+  background: hsl(var(--neon-color));
+  border-radius: 2px;
+  transform: translateX(-50%);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.3s ease,
+              opacity 0.3s ease;
+  box-shadow: 0 0 0 rgba(var(--neon-rgb), 0);
+  opacity: 0;
+  pointer-events: none;
+}
+.neon-link:hover {
+  color: hsl(var(--neon-color));
+  text-shadow:
+    0 0 5px rgba(var(--neon-rgb), 0.55),
+    0 0 10px rgba(var(--neon-rgb), 0.35);
+}
+.neon-link:hover::after {
+  width: 100%;
+  opacity: 1;
+  box-shadow:
+    0 0 8px rgba(var(--neon-rgb), 0.85),
+    0 0 16px rgba(var(--neon-rgb), 0.45);
+}
+
+/* Active state — permanently lit + subtle flicker */
+.neon-link.is-active,
+.neon-link[aria-current="page"],
+.neon-link.active {
+  color: hsl(var(--neon-color));
+  text-shadow:
+    0 0 5px rgba(var(--neon-rgb), 0.6),
+    0 0 12px rgba(var(--neon-rgb), 0.35);
+}
+.neon-link.is-active::after,
+.neon-link[aria-current="page"]::after,
+.neon-link.active::after {
+  width: 100%;
+  opacity: 1;
+  animation: neon-flicker 3.4s ease-in-out infinite;
+}
+
+@keyframes neon-flicker {
+  0%, 100% {
+    opacity: 1;
+    box-shadow:
+      0 0 8px rgba(var(--neon-rgb), 0.85),
+      0 0 18px rgba(var(--neon-rgb), 0.5);
+  }
+  42% {
+    opacity: 0.95;
+    box-shadow:
+      0 0 6px rgba(var(--neon-rgb), 0.65),
+      0 0 12px rgba(var(--neon-rgb), 0.35);
+  }
+  46% {
+    opacity: 0.7;
+    box-shadow:
+      0 0 4px rgba(var(--neon-rgb), 0.4),
+      0 0 8px rgba(var(--neon-rgb), 0.2);
+  }
+  50% {
+    opacity: 1;
+    box-shadow:
+      0 0 9px rgba(var(--neon-rgb), 0.9),
+      0 0 20px rgba(var(--neon-rgb), 0.55);
+  }
+}
+
+/* Section title variant — underline always visible, flickers gently */
+.neon-title {
+  position: relative;
+  display: inline-block;
+}
+.neon-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -10px;
+  height: 2px;
+  width: 100%;
+  background: hsl(var(--neon-color));
+  border-radius: 2px;
+  box-shadow:
+    0 0 8px rgba(var(--neon-rgb), 0.85),
+    0 0 18px rgba(var(--neon-rgb), 0.45);
+  animation: neon-flicker 4.2s ease-in-out infinite;
+}
+.neon-title.neon-title-center::after {
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64px;
+}
+
+/* Gold variant — for premium accents */
+.neon-gold {
+  --neon-color: 42 100% 65%;
+  --neon-rgb: 255, 210, 122;
+}
