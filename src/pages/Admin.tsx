@@ -240,6 +240,8 @@ const Admin = () => {
     setForm((f) => ({ ...f, images: f.images.filter((i) => i !== url) }));
 
   const handleSave = async () => {
+    if (saving || uploading) return;
+
     const priceCents = Math.round(parseFloat(form.priceReais || "0") * 100);
     const rarityNum = form.rarity ? parseInt(form.rarity, 10) : undefined;
     const parsed = productSchema.safeParse({
@@ -261,46 +263,54 @@ const Admin = () => {
         : null;
 
     setSaving(true);
-    const payload = {
-      title: parsed.data.title,
-      series: form.series || null,
-      description: form.description || null,
-      rarity: rarityNum ?? null,
-      price_cents: parsed.data.price_cents,
-      images: form.images,
-      video_url: form.video_url || null,
-      is_published: form.is_published,
-      status: form.status,
-      reservation_started_at: reservationDate ? reservationDate.toISOString() : null,
-    };
-    const { error } = editing
-      ? await supabase.from("products").update(payload).eq("id", editing.id)
-      : await supabase.from("products").insert(payload);
-    setSaving(false);
-    if (error) {
-      toast.error("Erro ao salvar", { description: error.message });
-      return;
-    }
-
-    // Se vinculou a um colecionador, cria o item no álbum dele.
-    if (form.collectorId && form.images[0]) {
-      const { error: itemErr } = await supabase.from("reservation_items").insert({
-        collector_id: form.collectorId,
+    try {
+      const payload = {
         title: parsed.data.title,
-        image_url: form.images[0],
-      });
-      if (itemErr) {
-        toast.warning("Produto salvo, mas falhou ao vincular ao colecionador", {
-          description: itemErr.message,
-        });
-      } else {
-        toast.success("Vinculado ao álbum do colecionador");
-      }
-    }
+        series: form.series || null,
+        description: form.description || null,
+        rarity: rarityNum ?? null,
+        price_cents: parsed.data.price_cents,
+        images: form.images,
+        video_url: form.video_url || null,
+        is_published: form.is_published,
+        status: form.status,
+        reservation_started_at: reservationDate ? reservationDate.toISOString() : null,
+      };
 
-    toast.success(editing ? "Miniatura atualizada" : "Miniatura adicionada");
-    setDialogOpen(false);
-    fetchProducts();
+      const { error } = editing
+        ? await supabase.from("products").update(payload).eq("id", editing.id).select("id").single()
+        : await supabase.from("products").insert(payload).select("id").single();
+
+      if (error) throw error;
+
+      // Se vinculou a um colecionador, cria o item no álbum dele.
+      if (form.collectorId && form.images[0]) {
+        const { error: itemErr } = await supabase.from("reservation_items").insert({
+          collector_id: form.collectorId,
+          title: parsed.data.title,
+          image_url: form.images[0],
+        });
+        if (itemErr) {
+          toast.warning("Produto salvo, mas falhou ao vincular ao colecionador", {
+            description: itemErr.message,
+          });
+        } else {
+          toast.success("Vinculado ao álbum do colecionador");
+        }
+      }
+
+      toast.success(editing ? "Miniatura atualizada" : "Miniatura adicionada");
+      setDialogOpen(false);
+      setEditing(null);
+      setForm(emptyForm);
+      await fetchProducts();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("Product save failed", err);
+      toast.error("Erro ao salvar", { description: msg, duration: 8000 });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDelete = async () => {
