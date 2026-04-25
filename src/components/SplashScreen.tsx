@@ -277,16 +277,18 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
           opening ? "opacity-0" : "opacity-100"
         }`}
       >
-        {/* Splash artwork — show the full image without crops so the
-            cars and badge stay intact on mobile and desktop. */}
-        <div className="splash-logo-enter flex justify-center">
+        {/* Splash artwork — only the central badge/logo. Sized so the
+            full emblem is always visible on both short mobile screens
+            and large desktops, never clipped. */}
+        <div className="splash-logo-enter flex justify-center items-center w-full">
           <img
             src={galpaoLogo}
             alt="Galpão 64 — A Arte do Diecast"
-            className="h-auto object-contain"
+            className="object-contain"
             style={{
-              width: "min(92vw, 620px)",
-              maxHeight: "min(70vh, 620px)",
+              width: "min(82vw, 460px)",
+              height: "auto",
+              maxHeight: "min(58vh, 460px)",
               filter: "drop-shadow(0 0 60px rgba(201,169,106,0.35))",
             }}
           />
