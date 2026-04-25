@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { CalendarIcon, Crop, Flame, Loader2, Lock, LogOut, Pencil, Plus, Trash2, Upload, X, Film, FileText, WandSparkles } from "lucide-react";
+import { CalendarIcon, Flame, Loader2, Lock, LogOut, Pencil, Plus, Trash2, Upload, X, Film, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { PixGeneratorDialog } from "@/components/PixGeneratorDialog";
-import { createManualCropDataUrl, removeBackgroundFromUrl, type ManualCrop } from "@/lib/removeBackground";
 import {
   Dialog,
   DialogContent,
@@ -675,59 +674,11 @@ const Admin = () => {
             </div>
 
 
-            <div className="space-y-2 rounded border border-border p-3 bg-muted/20">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <Label>Segunda Foto — venda Garage Pro</Label>
-                  <p className="text-xs text-muted-foreground">Salva a original e gera a versão sem fundo usada na Página de Venda.</p>
-                </div>
-                {processingSaleImage && <Loader2 className="h-4 w-4 animate-spin text-accent" />}
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Original</p>
-                  <div className="aspect-video rounded bg-black border border-border overflow-hidden flex items-center justify-center">
-                    {form.sale_image_original_url ? (
-                      <img src={form.sale_image_original_url} alt="Foto original de venda" className="h-full w-full object-contain" />
-                    ) : (
-                      <span className="text-xs text-muted-foreground">sem foto</span>
-                    )}
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tratada</p>
-                  <div className="aspect-video rounded bg-black border border-accent/40 overflow-hidden flex items-center justify-center">
-                    {form.sale_image_processed_url ? (
-                      <img src={form.sale_image_processed_url} alt="Foto tratada sem fundo" className="h-full w-full object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.85)]" />
-                    ) : (
-                      <span className="text-xs text-muted-foreground">aguardando tratamento</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <label className="inline-flex items-center justify-center gap-2 rounded-md border border-border hover:border-accent px-3 py-2 text-sm text-muted-foreground cursor-pointer transition-colors">
-                  {uploading || processingSaleImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <WandSparkles className="h-4 w-4" />}
-                  Enviar segunda foto
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleUpload(e, "saleImage")}
-                  />
-                </label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={!saleImageForManualCrop || manualProcessing}
-                  onClick={() => {
-                    setCropPoints([]);
-                    setManualCropOpen(true);
-                  }}
-                >
-                  <Crop className="h-4 w-4" /> Ajuste Manual
-                </Button>
-              </div>
+            <div className="rounded border border-border p-3 bg-muted/20 text-xs text-muted-foreground">
+              <strong className="text-foreground">Dica Garage Pro:</strong> envie a 1ª
+              foto como o carro <em>loose</em> (fora do blister) com fundo neutro — ela
+              será o destaque do palco. As próximas fotos podem incluir o blister
+              original. Adicione um vídeo MP4 curto para o giro 360º.
             </div>
 
             <div className="space-y-2">
