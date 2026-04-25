@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { PixGeneratorDialog } from "@/components/PixGeneratorDialog";
 import {
   Dialog,
   DialogContent,
@@ -301,6 +302,7 @@ const Admin = () => {
             </span>
           </Link>
           <div className="flex items-center gap-2">
+            <PixGeneratorDialog />
             <Button asChild variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10">
               <Link to="/admin/recibos">
                 <FileText className="h-4 w-4" /> Recibos
