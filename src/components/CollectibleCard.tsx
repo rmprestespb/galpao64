@@ -99,18 +99,25 @@ const CollectibleCard = ({
       >
         {/* Image stage */}
         <div className="relative aspect-square overflow-hidden bg-black">
-          <img
-            src={activeImage}
-            alt={product.alt ?? product.title}
-            width={768}
-            height={768}
-            loading="lazy"
-            className={cn(
-              "h-full w-full object-cover transition-all duration-[400ms] ease-out",
-              "group-hover:scale-110 group-focus-within:scale-110",
-              "group-hover:blur-[2px] group-focus-within:blur-[2px]",
-            )}
-          />
+          <button
+            type="button"
+            onClick={() => openLightbox(activeImage)}
+            aria-label={`Ampliar foto de ${product.title}`}
+            className="absolute inset-0 z-0 cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <img
+              src={activeImage}
+              alt={product.alt ?? product.title}
+              width={768}
+              height={768}
+              loading="lazy"
+              className={cn(
+                "h-full w-full object-cover transition-all duration-[400ms] ease-out",
+                "group-hover:scale-110 group-focus-within:scale-110",
+                "group-hover:blur-[2px] group-focus-within:blur-[2px]",
+              )}
+            />
+          </button>
 
           {/* Subtle vignette */}
           <div
@@ -187,11 +194,11 @@ const CollectibleCard = ({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setVideoOpen(true);
+                      openLightbox(product.videoUrl);
                     }}
                     aria-label="Assistir vídeo de demonstração"
                     className={cn(
-                      "ml-auto inline-flex h-10 w-10 items-center justify-center rounded-full",
+                      "relative z-10 ml-auto inline-flex h-10 w-10 items-center justify-center rounded-full",
                       "bg-accent/90 text-accent-foreground hover:bg-accent transition-colors",
                       "shadow-[0_6px_20px_-4px_rgba(0,229,255,0.6)]",
                     )}
