@@ -118,7 +118,7 @@ const Header = () => {
                 if (link.href === "/album") markSeen();
                 handleNav(e, link.href);
               }}
-              className="relative text-xs font-semibold tracking-[0.2em] text-foreground/90 hover:text-accent transition-colors"
+              className="neon-link text-xs font-semibold tracking-[0.2em] text-foreground/90"
             >
               {link.label}
               {link.href === "/album" && newCount > 0 && (
