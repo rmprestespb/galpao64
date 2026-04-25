@@ -128,7 +128,7 @@ const Album = () => {
       <main className="container py-12 md:py-20">
         <section className="mb-10 md:mb-14">
           <p className="text-xs font-semibold tracking-[0.3em] text-accent mb-3">ÁLBUM DE RESERVAS</p>
-          <h1 className="font-display text-4xl md:text-6xl font-bold leading-[1.05] mb-4">
+          <h1 className="neon-title font-display text-4xl md:text-6xl font-bold leading-[1.05] mb-6">
             A Garagem dos Colecionadores
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
@@ -254,7 +254,7 @@ const Album = () => {
               <HelpCircle className="h-3.5 w-3.5" />
               FAQ
             </p>
-            <h2 className="font-display text-3xl md:text-5xl font-bold leading-[1.05] mb-3">
+            <h2 className="neon-title font-display text-3xl md:text-5xl font-bold leading-[1.05] mb-5">
               🏎️ Dúvidas Frequentes
             </h2>
             <p className="text-sm md:text-base text-muted-foreground">
