@@ -116,8 +116,8 @@ const CollectibleLightbox = ({
       {/* Content shell */}
       <div
         className={cn(
-          "relative z-[105] w-full max-w-4xl max-h-[88vh]",
-          "grid grid-cols-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]",
+          "relative z-[105] w-full max-w-3xl max-h-[88vh]",
+          "grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]",
           "rounded-2xl overflow-hidden",
           "bg-[hsl(0_0%_5%)]/80 backdrop-blur-2xl border border-white/15",
           "ring-1 ring-white/5",
@@ -126,13 +126,13 @@ const CollectibleLightbox = ({
         )}
       >
         {/* Media side */}
-        <div className="relative bg-gradient-to-br from-black via-black to-neutral-900 flex items-center justify-center p-4 sm:p-6 min-h-[40vh] lg:min-h-[60vh] lg:max-h-[88vh]">
+        <div className="relative bg-gradient-to-br from-black via-black to-neutral-900 flex items-center justify-center p-4 sm:p-5 min-h-[36vh] md:min-h-[48vh] md:max-h-[88vh]">
           {current.type === "image" ? (
             <img
               key={current.src}
               src={current.src}
               alt={current.alt ?? title}
-              className="max-h-[36vh] lg:max-h-[58vh] max-w-full object-contain animate-fade-in rounded-lg drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
+              className="max-h-[34vh] md:max-h-[46vh] max-w-full object-contain animate-fade-in rounded-lg drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
             />
           ) : (
             <video
@@ -140,7 +140,7 @@ const CollectibleLightbox = ({
               src={current.src}
               controls
               autoPlay
-              className="max-h-[36vh] lg:max-h-[58vh] max-w-full rounded-lg"
+              className="max-h-[34vh] md:max-h-[46vh] max-w-full rounded-lg"
             />
           )}
 
@@ -193,7 +193,7 @@ const CollectibleLightbox = ({
         </div>
 
         {/* Info side */}
-        <aside className="relative bg-black/60 backdrop-blur-xl border-t lg:border-t-0 lg:border-l border-white/10 p-6 sm:p-8 flex flex-col gap-5 overflow-y-auto">
+        <aside className="relative bg-black/60 backdrop-blur-xl border-t md:border-t-0 md:border-l border-white/10 p-5 sm:p-6 flex flex-col gap-4 overflow-y-auto">
           {series && (
             <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-accent">
               {series}
