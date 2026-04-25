@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import galpaoLogo from "@/assets/galpao64-logo.png";
+import galpaoLogo from "@/assets/galpao64-splash.png";
 
 interface SplashScreenProps {
   onEnter: () => void;
