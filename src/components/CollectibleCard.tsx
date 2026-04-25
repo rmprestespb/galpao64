@@ -1,16 +1,8 @@
 import { useState } from "react";
 import { Play, MessageCircle, ShieldCheck, Truck, Lock } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import CollectibleLightbox, { type LightboxMedia } from "./CollectibleLightbox";
+import CollectibleLightbox, { type LightboxMedia, type SpecSheet } from "./CollectibleLightbox";
 
 export type CollectibleCardData = {
   id: string;
@@ -23,6 +15,10 @@ export type CollectibleCardData = {
   videoUrl?: string;
   alt?: string;
   status?: "disponivel" | "reservado" | "vendido";
+  brand?: string;
+  scale?: string;
+  color?: string;
+  condition?: string;
 };
 
 const formatBRL = (cents: number) =>
@@ -38,36 +34,15 @@ type Props = {
 const CollectibleCard = ({
   product,
   onAction,
-  actionLabel = "Reservar no WhatsApp",
+  actionLabel = "Garantir esta peça",
   whatsappNumber = "5546999350070",
 }: Props) => {
   const [activeImage, setActiveImage] = useState(product.images[0]);
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const hasGallery = product.images.length > 1;
   const status = product.status ?? "disponivel";
   const isLocked = status === "reservado" || status === "vendido";
-
-  const handleBuyClick = () => {
-    if (isLocked) return;
-    onAction?.(product);
-    setConfirmOpen(true);
-  };
-
-  const handleConfirm = () => {
-    const message = encodeURIComponent(
-      `Olá Robson! Gostaria de reservar a miniatura ${product.title}` +
-        (product.series ? ` (Série: ${product.series})` : "") +
-        ` - Valor: ${formatBRL(product.price_cents)}.\n\n` +
-        `Como faço para pagar via PIX e combinar o frete?`,
-    );
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
-    toast.success("Reserva iniciada", {
-      description: `Continue a conversa no WhatsApp para combinar o PIX e o frete.`,
-    });
-    setConfirmOpen(false);
-  };
 
   const description =
     product.description ??
@@ -78,10 +53,39 @@ const CollectibleCard = ({
     ...(product.videoUrl ? [{ type: "video" as const, src: product.videoUrl }] : []),
   ];
 
-  const openLightbox = (mediaSrc?: string) => {
+  const specs: SpecSheet = {
+    brand: product.brand ?? "Hot Wheels",
+    series: product.series ?? null,
+    scale: product.scale ?? "1:64",
+    color: product.color ?? null,
+    condition: product.condition ?? "Na cartela",
+  };
+
+  const openDetail = (mediaSrc?: string) => {
     const i = mediaSrc ? lightboxMedia.findIndex((m) => m.src === mediaSrc) : 0;
     setLightboxIndex(i >= 0 ? i : 0);
     setLightboxOpen(true);
+  };
+
+  const handleCardCtaClick = () => {
+    if (isLocked) return;
+    onAction?.(product);
+    openDetail(activeImage);
+  };
+
+  const sendToWhatsApp = () => {
+    const message = encodeURIComponent(
+      `Olá! Vi a miniatura ${product.title}` +
+        (product.series ? ` (${product.series})` : "") +
+        ` no site e quero garantir ela.` +
+        ` Valor: ${formatBRL(product.price_cents)}.\n\n` +
+        `Como prosseguimos com o PIX?`,
+    );
+    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
+    toast.success("Peça garantida", {
+      description: `Continue a conversa no WhatsApp para combinar o PIX e o frete.`,
+    });
+    setLightboxOpen(false);
   };
 
   return (
@@ -103,7 +107,7 @@ const CollectibleCard = ({
         <div className="relative aspect-square overflow-hidden bg-black">
           <button
             type="button"
-            onClick={() => openLightbox(activeImage)}
+            onClick={() => openDetail(activeImage)}
             aria-label={`Ampliar foto de ${product.title}`}
             className="absolute inset-0 z-0 cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
@@ -219,7 +223,7 @@ const CollectibleCard = ({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      openLightbox(product.videoUrl);
+                      openDetail(product.videoUrl);
                     }}
                     aria-label="Assistir vídeo de demonstração"
                     className={cn(
@@ -258,8 +262,8 @@ const CollectibleCard = ({
           </div>
           <button
             type="button"
-            onClick={handleBuyClick}
-            aria-label={isLocked ? `${product.title} indisponível` : `Reservar ${product.title} no WhatsApp`}
+            onClick={handleCardCtaClick}
+            aria-label={isLocked ? `${product.title} indisponível` : `Ver detalhes e garantir ${product.title}`}
             disabled={isLocked}
             className={cn(
               "w-full inline-flex items-center justify-center gap-2",
@@ -284,63 +288,6 @@ const CollectibleCard = ({
         </div>
       </article>
 
-      {/* Confirmação de compra */}
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent className="max-w-md bg-card/95 backdrop-blur-md border-border/60">
-          <DialogHeader>
-            <p className="text-[11px] font-bold tracking-[0.25em] text-accent uppercase">
-              Garantir esta peça
-            </p>
-            <DialogTitle className="text-xl font-extrabold leading-tight">
-              {product.title}
-            </DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground">
-              {product.series ? `${product.series} · ` : ""}
-              Pagamento via PIX. Após clicar em reservar, você será atendido
-              pessoalmente para combinar PIX, frete e envio.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex items-center gap-4 rounded-lg border border-border/60 bg-black/40 p-3">
-            <img
-              src={activeImage}
-              alt=""
-              className="h-16 w-16 rounded-md object-cover border border-white/10"
-            />
-            <div className="flex-1">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                Valor da peça
-              </p>
-              <p className="text-2xl font-extrabold text-[#FFD27A]">
-                {formatBRL(product.price_cents)}
-              </p>
-              <p className="mt-0.5 text-[10px] text-muted-foreground inline-flex items-center gap-1">
-                <Truck className="h-3 w-3" />
-                Frete: A combinar
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2 sm:gap-2">
-            <button
-              type="button"
-              onClick={() => setConfirmOpen(false)}
-              className="rounded-md px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              onClick={handleConfirm}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-[#25D366] px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] text-black hover:brightness-110 transition-all"
-            >
-              <MessageCircle className="h-4 w-4" />
-              Reservar no WhatsApp
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       <CollectibleLightbox
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
@@ -352,10 +299,8 @@ const CollectibleCard = ({
         media={lightboxMedia}
         initialIndex={lightboxIndex}
         status={status}
-        onBuy={isLocked ? undefined : () => {
-          setLightboxOpen(false);
-          setConfirmOpen(true);
-        }}
+        specs={specs}
+        onBuy={isLocked ? undefined : sendToWhatsApp}
       />
     </>
   );
