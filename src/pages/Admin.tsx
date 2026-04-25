@@ -364,6 +364,19 @@ const Admin = () => {
                       RASCUNHO
                     </span>
                   )}
+                  {p.status && p.status !== "disponivel" && (
+                    <span
+                      className={cn(
+                        "absolute bottom-2 left-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded backdrop-blur-md border",
+                        p.status === "reservado"
+                          ? "bg-amber-500/20 text-amber-200 border-amber-400/40"
+                          : "bg-red-500/20 text-red-200 border-red-400/40",
+                      )}
+                    >
+                      <Lock className="h-2.5 w-2.5" />
+                      {STATUS_LABEL[p.status]}
+                    </span>
+                  )}
                   {p.video_url && (
                     <span className="absolute top-2 right-2 bg-background/90 p-1.5 rounded">
                       <Film className="h-3 w-3 text-accent" />
