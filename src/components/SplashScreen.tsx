@@ -273,23 +273,37 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
 
       {/* Centered content (sits above doors but disappears as they slide) */}
       <div
-        className={`absolute inset-0 flex flex-col items-center justify-center pointer-events-auto transition-opacity duration-500 ${
+        className={`absolute inset-0 flex flex-col items-center justify-center gap-6 px-4 py-6 pointer-events-auto transition-opacity duration-500 ${
           opening ? "opacity-0" : "opacity-100"
         }`}
       >
-        <img
-          src={galpaoLogo}
-          alt="Galpão 64 — A Arte do Diecast"
-          className="w-[340px] md:w-[460px] lg:w-[540px] h-auto splash-logo-enter"
-          style={{
-            filter: "drop-shadow(0 0 60px rgba(201,169,106,0.35))",
-          }}
-        />
+        {/* Wrapper crops the bottom of the PNG (which embeds its own
+            "GALPÃO 64" button + "Clique para acelerar" caption) so we
+            don't show duplicates of the external button/caption below.
+            Uses responsive sizes capped by viewport height to avoid
+            cutting off the cars on short mobile screens. */}
+        <div
+          className="overflow-hidden splash-logo-enter flex justify-center"
+          style={{ maxHeight: "min(62vh, 560px)" }}
+        >
+          <img
+            src={galpaoLogo}
+            alt="Galpão 64 — A Arte do Diecast"
+            className="h-auto object-contain"
+            style={{
+              width: "min(88vw, 540px)",
+              maxHeight: "min(62vh, 560px)",
+              clipPath: "inset(0 0 18% 0)",
+              marginBottom: "-12%",
+              filter: "drop-shadow(0 0 60px rgba(201,169,106,0.35))",
+            }}
+          />
+        </div>
 
         <button
           type="button"
           onClick={handleEnter}
-          className="mt-10 group relative inline-flex items-center justify-center border border-[#C9A96A]/70 bg-transparent px-10 py-3 text-xs tracking-[0.5em] text-[#C9A96A] transition-all duration-500 hover:bg-[#C9A96A] hover:text-black hover:shadow-[0_0_40px_rgba(201,169,106,0.55)] focus:outline-none focus:ring-2 focus:ring-[#C9A96A]/60"
+          className="group relative inline-flex items-center justify-center border border-[#C9A96A]/70 bg-transparent px-8 py-3 text-[11px] sm:text-xs tracking-[0.5em] text-[#C9A96A] transition-all duration-500 hover:bg-[#C9A96A] hover:text-black hover:shadow-[0_0_40px_rgba(201,169,106,0.55)] focus:outline-none focus:ring-2 focus:ring-[#C9A96A]/60"
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
           <span className="absolute -left-6 top-1/2 h-px w-4 bg-[#C9A96A]/60 transition-all duration-500 group-hover:w-6" />
@@ -298,7 +312,7 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
         </button>
 
         <p
-          className="mt-6 text-[10px] uppercase tracking-[0.6em] text-white/40"
+          className="text-[10px] uppercase tracking-[0.5em] sm:tracking-[0.6em] text-white/40 text-center"
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
           Clique para acelerar
