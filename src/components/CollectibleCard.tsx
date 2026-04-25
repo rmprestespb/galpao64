@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play, X, ShoppingBag, MessageCircle } from "lucide-react";
+import { Play, ShoppingBag, MessageCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -41,7 +41,6 @@ const CollectibleCard = ({
   whatsappNumber = "5546999350070",
 }: Props) => {
   const [activeImage, setActiveImage] = useState(product.images[0]);
-  const [videoOpen, setVideoOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -299,30 +298,21 @@ const CollectibleCard = ({
         </DialogContent>
       </Dialog>
 
-      {product.videoUrl && (
-        <Dialog open={videoOpen} onOpenChange={setVideoOpen}>
-          <DialogContent className="max-w-3xl bg-black border-white/10 p-0 overflow-hidden">
-            <DialogHeader className="sr-only">
-              <DialogTitle>{product.title}</DialogTitle>
-            </DialogHeader>
-            <button
-              onClick={() => setVideoOpen(false)}
-              className="absolute right-3 top-3 z-10 rounded-full bg-black/60 p-2 text-white hover:bg-black/80"
-              aria-label="Fechar vídeo"
-            >
-              <X className="h-4 w-4" />
-            </button>
-            <div className="aspect-video w-full bg-black">
-              <video
-                src={product.videoUrl}
-                controls
-                autoPlay
-                className="h-full w-full"
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      <CollectibleLightbox
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        title={product.title}
+        series={product.series}
+        rarity={product.rarity}
+        priceLabel={formatBRL(product.price_cents)}
+        description={description}
+        media={lightboxMedia}
+        initialIndex={lightboxIndex}
+        onBuy={() => {
+          setLightboxOpen(false);
+          setConfirmOpen(true);
+        }}
+      />
     </>
   );
 };
