@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Flame, Loader2, LogOut, Plus, Trash2, Printer, FileText, ArrowLeft, MessageCircle } from "lucide-react";
+import { Flame, Loader2, LogOut, Plus, Trash2, Printer, FileText, ArrowLeft, MessageCircle, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,6 +22,63 @@ type Item = {
 
 type Payment = "Dinheiro" | "PIX" | "Cartão Débito" | "Cartão Crédito" | "Outro";
 const PAYMENTS: Payment[] = ["Dinheiro", "PIX", "Cartão Débito", "Cartão Crédito", "Outro"];
+
+// ===== Helpers BR Code (PIX Copia e Cola) — banco C6 =====
+const tlv = (id: string, value: string) => {
+  const len = value.length.toString().padStart(2, "0");
+  return `${id}${len}${value}`;
+};
+const crc16 = (payload: string) => {
+  let crc = 0xffff;
+  for (let i = 0; i < payload.length; i++) {
+    crc ^= payload.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) {
+      crc = crc & 0x8000 ? (crc << 1) ^ 0x1021 : crc << 1;
+      crc &= 0xffff;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, "0");
+};
+const stripDiacritics = (s: string) =>
+  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const buildPixPayload = ({
+  key,
+  amount,
+  merchantName,
+  city,
+  description,
+}: {
+  key: string;
+  amount: number;
+  merchantName: string;
+  city: string;
+  description?: string;
+}) => {
+  const gui = tlv("00", "br.gov.bcb.pix");
+  const keyTlv = tlv("01", key);
+  const desc = description ? tlv("02", stripDiacritics(description).slice(0, 50)) : "";
+  const merchantAccountInfo = tlv("26", gui + keyTlv + desc);
+  const payloadFormat = tlv("00", "01");
+  const merchantCategoryCode = tlv("52", "0000");
+  const transactionCurrency = tlv("53", "986");
+  const transactionAmount = amount > 0 ? tlv("54", amount.toFixed(2)) : "";
+  const countryCode = tlv("58", "BR");
+  const name = tlv("59", stripDiacritics(merchantName).slice(0, 25));
+  const cityTlv = tlv("60", stripDiacritics(city).slice(0, 15).toUpperCase());
+  const additionalData = tlv("62", tlv("05", "***"));
+  const partial =
+    payloadFormat +
+    merchantAccountInfo +
+    merchantCategoryCode +
+    transactionCurrency +
+    transactionAmount +
+    countryCode +
+    name +
+    cityTlv +
+    additionalData +
+    "6304";
+  return partial + crc16(partial);
+};
 
 const formatBRL = (n: number) =>
   n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -63,6 +120,43 @@ const Receipts = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [notes, setNotes] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
+
+  // PIX (banco C6) — persistido no localStorage e compartilhado com o gerador PIX
+  const [pixKey, setPixKey] = useState(
+    () => localStorage.getItem("pix_key") || "rmprestespb@gmail.com",
+  );
+  const [pixName, setPixName] = useState(
+    () => localStorage.getItem("pix_name") || "Robson Galpao 64",
+  );
+  const [pixCity, setPixCity] = useState(
+    () => localStorage.getItem("pix_city") || "PATO BRANCO",
+  );
+  const [includePix, setIncludePix] = useState(true);
+
+  useEffect(() => {
+    localStorage.setItem("pix_key", pixKey);
+    localStorage.setItem("pix_name", pixName);
+    localStorage.setItem("pix_city", pixCity);
+  }, [pixKey, pixName, pixCity]);
+
+  const pixPayload = useMemo(() => {
+    if (!includePix || !pixKey.trim() || !pixName.trim() || !pixCity.trim()) return "";
+    try {
+      return buildPixPayload({
+        key: pixKey.trim(),
+        amount: total,
+        merchantName: pixName.trim(),
+        city: pixCity.trim(),
+        description: `Recibo ${receiptNumber}`,
+      });
+    } catch {
+      return "";
+    }
+  }, [includePix, pixKey, pixName, pixCity, total, receiptNumber]);
+
+  const pixQrUrl = pixPayload
+    ? `https://quickchart.io/qr?size=320&margin=1&dark=000000&light=ffffff&text=${encodeURIComponent(pixPayload)}`
+    : "";
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
