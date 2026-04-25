@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play, ShoppingBag, MessageCircle } from "lucide-react";
+import { Play, MessageCircle, ShieldCheck, Truck, Lock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,7 @@ export type CollectibleCardData = {
   description?: string;
   videoUrl?: string;
   alt?: string;
+  status?: "disponivel" | "reservado" | "vendido";
 };
 
 const formatBRL = (cents: number) =>
@@ -37,7 +38,7 @@ type Props = {
 const CollectibleCard = ({
   product,
   onAction,
-  actionLabel = "Comprar",
+  actionLabel = "Reservar no WhatsApp",
   whatsappNumber = "5546999350070",
 }: Props) => {
   const [activeImage, setActiveImage] = useState(product.images[0]);
@@ -45,23 +46,25 @@ const CollectibleCard = ({
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const hasGallery = product.images.length > 1;
+  const status = product.status ?? "disponivel";
+  const isLocked = status === "reservado" || status === "vendido";
 
   const handleBuyClick = () => {
+    if (isLocked) return;
     onAction?.(product);
     setConfirmOpen(true);
   };
 
   const handleConfirm = () => {
     const message = encodeURIComponent(
-      `Olá! Tenho interesse em comprar:\n\n` +
-        `• ${product.title}\n` +
-        (product.series ? `• Série: ${product.series}\n` : "") +
-        `• Valor: ${formatBRL(product.price_cents)}\n\n` +
-        `Pode me passar as próximas etapas?`,
+      `Olá Robson! Gostaria de reservar a miniatura ${product.title}` +
+        (product.series ? ` (Série: ${product.series})` : "") +
+        ` - Valor: ${formatBRL(product.price_cents)}.\n\n` +
+        `Como faço para pagar via PIX e combinar o frete?`,
     );
     window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
-    toast.success("Pedido iniciado", {
-      description: `Continue a conversa no WhatsApp para finalizar.`,
+    toast.success("Reserva iniciada", {
+      description: `Continue a conversa no WhatsApp para combinar o PIX e o frete.`,
     });
     setConfirmOpen(false);
   };
@@ -114,6 +117,7 @@ const CollectibleCard = ({
                 "h-full w-full object-cover transition-all duration-[400ms] ease-out",
                 "group-hover:scale-110 group-focus-within:scale-110",
                 "group-hover:blur-[2px] group-focus-within:blur-[2px]",
+                isLocked && "grayscale-[60%] opacity-80",
               )}
             />
           </button>
@@ -123,6 +127,23 @@ const CollectibleCard = ({
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"
           />
+
+          {/* Status badge */}
+          {isLocked && (
+            <div className="absolute left-3 top-3 z-10">
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] backdrop-blur-md border",
+                  status === "reservado"
+                    ? "bg-amber-500/20 text-amber-200 border-amber-400/40"
+                    : "bg-red-500/20 text-red-200 border-red-400/40",
+                )}
+              >
+                <Lock className="h-3 w-3" />
+                {status === "reservado" ? "Reservado" : "Vendido"}
+              </span>
+            </div>
+          )}
 
           {/* Discreet price (initial state) */}
           <div
@@ -162,6 +183,11 @@ const CollectibleCard = ({
               >
                 {description}
               </p>
+
+              <div className="flex items-center gap-2 text-[10px] text-white/70">
+                <ShieldCheck className="h-3 w-3 text-accent" />
+                <span>Pagamento via PIX · atendimento pessoal pelo WhatsApp</span>
+              </div>
 
               <div className="flex items-center gap-2">
                 {hasGallery && (
@@ -225,23 +251,35 @@ const CollectibleCard = ({
                 {product.series}
               </p>
             )}
+            <p className="mt-1 text-[10px] text-white/50 inline-flex items-center gap-1">
+              <Truck className="h-3 w-3" />
+              Frete: A combinar
+            </p>
           </div>
           <button
             type="button"
             onClick={handleBuyClick}
-            aria-label={`Comprar ${product.title}`}
+            aria-label={isLocked ? `${product.title} indisponível` : `Reservar ${product.title} no WhatsApp`}
+            disabled={isLocked}
             className={cn(
               "w-full inline-flex items-center justify-center gap-2",
               "rounded-full px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.2em]",
-              "bg-primary text-primary-foreground",
-              "border border-primary/60",
-              "shadow-[0_8px_24px_-8px_rgba(255,140,0,0.55)]",
-              "hover:brightness-110 hover:shadow-[0_10px_30px_-6px_rgba(255,140,0,0.75)]",
-              "active:scale-[0.98] transition-all",
+              isLocked
+                ? "bg-white/5 text-white/40 border border-white/10 cursor-not-allowed"
+                : "bg-[#25D366] text-black border border-[#25D366]/60 shadow-[0_8px_24px_-8px_rgba(37,211,102,0.6)] hover:brightness-110 hover:shadow-[0_10px_30px_-6px_rgba(37,211,102,0.8)] active:scale-[0.98] transition-all",
             )}
           >
-            <ShoppingBag className="h-4 w-4" strokeWidth={2.5} />
-            {actionLabel}
+            {isLocked ? (
+              <>
+                <Lock className="h-4 w-4" strokeWidth={2.5} />
+                {status === "reservado" ? "Reservado" : "Vendido"}
+              </>
+            ) : (
+              <>
+                <MessageCircle className="h-4 w-4" strokeWidth={2.5} />
+                {actionLabel}
+              </>
+            )}
           </button>
         </div>
       </article>
@@ -251,14 +289,15 @@ const CollectibleCard = ({
         <DialogContent className="max-w-md bg-card/95 backdrop-blur-md border-border/60">
           <DialogHeader>
             <p className="text-[11px] font-bold tracking-[0.25em] text-accent uppercase">
-              Confirmar Compra
+              Garantir esta peça
             </p>
             <DialogTitle className="text-xl font-extrabold leading-tight">
               {product.title}
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
               {product.series ? `${product.series} · ` : ""}
-              Você será encaminhado ao WhatsApp do Galpão 64 para finalizar a reserva.
+              Pagamento via PIX. Após clicar em reservar, você será atendido
+              pessoalmente para combinar PIX, frete e envio.
             </DialogDescription>
           </DialogHeader>
 
@@ -270,10 +309,14 @@ const CollectibleCard = ({
             />
             <div className="flex-1">
               <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                Total
+                Valor da peça
               </p>
               <p className="text-2xl font-extrabold text-[#FFD27A]">
                 {formatBRL(product.price_cents)}
+              </p>
+              <p className="mt-0.5 text-[10px] text-muted-foreground inline-flex items-center gap-1">
+                <Truck className="h-3 w-3" />
+                Frete: A combinar
               </p>
             </div>
           </div>
@@ -289,10 +332,10 @@ const CollectibleCard = ({
             <button
               type="button"
               onClick={handleConfirm}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-green-500 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] text-white hover:bg-green-600 transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-[#25D366] px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] text-black hover:brightness-110 transition-all"
             >
               <MessageCircle className="h-4 w-4" />
-              Confirmar no WhatsApp
+              Reservar no WhatsApp
             </button>
           </DialogFooter>
         </DialogContent>
@@ -308,7 +351,8 @@ const CollectibleCard = ({
         description={description}
         media={lightboxMedia}
         initialIndex={lightboxIndex}
-        onBuy={() => {
+        status={status}
+        onBuy={isLocked ? undefined : () => {
           setLightboxOpen(false);
           setConfirmOpen(true);
         }}
