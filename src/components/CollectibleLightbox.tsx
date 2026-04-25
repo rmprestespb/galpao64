@@ -214,20 +214,52 @@ const CollectibleLightbox = ({
             {title}
           </h2>
 
-          <div className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-md p-4 shadow-inner">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-white/50">
-              Valor
-            </p>
-            <p
-              className="text-4xl sm:text-5xl font-extrabold text-[#FFD27A] mt-1 drop-shadow-[0_2px_12px_rgba(255,210,122,0.35)]"
-              style={{ fontFamily: "Inter, system-ui, sans-serif" }}
+          {/* Price card — metallic finish */}
+          <div
+            className="relative rounded-xl p-[1px] overflow-hidden shadow-[0_10px_40px_-10px_rgba(255,210,122,0.35)]"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(255,224,160,0.55) 0%, rgba(255,210,122,0.15) 35%, rgba(255,255,255,0.05) 50%, rgba(184,134,11,0.4) 100%)",
+            }}
+          >
+            <div
+              className="relative rounded-[11px] p-4 backdrop-blur-md overflow-hidden"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(20,16,8,0.85) 0%, rgba(8,8,8,0.95) 100%)",
+              }}
             >
-              {priceLabel}
-            </p>
-            <p className="mt-2 text-[11px] text-white/60 inline-flex items-center gap-1.5">
-              <Truck className="h-3.5 w-3.5" />
-              Frete: A combinar
-            </p>
+              {/* Specular sheen */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-0 h-1/2 opacity-60"
+                style={{
+                  background:
+                    "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 100%)",
+                }}
+              />
+              <p className="relative text-[10px] uppercase tracking-[0.25em] text-[#FFD27A]/70">
+                Valor
+              </p>
+              <p
+                className="relative text-4xl sm:text-5xl font-extrabold mt-1 drop-shadow-[0_2px_14px_rgba(255,210,122,0.45)]"
+                style={{
+                  fontFamily: "Inter, system-ui, sans-serif",
+                  backgroundImage:
+                    "linear-gradient(180deg, #FFEFC2 0%, #FFD27A 45%, #C9962B 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                {priceLabel}
+              </p>
+              <p className="relative mt-2 text-[11px] text-white/65 inline-flex items-center gap-1.5">
+                <Truck className="h-3.5 w-3.5" />
+                Frete: A combinar
+              </p>
+            </div>
           </div>
 
           <div className="flex items-start gap-2 rounded-lg border border-accent/20 bg-accent/5 p-3 text-[12px] text-white/85">
