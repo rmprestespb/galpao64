@@ -277,28 +277,14 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
           opening ? "opacity-0" : "opacity-100"
         }`}
       >
-        <div className="splash-logo-enter">
-          <img
-            src={galpaoLogo}
-            alt="Galpão 64 — A Arte do Diecast"
-            className="w-[340px] md:w-[460px] lg:w-[540px] h-auto"
-            style={{
-              // Crop bottom portion of the PNG that contains the embedded
-              // "GALPÃO 64" button and "CLIQUE PARA ACELERAR" caption.
-              clipPath: "inset(0 0 18% 0)",
-              marginBottom: "-3rem",
-              // Dissolve the rectangular dark frame of the PNG into the
-              // black splash background. The mask is generous (covers the
-              // full artwork) and only fades the very edges, so no part of
-              // the cars/badge gets cropped on mobile or desktop.
-              WebkitMaskImage:
-                "radial-gradient(ellipse 95% 90% at 50% 45%, #000 70%, rgba(0,0,0,0.6) 85%, transparent 100%)",
-              maskImage:
-                "radial-gradient(ellipse 95% 90% at 50% 45%, #000 70%, rgba(0,0,0,0.6) 85%, transparent 100%)",
-              filter: "drop-shadow(0 0 60px rgba(201,169,106,0.35))",
-            }}
-          />
-        </div>
+        <img
+          src={galpaoLogo}
+          alt="Galpão 64 — A Arte do Diecast"
+          className="w-[340px] md:w-[460px] lg:w-[540px] h-auto splash-logo-enter"
+          style={{
+            filter: "drop-shadow(0 0 60px rgba(201,169,106,0.35))",
+          }}
+        />
 
         <button
           type="button"
