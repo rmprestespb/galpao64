@@ -729,52 +729,9 @@ const Admin = () => {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSave} disabled={saving || uploading || manualProcessing}>
+            <Button onClick={handleSave} disabled={saving || uploading}>
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Salvar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-
-      <Dialog open={manualCropOpen} onOpenChange={setManualCropOpen}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Ajuste Manual da foto de venda</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Clique primeiro no canto superior esquerdo do carro e depois no canto inferior direito para definir o recorte.
-            </p>
-            <button
-              type="button"
-              onClick={handleManualCropClick}
-              className="relative w-full overflow-hidden rounded-md border border-border bg-black cursor-crosshair"
-            >
-              {saleImageForManualCrop ? (
-                <img src={saleImageForManualCrop} alt="Definir recorte do carro" className="max-h-[60vh] w-full object-contain" />
-              ) : (
-                <div className="py-20 text-sm text-muted-foreground">Envie a segunda foto primeiro.</div>
-              )}
-              {activeManualCrop && (
-                <span
-                  className="absolute border-2 border-accent bg-accent/10 shadow-[0_0_20px_hsl(var(--accent)/0.45)]"
-                  style={{
-                    left: `${activeManualCrop.x * 100}%`,
-                    top: `${activeManualCrop.y * 100}%`,
-                    width: `${activeManualCrop.width * 100}%`,
-                    height: `${activeManualCrop.height * 100}%`,
-                  }}
-                />
-              )}
-            </button>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setManualCropOpen(false)}>Cancelar</Button>
-            <Button onClick={applyManualCrop} disabled={manualProcessing || !activeManualCrop}>
-              {manualProcessing && <Loader2 className="h-4 w-4 animate-spin" />}
-              Aplicar recorte
             </Button>
           </DialogFooter>
         </DialogContent>
