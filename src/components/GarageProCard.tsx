@@ -193,9 +193,26 @@ const GarageProCard = ({ product, whatsappNumber = "5546999350070" }: Props) => 
             backgroundSize: "20px 20px,20px 20px,100% 100%",
           }}
         >
-          {/* Floating price tag */}
+          {/* Model title — top-left in stage */}
+          <div className="absolute left-2 top-2 z-10 max-w-[60%] select-none">
+            <p
+              className="text-[8px] font-bold uppercase tracking-[0.22em] text-[#00FFFF]/80 leading-none drop-shadow-[0_0_6px_rgba(0,229,255,0.5)]"
+              style={{ fontFamily: "Montserrat, system-ui, sans-serif" }}
+            >
+              Modelo
+            </p>
+            <p
+              className="mt-0.5 text-[12px] font-extrabold uppercase tracking-[0.06em] text-white leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] truncate"
+              style={{ fontFamily: "Montserrat, system-ui, sans-serif" }}
+              title={product.title}
+            >
+              {product.title}
+            </p>
+          </div>
+
+          {/* Floating price tag — top-right */}
           <div
-            className="absolute left-2 top-2 z-10 select-none rounded-sm border border-white/20 px-2.5 py-1 shadow-[0_4px_14px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.15)]"
+            className="absolute right-2 top-2 z-10 select-none rounded-sm border border-white/20 px-2.5 py-1 shadow-[0_4px_14px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.15)]"
             style={{
               background:
                 "linear-gradient(180deg,#3a2a1a 0%,#1a120a 100%)",
@@ -212,7 +229,7 @@ const GarageProCard = ({ product, whatsappNumber = "5546999350070" }: Props) => 
 
           {/* Status overlay */}
           {isLocked && (
-            <div className="absolute right-2 top-2 z-10">
+            <div className="absolute right-2 bottom-10 z-10">
               <span
                 className={cn(
                   "inline-flex items-center rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.2em] backdrop-blur border",
@@ -226,19 +243,43 @@ const GarageProCard = ({ product, whatsappNumber = "5546999350070" }: Props) => 
             </div>
           )}
 
-          {/* Stage shadow under car */}
+          {/* Studio key light from above */}
           <div
             aria-hidden="true"
-            className="absolute left-1/2 -translate-x-1/2 bottom-[12%] h-3 w-3/5 rounded-[50%] bg-black/70 blur-md"
+            className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+            style={{
+              background:
+                "radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 40%, transparent 70%)",
+            }}
           />
 
-          {/* Centered product */}
+          {/* Realistic projected ground shadow under car */}
+          <div
+            aria-hidden="true"
+            className="absolute left-1/2 -translate-x-1/2 bottom-[14%] h-4 w-[62%] rounded-[50%]"
+            style={{
+              background:
+                "radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.55) 40%, rgba(0,0,0,0) 75%)",
+              filter: "blur(6px)",
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute left-1/2 -translate-x-1/2 bottom-[15%] h-1.5 w-2/5 rounded-[50%] bg-black/80 blur-sm"
+          />
+
+          {/* Centered product with Studio Lighting filter */}
           <div className="absolute inset-0 flex items-center justify-center p-4">
             {stageImage ? (
               <img
                 src={stageImage}
                 alt={product.alt ?? product.title}
-                className="max-h-full max-w-full object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.8)]"
+                className="max-h-[78%] max-w-[88%] object-contain"
+                style={{
+                  // Studio Lighting: brighter highlights, slightly punchier color, subtle rim glow
+                  filter:
+                    "brightness(1.08) contrast(1.12) saturate(1.18) drop-shadow(0 2px 0 rgba(255,255,255,0.08)) drop-shadow(0 14px 20px rgba(0,0,0,0.85))",
+                }}
               />
             ) : (
               <div className="flex flex-col items-center gap-2 text-white/60">
@@ -284,19 +325,8 @@ const GarageProCard = ({ product, whatsappNumber = "5546999350070" }: Props) => 
         </div>
       </div>
 
-      {/* Title bar */}
-      <div className="relative z-10 px-4">
-        <h3
-          className="truncate text-sm font-extrabold uppercase tracking-[0.08em] text-white"
-          style={{ fontFamily: "Montserrat, system-ui, sans-serif" }}
-          title={product.title}
-        >
-          {product.title}
-        </h3>
-      </div>
-
       {/* Certification panel */}
-      <div className="relative z-10 mx-3 mt-2 mb-3 rounded-md border border-white/10 bg-[linear-gradient(180deg,#161616,#0a0a0a)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+      <div className="relative z-10 mx-3 mb-3 rounded-md border border-white/10 bg-[linear-gradient(180deg,#161616,#0a0a0a)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
         <div className="flex items-center justify-between border-b border-white/10 px-3 py-1.5">
           <span className="inline-flex items-center gap-1.5">
             <Award className="h-3 w-3 text-[#00FFFF]" />
