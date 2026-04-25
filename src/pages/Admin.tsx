@@ -176,12 +176,47 @@ const Admin = () => {
     try {
       const uploaded: string[] = [];
       for (const file of files) {
-        const ext = file.name.split(".").pop();
+        // Limite defensivo: 25MB (fotos de celular comprimidas cabem)
+        const MAX_BYTES = 25 * 1024 * 1024;
+        if (file.size > MAX_BYTES) {
+          throw new Error(
+            `"${file.name}" tem ${(file.size / 1024 / 1024).toFixed(1)}MB. Máximo 25MB. Reduza a foto antes de enviar.`,
+          );
+        }
+
+        // Normaliza extensão: minúscula, só letras/números, fallback "jpg"/"mp4"
+        const rawExt = file.name.includes(".")
+          ? file.name.split(".").pop() ?? ""
+          : "";
+        let ext = rawExt.toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (!ext) {
+          // Deriva do MIME quando possível
+          const mimeExt = file.type.split("/")[1]?.toLowerCase();
+          ext = mimeExt && /^[a-z0-9]+$/.test(mimeExt)
+            ? mimeExt
+            : kind === "image"
+              ? "jpg"
+              : "mp4";
+        }
+        // HEIC/HEIF do iPhone não renderiza no navegador — avisa
+        if (kind === "image" && (ext === "heic" || ext === "heif")) {
+          throw new Error(
+            `"${file.name}" está em formato HEIC (iPhone). Converta para JPG ou PNG antes de enviar.`,
+          );
+        }
+
         const path = `${kind}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        const { error } = await supabase.storage
+        const { error: upErr } = await supabase.storage
           .from("product-media")
-          .upload(path, file, { contentType: file.type, upsert: false });
-        if (error) throw error;
+          .upload(path, file, {
+            contentType: file.type || (kind === "image" ? "image/jpeg" : "video/mp4"),
+            upsert: false,
+            cacheControl: "3600",
+          });
+        if (upErr) {
+          console.error("Storage upload error", { path, file: file.name, size: file.size, type: file.type, upErr });
+          throw new Error(`${file.name}: ${upErr.message}`);
+        }
         const { data } = supabase.storage.from("product-media").getPublicUrl(path);
         uploaded.push(data.publicUrl);
       }
@@ -192,7 +227,9 @@ const Admin = () => {
       }
       toast.success(kind === "image" ? "Foto(s) enviada(s)" : "Vídeo enviado");
     } catch (err) {
-      toast.error("Falha no upload", { description: (err as Error).message });
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("handleUpload failed:", err);
+      toast.error("Falha no upload", { description: msg, duration: 8000 });
     } finally {
       setUploading(false);
       e.target.value = "";
