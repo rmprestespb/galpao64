@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import ShowroomCard, { ShowroomProductData } from "@/components/ShowroomCard";
+import GarageProShowcase, {
+  GarageProShowcaseData,
+} from "@/components/GarageProShowcase";
 import galpaoLogo from "@/assets/galpao64-logo.png";
 import garageBg from "@/assets/luxury-garage-bg.jpg";
 
@@ -10,22 +12,22 @@ type Row = {
   id: string;
   title: string;
   series: string | null;
+  description: string | null;
   price_cents: number;
   images: string[] | null;
-  sale_image_original_url: string | null;
-  sale_image_processed_url: string | null;
+  video_url: string | null;
   status: "disponivel" | "reservado" | "vendido" | null;
 };
 
 const Showroom = () => {
-  const [products, setProducts] = useState<ShowroomProductData[]>([]);
+  const [products, setProducts] = useState<GarageProShowcaseData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     supabase
       .from("products")
       .select(
-        "id, title, series, price_cents, images, sale_image_original_url, sale_image_processed_url, status",
+        "id, title, series, description, price_cents, images, video_url, status",
       )
       .eq("is_published", true)
       .order("display_order", { ascending: true })
@@ -35,22 +37,21 @@ const Showroom = () => {
           setProducts(
             (data as Row[]).map((d) => {
               const imgs = d.images?.length ? d.images : [];
-              // Foto 1 (Destaque) = preferimos imagem de venda original (close-up do carro)
-              const highlight =
-                d.sale_image_original_url || imgs[0] || "";
-              // Foto 2 (Blister) = primeira do array geral, se diferente da Foto 1
-              const blister =
-                imgs.find((u) => u && u !== highlight) ?? imgs[1] ?? null;
+              // Visão 1 (Loose) = primeira foto enviada = foto do carro fora do blister.
+              const loose = imgs[0] ?? "";
+              // Visão 2 (Blister) = segunda foto, se houver. Mantém fundo original.
+              const blister = imgs[1] ?? null;
               return {
                 id: d.id,
                 title: d.title,
                 series: d.series,
+                description: d.description,
                 price_cents: d.price_cents,
-                highlightImage: highlight,
-                highlightProcessed: d.sale_image_processed_url,
+                looseImage: loose,
                 blisterImage: blister,
+                videoUrl: d.video_url,
                 status: d.status ?? "disponivel",
-              } satisfies ShowroomProductData;
+              } satisfies GarageProShowcaseData;
             }),
           );
         }
@@ -109,9 +110,9 @@ const Showroom = () => {
               Nenhuma peça publicada no momento.
             </p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
               {products.map((p) => (
-                <ShowroomCard key={p.id} product={p} />
+                <GarageProShowcase key={p.id} product={p} />
               ))}
             </div>
           )}
