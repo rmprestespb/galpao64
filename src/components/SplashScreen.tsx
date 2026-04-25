@@ -277,11 +277,21 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
           opening ? "opacity-0" : "opacity-100"
         }`}
       >
-        <img
-          src={galpaoLogo}
-          alt="Galpão 64 — A Arte do Diecast"
-          className="w-[260px] md:w-[360px] lg:w-[420px] h-auto drop-shadow-[0_0_60px_rgba(201,169,106,0.35)] splash-logo-enter"
-        />
+        <div className="overflow-hidden splash-logo-enter">
+          <img
+            src={galpaoLogo}
+            alt="Galpão 64 — A Arte do Diecast"
+            className="w-[320px] md:w-[440px] lg:w-[520px] h-auto drop-shadow-[0_0_60px_rgba(201,169,106,0.35)]"
+            style={{
+              // Crop bottom portion of the PNG that contains the embedded
+              // "GALPÃO 64" button and "CLIQUE PARA ACELERAR" caption,
+              // so only the artwork remains and the external button/caption
+              // below are not duplicated.
+              clipPath: "inset(0 0 18% 0)",
+              marginBottom: "-3rem",
+            }}
+          />
+        </div>
 
         <button
           type="button"
