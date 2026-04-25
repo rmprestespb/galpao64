@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import CollectibleLightbox, { type LightboxMedia } from "./CollectibleLightbox";
 
 export type CollectibleCardData = {
   id: string;
@@ -42,6 +43,8 @@ const CollectibleCard = ({
   const [activeImage, setActiveImage] = useState(product.images[0]);
   const [videoOpen, setVideoOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   const hasGallery = product.images.length > 1;
 
   const handleBuyClick = () => {
@@ -67,6 +70,17 @@ const CollectibleCard = ({
   const description =
     product.description ??
     `${product.title}${product.series ? ` — Série ${product.series}` : ""}. Peça curada pelo Galpão 64 em escala 1:64, com acabamento premium e tampografia detalhada.`;
+
+  const lightboxMedia: LightboxMedia[] = [
+    ...product.images.map((src) => ({ type: "image" as const, src, alt: product.alt ?? product.title })),
+    ...(product.videoUrl ? [{ type: "video" as const, src: product.videoUrl }] : []),
+  ];
+
+  const openLightbox = (mediaSrc?: string) => {
+    const i = mediaSrc ? lightboxMedia.findIndex((m) => m.src === mediaSrc) : 0;
+    setLightboxIndex(i >= 0 ? i : 0);
+    setLightboxOpen(true);
+  };
 
   return (
     <>
