@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Flame, Loader2, LogOut, Plus, Trash2, Printer, FileText, ArrowLeft, MessageCircle } from "lucide-react";
+import { Flame, Loader2, LogOut, Plus, Trash2, Printer, FileText, ArrowLeft, MessageCircle, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,6 +22,63 @@ type Item = {
 
 type Payment = "Dinheiro" | "PIX" | "Cartão Débito" | "Cartão Crédito" | "Outro";
 const PAYMENTS: Payment[] = ["Dinheiro", "PIX", "Cartão Débito", "Cartão Crédito", "Outro"];
+
+// ===== Helpers BR Code (PIX Copia e Cola) — banco C6 =====
+const tlv = (id: string, value: string) => {
+  const len = value.length.toString().padStart(2, "0");
+  return `${id}${len}${value}`;
+};
+const crc16 = (payload: string) => {
+  let crc = 0xffff;
+  for (let i = 0; i < payload.length; i++) {
+    crc ^= payload.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) {
+      crc = crc & 0x8000 ? (crc << 1) ^ 0x1021 : crc << 1;
+      crc &= 0xffff;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, "0");
+};
+const stripDiacritics = (s: string) =>
+  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const buildPixPayload = ({
+  key,
+  amount,
+  merchantName,
+  city,
+  description,
+}: {
+  key: string;
+  amount: number;
+  merchantName: string;
+  city: string;
+  description?: string;
+}) => {
+  const gui = tlv("00", "br.gov.bcb.pix");
+  const keyTlv = tlv("01", key);
+  const desc = description ? tlv("02", stripDiacritics(description).slice(0, 50)) : "";
+  const merchantAccountInfo = tlv("26", gui + keyTlv + desc);
+  const payloadFormat = tlv("00", "01");
+  const merchantCategoryCode = tlv("52", "0000");
+  const transactionCurrency = tlv("53", "986");
+  const transactionAmount = amount > 0 ? tlv("54", amount.toFixed(2)) : "";
+  const countryCode = tlv("58", "BR");
+  const name = tlv("59", stripDiacritics(merchantName).slice(0, 25));
+  const cityTlv = tlv("60", stripDiacritics(city).slice(0, 15).toUpperCase());
+  const additionalData = tlv("62", tlv("05", "***"));
+  const partial =
+    payloadFormat +
+    merchantAccountInfo +
+    merchantCategoryCode +
+    transactionCurrency +
+    transactionAmount +
+    countryCode +
+    name +
+    cityTlv +
+    additionalData +
+    "6304";
+  return partial + crc16(partial);
+};
 
 const formatBRL = (n: number) =>
   n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -79,6 +136,43 @@ const Receipts = () => {
     [items],
   );
   const total = subtotal + (shipping || 0);
+
+  // PIX (banco C6) — persistido no localStorage e compartilhado com o gerador PIX
+  const [pixKey, setPixKey] = useState(
+    () => localStorage.getItem("pix_key") || "rmprestespb@gmail.com",
+  );
+  const [pixName, setPixName] = useState(
+    () => localStorage.getItem("pix_name") || "Robson Galpao 64",
+  );
+  const [pixCity, setPixCity] = useState(
+    () => localStorage.getItem("pix_city") || "PATO BRANCO",
+  );
+  const [includePix, setIncludePix] = useState(true);
+
+  useEffect(() => {
+    localStorage.setItem("pix_key", pixKey);
+    localStorage.setItem("pix_name", pixName);
+    localStorage.setItem("pix_city", pixCity);
+  }, [pixKey, pixName, pixCity]);
+
+  const pixPayload = useMemo(() => {
+    if (!includePix || !pixKey.trim() || !pixName.trim() || !pixCity.trim()) return "";
+    try {
+      return buildPixPayload({
+        key: pixKey.trim(),
+        amount: total,
+        merchantName: pixName.trim(),
+        city: pixCity.trim(),
+        description: `Recibo ${receiptNumber}`,
+      });
+    } catch {
+      return "";
+    }
+  }, [includePix, pixKey, pixName, pixCity, total, receiptNumber]);
+
+  const pixQrUrl = pixPayload
+    ? `https://quickchart.io/qr?size=320&margin=1&dark=000000&light=ffffff&text=${encodeURIComponent(pixPayload)}`
+    : "";
 
   const updateItem = (id: string, patch: Partial<Item>) =>
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
@@ -139,6 +233,9 @@ const Receipts = () => {
       `*TOTAL: ${formatBRL(total)}*`,
       payments.length ? `Pagamento: ${payments.join(", ")}` : "",
       notes && `Obs: ${notes}`,
+      "",
+      includePix && pixPayload && `*PIX (Banco C6) — Copia e Cola:*\n${pixPayload}`,
+      includePix && pixPayload && `Chave: ${pixKey} (${pixName})`,
       "",
       "_A Arte do Diecast_",
     ]
@@ -421,6 +518,48 @@ const Receipts = () => {
           </div>
         </section>
 
+        {/* PIX (BANCO C6) */}
+        <section className="rounded-lg border border-accent/40 bg-card/60 backdrop-blur-sm p-6 mb-6">
+          <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <QrCode className="h-5 w-5 text-accent" />
+              <h2 className="text-xs uppercase tracking-[0.3em] text-accent font-bold">
+                PIX no Recibo — Banco C6
+              </h2>
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer text-xs uppercase tracking-wider">
+              <Checkbox
+                checked={includePix}
+                onCheckedChange={(v) => setIncludePix(v === true)}
+              />
+              <span>Incluir QR Code no recibo</span>
+            </label>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-[0.2em] text-primary">Chave PIX (C6)</Label>
+              <Input
+                value={pixKey}
+                onChange={(e) => setPixKey(e.target.value)}
+                placeholder="email, CPF ou aleatória"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-[0.2em] text-primary">Favorecido</Label>
+              <Input value={pixName} onChange={(e) => setPixName(e.target.value)} maxLength={25} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-[0.2em] text-primary">Cidade</Label>
+              <Input value={pixCity} onChange={(e) => setPixCity(e.target.value)} maxLength={15} />
+            </div>
+          </div>
+
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            O QR Code será gerado automaticamente com o valor total <span className="text-accent font-bold">{formatBRL(total)}</span> e impresso no recibo com fundo temático Galpão 64.
+          </p>
+        </section>
+
         {/* ACTIONS */}
         <div className="flex flex-wrap gap-3">
           <Button onClick={generate} className="font-bold tracking-wider">
@@ -544,6 +683,92 @@ const Receipts = () => {
                 </div>
               </div>
             </div>
+
+            {/* PIX QR — Banco C6 com fundo temático Galpão 64 */}
+            {includePix && pixQrUrl && (
+              <div className="mt-8 rounded-xl overflow-hidden border-2 border-black/80 print:border-black break-inside-avoid">
+                <div className="grid grid-cols-[auto_1fr] gap-0 items-stretch">
+                  {/* Stage temático */}
+                  <div
+                    className="relative flex items-center justify-center p-5"
+                    style={{
+                      background:
+                        "radial-gradient(circle at 30% 30%, #ff7a18 0%, #b53a00 45%, #1a0d05 100%)",
+                    }}
+                  >
+                    {/* Grid sutil */}
+                    <div
+                      className="absolute inset-0 opacity-25"
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(to right, rgba(255,255,255,0.18) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.18) 1px, transparent 1px)",
+                        backgroundSize: "14px 14px",
+                      }}
+                    />
+                    {/* Selo Galpão 64 acima */}
+                    <div className="absolute top-2 left-2 right-2 flex items-center justify-between text-white text-[9px] font-black uppercase tracking-[0.25em] z-10">
+                      <span className="flex items-center gap-1">
+                        <Flame className="h-3 w-3" fill="currentColor" /> GALPÃO 64
+                      </span>
+                      <span className="opacity-80">PIX • C6 BANK</span>
+                    </div>
+                    {/* Moldura branca em torno do QR para garantir leitura */}
+                    <div className="relative z-10 mt-4 rounded-lg bg-white p-3 shadow-[0_8px_24px_rgba(0,0,0,0.5)] ring-2 ring-white">
+                      <img
+                        src={pixQrUrl}
+                        alt="QR Code PIX Galpão 64"
+                        className="h-44 w-44 block"
+                        crossOrigin="anonymous"
+                      />
+                      {/* Logo central sobre o QR (pequeno, fundo branco — não atrapalha leitura) */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="bg-white rounded-md p-1 shadow-md ring-1 ring-black/10">
+                          <img src={logo} alt="" className="h-6 w-6 object-contain" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="absolute bottom-1 left-2 right-2 text-center text-white text-[8px] uppercase tracking-[0.3em] opacity-80 z-10">
+                      A Arte do Diecast
+                    </div>
+                  </div>
+
+                  {/* Dados do PIX */}
+                  <div className="bg-neutral-50 p-4 text-xs text-black">
+                    <div className="text-[10px] uppercase tracking-[0.25em] text-neutral-600 font-bold">
+                      Pagamento via PIX
+                    </div>
+                    <div className="mt-1 text-base font-black tracking-wider">
+                      Banco C6 — Galpão 64
+                    </div>
+                    <div className="mt-3 grid grid-cols-1 gap-1.5">
+                      <div>
+                        <div className="text-[9px] uppercase tracking-[0.2em] text-neutral-500">
+                          Favorecido
+                        </div>
+                        <div className="font-bold">{pixName}</div>
+                      </div>
+                      <div>
+                        <div className="text-[9px] uppercase tracking-[0.2em] text-neutral-500">
+                          Chave PIX
+                        </div>
+                        <div className="font-mono break-all">{pixKey}</div>
+                      </div>
+                      <div>
+                        <div className="text-[9px] uppercase tracking-[0.2em] text-neutral-500">
+                          Valor
+                        </div>
+                        <div className="text-lg font-black tabular-nums text-[#b53a00]">
+                          {formatBRL(total)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 text-[9px] uppercase tracking-[0.2em] text-neutral-500">
+                      Aponte a câmera do app do seu banco para o QR Code ao lado.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="mt-12 grid grid-cols-2 gap-10 text-xs">
               <div className="border-t border-black pt-2 text-center">
