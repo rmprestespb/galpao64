@@ -363,7 +363,9 @@ const Admin = () => {
   };
 
   const handleSave = async () => {
-    if (saving || uploading || processingSaleImage || manualProcessing) return;
+    // NOTE: processingSaleImage is intentionally NOT a blocker here — the AI
+    // background-removal runs async and the original URL is already persisted.
+    if (saving || uploading || manualProcessing) return;
 
     const priceCents = Math.round(parseFloat(form.priceReais || "0") * 100);
     const rarityNum = form.rarity ? parseInt(form.rarity, 10) : undefined;
