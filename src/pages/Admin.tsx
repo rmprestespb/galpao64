@@ -55,7 +55,7 @@ type Product = {
   video_url: string | null;
   sale_image_original_url?: string | null;
   sale_image_processed_url?: string | null;
-  sale_image_crop?: ManualCrop | null;
+  sale_image_crop?: unknown | null;
   is_published: boolean;
   display_order: number;
   status: ProductStatus;
@@ -102,6 +102,11 @@ const STATUS_LABEL: Record<ProductStatus, string> = {
   reservado: "Reservado",
   vendido: "Vendido",
 };
+
+const isManualCrop = (value: unknown): value is ManualCrop =>
+  typeof value === "object" &&
+  value !== null &&
+  ["x", "y", "width", "height"].every((key) => typeof (value as Record<string, unknown>)[key] === "number");
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -172,7 +177,7 @@ const Admin = () => {
       video_url: p.video_url ?? "",
       sale_image_original_url: p.sale_image_original_url ?? p.images[1] ?? "",
       sale_image_processed_url: p.sale_image_processed_url ?? p.images[1] ?? "",
-      sale_image_crop: p.sale_image_crop ?? null,
+      sale_image_crop: isManualCrop(p.sale_image_crop) ? p.sale_image_crop : null,
       status: p.status ?? "disponivel",
       collectorId: "",
       reservationDate: p.reservation_started_at ? new Date(p.reservation_started_at) : undefined,
@@ -345,7 +350,7 @@ const Admin = () => {
   };
 
   const handleSave = async () => {
-    if (saving || uploading) return;
+    if (saving || uploading || processingSaleImage || manualProcessing) return;
 
     const priceCents = Math.round(parseFloat(form.priceReais || "0") * 100);
     const rarityNum = form.rarity ? parseInt(form.rarity, 10) : undefined;
