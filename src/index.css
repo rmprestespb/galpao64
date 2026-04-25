@@ -407,6 +407,21 @@ All colors MUST be HSL.
     0 0 16px rgba(var(--neon-rgb), 0.45);
 }
 
+/* Keyboard focus — mirrors hover so focus is always clearly visible */
+.neon-link:focus-visible {
+  color: hsl(var(--neon-color));
+  text-shadow:
+    0 0 5px rgba(var(--neon-rgb), 0.55),
+    0 0 10px rgba(var(--neon-rgb), 0.35);
+}
+.neon-link:focus-visible::after {
+  width: 100%;
+  opacity: 1;
+  box-shadow:
+    0 0 8px rgba(var(--neon-rgb), 0.85),
+    0 0 16px rgba(var(--neon-rgb), 0.45);
+}
+
 /* Active state — permanently lit + subtle flicker */
 .neon-link.is-active,
 .neon-link[aria-current="page"],
