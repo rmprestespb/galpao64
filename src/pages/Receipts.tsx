@@ -121,6 +121,22 @@ const Receipts = () => {
   const [notes, setNotes] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
 
+  useEffect(() => {
+    if (!authLoading && (!user || !isAdmin)) {
+      navigate("/admin/login", { replace: true });
+    }
+  }, [authLoading, user, isAdmin, navigate]);
+
+  const subtotal = useMemo(
+    () => items.reduce((acc, i) => acc + i.quantity * i.unit, 0),
+    [items],
+  );
+  const totalQty = useMemo(
+    () => items.reduce((acc, i) => acc + (Number.isFinite(i.quantity) ? i.quantity : 0), 0),
+    [items],
+  );
+  const total = subtotal + (shipping || 0);
+
   // PIX (banco C6) — persistido no localStorage e compartilhado com o gerador PIX
   const [pixKey, setPixKey] = useState(
     () => localStorage.getItem("pix_key") || "rmprestespb@gmail.com",
@@ -157,22 +173,6 @@ const Receipts = () => {
   const pixQrUrl = pixPayload
     ? `https://quickchart.io/qr?size=320&margin=1&dark=000000&light=ffffff&text=${encodeURIComponent(pixPayload)}`
     : "";
-
-  useEffect(() => {
-    if (!authLoading && (!user || !isAdmin)) {
-      navigate("/admin/login", { replace: true });
-    }
-  }, [authLoading, user, isAdmin, navigate]);
-
-  const subtotal = useMemo(
-    () => items.reduce((acc, i) => acc + i.quantity * i.unit, 0),
-    [items],
-  );
-  const totalQty = useMemo(
-    () => items.reduce((acc, i) => acc + (Number.isFinite(i.quantity) ? i.quantity : 0), 0),
-    [items],
-  );
-  const total = subtotal + (shipping || 0);
 
   const updateItem = (id: string, patch: Partial<Item>) =>
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
