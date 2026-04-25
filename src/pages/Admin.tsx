@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { CalendarIcon, Flame, Loader2, Lock, LogOut, Pencil, Plus, Trash2, Upload, X, Film, FileText } from "lucide-react";
+import { CalendarIcon, Crop, Flame, Loader2, Lock, LogOut, Pencil, Plus, Trash2, Upload, X, Film, FileText, WandSparkles } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { PixGeneratorDialog } from "@/components/PixGeneratorDialog";
+import { createManualCropDataUrl, removeBackgroundFromUrl, type ManualCrop } from "@/lib/removeBackground";
 import {
   Dialog,
   DialogContent,
@@ -52,6 +53,9 @@ type Product = {
   price_cents: number;
   images: string[];
   video_url: string | null;
+  sale_image_original_url?: string | null;
+  sale_image_processed_url?: string | null;
+  sale_image_crop?: unknown | null;
   is_published: boolean;
   display_order: number;
   status: ProductStatus;
@@ -85,6 +89,9 @@ const emptyForm = {
   is_published: true,
   images: [] as string[],
   video_url: "" as string,
+  sale_image_original_url: "" as string,
+  sale_image_processed_url: "" as string,
+  sale_image_crop: null as ManualCrop | null,
   status: "disponivel" as ProductStatus,
   collectorId: "" as string, // "" = não vincular
   reservationDate: undefined as Date | undefined,
@@ -95,6 +102,11 @@ const STATUS_LABEL: Record<ProductStatus, string> = {
   reservado: "Reservado",
   vendido: "Vendido",
 };
+
+const isManualCrop = (value: unknown): value is ManualCrop =>
+  typeof value === "object" &&
+  value !== null &&
+  ["x", "y", "width", "height"].every((key) => typeof (value as Record<string, unknown>)[key] === "number");
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -107,6 +119,10 @@ const Admin = () => {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [processingSaleImage, setProcessingSaleImage] = useState(false);
+  const [manualCropOpen, setManualCropOpen] = useState(false);
+  const [cropPoints, setCropPoints] = useState<Array<{ x: number; y: number }>>([]);
+  const [manualProcessing, setManualProcessing] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -159,6 +175,9 @@ const Admin = () => {
       is_published: p.is_published,
       images: p.images,
       video_url: p.video_url ?? "",
+      sale_image_original_url: p.sale_image_original_url ?? p.images[1] ?? "",
+      sale_image_processed_url: p.sale_image_processed_url ?? p.images[1] ?? "",
+      sale_image_crop: isManualCrop(p.sale_image_crop) ? p.sale_image_crop : null,
       status: p.status ?? "disponivel",
       collectorId: "",
       reservationDate: p.reservation_started_at ? new Date(p.reservation_started_at) : undefined,
@@ -166,9 +185,37 @@ const Admin = () => {
     setDialogOpen(true);
   };
 
+
+  const uploadDataUrl = async (dataUrl: string, folder = "processed") => {
+    const blob = await fetch(dataUrl).then((res) => res.blob());
+    const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
+    const { error } = await supabase.storage.from("product-media").upload(path, blob, {
+      contentType: "image/png",
+      upsert: false,
+      cacheControl: "3600",
+    });
+    if (error) throw error;
+    const { data } = supabase.storage.from("product-media").getPublicUrl(path);
+    return data.publicUrl;
+  };
+
+  const processSaleImage = async (originalUrl: string) => {
+    try {
+      const processedDataUrl = await removeBackgroundFromUrl(originalUrl);
+      return await uploadDataUrl(processedDataUrl);
+    } catch (err) {
+      console.error("Sale image background removal failed", err);
+      toast.warning("Remoção automática falhou", {
+        description: "A foto original foi salva. Use Ajuste Manual para recortar o carro.",
+        duration: 8000,
+      });
+      return originalUrl;
+    }
+  };
+
   const handleUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    kind: "image" | "video",
+    kind: "image" | "video" | "saleImage",
   ) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
@@ -205,11 +252,12 @@ const Admin = () => {
           );
         }
 
-        const path = `${kind}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const storageKind = kind === "saleImage" ? "image" : kind;
+        const path = `${storageKind}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
         const { error: upErr } = await supabase.storage
           .from("product-media")
           .upload(path, file, {
-            contentType: file.type || (kind === "image" ? "image/jpeg" : "video/mp4"),
+            contentType: file.type || (kind === "video" ? "video/mp4" : "image/jpeg"),
             upsert: false,
             cacheControl: "3600",
           });
@@ -220,18 +268,33 @@ const Admin = () => {
         const { data } = supabase.storage.from("product-media").getPublicUrl(path);
         uploaded.push(data.publicUrl);
       }
-      if (kind === "image") {
+      if (kind === "saleImage") {
+        const originalUrl = uploaded[0];
+        setProcessingSaleImage(true);
+        const processedUrl = await processSaleImage(originalUrl);
+        setForm((f) => ({
+          ...f,
+          sale_image_original_url: originalUrl,
+          sale_image_processed_url: processedUrl,
+          sale_image_crop: null,
+          images: f.images.length ? f.images : [processedUrl],
+        }));
+        setProcessingSaleImage(false);
+        toast.success("Foto de venda salva", { description: "Original e versão tratada foram vinculadas ao produto." });
+      } else if (kind === "image") {
         setForm((f) => ({ ...f, images: [...f.images, ...uploaded] }));
+        toast.success("Foto(s) enviada(s)");
       } else {
         setForm((f) => ({ ...f, video_url: uploaded[0] }));
+        toast.success("Vídeo enviado");
       }
-      toast.success(kind === "image" ? "Foto(s) enviada(s)" : "Vídeo enviado");
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error("handleUpload failed:", err);
       toast.error("Falha no upload", { description: msg, duration: 8000 });
     } finally {
       setUploading(false);
+      setProcessingSaleImage(false);
       e.target.value = "";
     }
   };
@@ -239,8 +302,55 @@ const Admin = () => {
   const removeImage = (url: string) =>
     setForm((f) => ({ ...f, images: f.images.filter((i) => i !== url) }));
 
+  const saleImageForManualCrop = form.sale_image_original_url || form.images[1] || form.images[0] || "";
+  const activeManualCrop = cropPoints.length >= 2
+    ? {
+        x: Math.min(cropPoints[0].x, cropPoints[1].x),
+        y: Math.min(cropPoints[0].y, cropPoints[1].y),
+        width: Math.abs(cropPoints[0].x - cropPoints[1].x),
+        height: Math.abs(cropPoints[0].y - cropPoints[1].y),
+      }
+    : null;
+
+  const handleManualCropClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const point = {
+      x: Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)),
+      y: Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height)),
+    };
+    setCropPoints((points) => (points.length >= 2 ? [point] : [...points, point]));
+  };
+
+  const applyManualCrop = async () => {
+    if (!saleImageForManualCrop || !activeManualCrop || activeManualCrop.width < 0.05 || activeManualCrop.height < 0.05) {
+      toast.error("Marque dois pontos", { description: "Clique no canto superior esquerdo e depois no inferior direito do carro." });
+      return;
+    }
+    setManualProcessing(true);
+    try {
+      const dataUrl = await createManualCropDataUrl(saleImageForManualCrop, activeManualCrop);
+      const processedUrl = await uploadDataUrl(dataUrl);
+      setForm((f) => ({
+        ...f,
+        sale_image_original_url: f.sale_image_original_url || saleImageForManualCrop,
+        sale_image_processed_url: processedUrl,
+        sale_image_crop: activeManualCrop,
+        images: f.images.length ? f.images : [processedUrl],
+      }));
+      toast.success("Ajuste manual aplicado");
+      setManualCropOpen(false);
+      setCropPoints([]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("Manual crop failed", err);
+      toast.error("Falha no ajuste manual", { description: msg, duration: 8000 });
+    } finally {
+      setManualProcessing(false);
+    }
+  };
+
   const handleSave = async () => {
-    if (saving || uploading) return;
+    if (saving || uploading || processingSaleImage || manualProcessing) return;
 
     const priceCents = Math.round(parseFloat(form.priceReais || "0") * 100);
     const rarityNum = form.rarity ? parseInt(form.rarity, 10) : undefined;
@@ -272,6 +382,9 @@ const Admin = () => {
         price_cents: parsed.data.price_cents,
         images: form.images,
         video_url: form.video_url || null,
+        sale_image_original_url: form.sale_image_original_url || null,
+        sale_image_processed_url: form.sale_image_processed_url || form.sale_image_original_url || form.images[0] || null,
+        sale_image_crop: form.sale_image_crop,
         is_published: form.is_published,
         status: form.status,
         reservation_started_at: reservationDate ? reservationDate.toISOString() : null,
@@ -288,7 +401,7 @@ const Admin = () => {
         const { error: itemErr } = await supabase.from("reservation_items").insert({
           collector_id: form.collectorId,
           title: parsed.data.title,
-          image_url: form.images[0],
+          image_url: form.sale_image_processed_url || form.images[0],
         });
         if (itemErr) {
           toast.warning("Produto salvo, mas falhou ao vincular ao colecionador", {
@@ -546,6 +659,62 @@ const Admin = () => {
               </div>
             </div>
 
+
+            <div className="space-y-2 rounded border border-border p-3 bg-muted/20">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <Label>Segunda Foto — venda Garage Pro</Label>
+                  <p className="text-xs text-muted-foreground">Salva a original e gera a versão sem fundo usada na Página de Venda.</p>
+                </div>
+                {processingSaleImage && <Loader2 className="h-4 w-4 animate-spin text-accent" />}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Original</p>
+                  <div className="aspect-video rounded bg-black border border-border overflow-hidden flex items-center justify-center">
+                    {form.sale_image_original_url ? (
+                      <img src={form.sale_image_original_url} alt="Foto original de venda" className="h-full w-full object-contain" />
+                    ) : (
+                      <span className="text-xs text-muted-foreground">sem foto</span>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tratada</p>
+                  <div className="aspect-video rounded bg-black border border-accent/40 overflow-hidden flex items-center justify-center">
+                    {form.sale_image_processed_url ? (
+                      <img src={form.sale_image_processed_url} alt="Foto tratada sem fundo" className="h-full w-full object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.85)]" />
+                    ) : (
+                      <span className="text-xs text-muted-foreground">aguardando tratamento</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <label className="inline-flex items-center justify-center gap-2 rounded-md border border-border hover:border-accent px-3 py-2 text-sm text-muted-foreground cursor-pointer transition-colors">
+                  {uploading || processingSaleImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <WandSparkles className="h-4 w-4" />}
+                  Enviar segunda foto
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleUpload(e, "saleImage")}
+                  />
+                </label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!saleImageForManualCrop || manualProcessing}
+                  onClick={() => {
+                    setCropPoints([]);
+                    setManualCropOpen(true);
+                  }}
+                >
+                  <Crop className="h-4 w-4" /> Ajuste Manual
+                </Button>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label>Vídeo</Label>
               {form.video_url ? (
@@ -689,9 +858,52 @@ const Admin = () => {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSave} disabled={saving || uploading}>
+            <Button onClick={handleSave} disabled={saving || uploading || processingSaleImage || manualProcessing}>
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
+      <Dialog open={manualCropOpen} onOpenChange={setManualCropOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Ajuste Manual da foto de venda</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Clique primeiro no canto superior esquerdo do carro e depois no canto inferior direito para definir o recorte.
+            </p>
+            <button
+              type="button"
+              onClick={handleManualCropClick}
+              className="relative w-full overflow-hidden rounded-md border border-border bg-black cursor-crosshair"
+            >
+              {saleImageForManualCrop ? (
+                <img src={saleImageForManualCrop} alt="Definir recorte do carro" className="max-h-[60vh] w-full object-contain" />
+              ) : (
+                <div className="py-20 text-sm text-muted-foreground">Envie a segunda foto primeiro.</div>
+              )}
+              {activeManualCrop && (
+                <span
+                  className="absolute border-2 border-accent bg-accent/10 shadow-[0_0_20px_hsl(var(--accent)/0.45)]"
+                  style={{
+                    left: `${activeManualCrop.x * 100}%`,
+                    top: `${activeManualCrop.y * 100}%`,
+                    width: `${activeManualCrop.width * 100}%`,
+                    height: `${activeManualCrop.height * 100}%`,
+                  }}
+                />
+              )}
+            </button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setManualCropOpen(false)}>Cancelar</Button>
+            <Button onClick={applyManualCrop} disabled={manualProcessing || !activeManualCrop}>
+              {manualProcessing && <Loader2 className="h-4 w-4 animate-spin" />}
+              Aplicar recorte
             </Button>
           </DialogFooter>
         </DialogContent>

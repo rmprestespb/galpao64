@@ -21,6 +21,8 @@ export type GarageProCardData = {
   rarity?: number | null;
   price_cents: number;
   images: string[];
+  sale_image_original_url?: string | null;
+  sale_image_processed_url?: string | null;
   description?: string;
   alt?: string;
   status?: "disponivel" | "reservado" | "vendido";
@@ -76,7 +78,8 @@ const CertItem = ({
 );
 
 const GarageProCard = ({ product, whatsappNumber = "5546999350070" }: Props) => {
-  const baseImage = product.images[0];
+  const baseImage = product.sale_image_processed_url || product.images[0];
+  const zoomSource = product.sale_image_original_url || baseImage;
   const [stageImage, setStageImage] = useState<string | null>(null);
   const [zooms, setZooms] = useState<string[]>([]);
   const [processing, setProcessing] = useState(false);
@@ -88,18 +91,25 @@ const GarageProCard = ({ product, whatsappNumber = "5546999350070" }: Props) => 
     let cancelled = false;
     if (!baseImage) return;
 
-    setProcessing(true);
+    setProcessing(!product.sale_image_processed_url);
     setStageImage(null);
     setZooms([]);
 
     // Always generate zoom crops (cheap, no AI)
-    generateZoomCrops(baseImage, 3, 220)
+    generateZoomCrops(zoomSource, 3, 220)
       .then((crops) => {
         if (!cancelled) setZooms(crops);
       })
       .catch(() => {
         if (!cancelled) setZooms([baseImage, baseImage, baseImage]);
       });
+
+    if (product.sale_image_processed_url) {
+      setStageImage(product.sale_image_processed_url);
+      return () => {
+        cancelled = true;
+      };
+    }
 
     // Background removal (heavy)
     removeBackgroundFromUrl(baseImage)
@@ -120,13 +130,15 @@ const GarageProCard = ({ product, whatsappNumber = "5546999350070" }: Props) => 
     return () => {
       cancelled = true;
     };
-  }, [baseImage]);
+  }, [baseImage, product.sale_image_processed_url, zoomSource]);
 
   const sendToWhatsApp = () => {
     const message = encodeURIComponent(
       `Olá! Tenho interesse na peça ${product.title}` +
         (product.series ? ` (${product.series})` : "") +
-        ` — ${formatBRL(product.price_cents)}.\n\nGostaria de confirmar disponibilidade.`,
+        ` — ${formatBRL(product.price_cents)}.` +
+        (baseImage ? `\nFoto: ${baseImage}` : "") +
+        `\n\nGostaria de confirmar disponibilidade.`,
     );
     window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
   };

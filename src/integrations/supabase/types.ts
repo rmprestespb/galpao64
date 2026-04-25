@@ -25,6 +25,9 @@ export type Database = {
           price_cents: number
           rarity: number | null
           reservation_started_at: string | null
+          sale_image_crop: Json | null
+          sale_image_original_url: string | null
+          sale_image_processed_url: string | null
           series: string | null
           status: Database["public"]["Enums"]["product_status"]
           title: string
@@ -41,6 +44,9 @@ export type Database = {
           price_cents?: number
           rarity?: number | null
           reservation_started_at?: string | null
+          sale_image_crop?: Json | null
+          sale_image_original_url?: string | null
+          sale_image_processed_url?: string | null
           series?: string | null
           status?: Database["public"]["Enums"]["product_status"]
           title: string
@@ -57,6 +63,9 @@ export type Database = {
           price_cents?: number
           rarity?: number | null
           reservation_started_at?: string | null
+          sale_image_crop?: Json | null
+          sale_image_original_url?: string | null
+          sale_image_processed_url?: string | null
           series?: string | null
           status?: Database["public"]["Enums"]["product_status"]
           title?: string

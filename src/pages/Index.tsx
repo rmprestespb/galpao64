@@ -34,6 +34,8 @@ type Product = {
   rarity: number | null;
   price_cents: number;
   images: string[];
+  sale_image_original_url?: string | null;
+  sale_image_processed_url?: string | null;
   alt?: string;
   status?: "disponivel" | "reservado" | "vendido";
 };
@@ -577,7 +579,7 @@ const Collection = () => {
   useEffect(() => {
     supabase
       .from("products")
-      .select("id, title, series, rarity, price_cents, images, status")
+      .select("id, title, series, rarity, price_cents, images, sale_image_original_url, sale_image_processed_url, status")
       .eq("is_published", true)
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: false })
@@ -591,6 +593,8 @@ const Collection = () => {
               rarity: d.rarity,
               price_cents: d.price_cents,
               images: d.images?.length ? d.images : [ferrariRedline],
+              sale_image_original_url: d.sale_image_original_url,
+              sale_image_processed_url: d.sale_image_processed_url,
               status: (d as any).status ?? "disponivel",
             })),
           );
@@ -618,6 +622,8 @@ const Collection = () => {
                   rarity: p.rarity,
                   price_cents: p.price_cents,
                   images: p.images,
+                  sale_image_original_url: p.sale_image_original_url,
+                  sale_image_processed_url: p.sale_image_processed_url,
                   alt: p.alt,
                   status: p.status,
                 }}
