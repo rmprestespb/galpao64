@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import ProductGarageCard from "@/components/ProductGarageCard";
+import GarageProShowcase from "@/components/GarageProShowcase";
 import ferrariRedline from "@/assets/car-ferrari-redline.jpg";
 import camaroPurple from "@/assets/car-camaro-purple.jpg";
 import bumblebee from "@/assets/car-bumblebee.jpg";
@@ -616,9 +616,9 @@ const Collection = () => {
             <Loader2 className="h-8 w-8 animate-spin text-accent" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             {products.map((p) => (
-              <ProductGarageCard
+              <GarageProShowcase
                 key={p.id}
                 product={{
                   id: p.id,
@@ -626,8 +626,9 @@ const Collection = () => {
                   series: p.series,
                   description: p.description,
                   price_cents: p.price_cents,
-                  images: p.images,
-                  video_url: p.video_url,
+                  looseImage: p.images[0] ?? "",
+                  blisterImage: p.images[1] ?? null,
+                  videoUrl: p.video_url,
                   alt: p.alt,
                   status: p.status,
                 }}
