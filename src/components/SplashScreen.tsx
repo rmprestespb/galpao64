@@ -290,36 +290,14 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
           }}
         />
 
-        {/* Subtle warm vignette to deepen the cinematic mood and ensure
-            the CTA reads cleanly over the lower portion of the artwork. */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse at center 35%, transparent 35%, rgba(0,0,0,0.35) 75%, rgba(0,0,0,0.75) 100%)",
-          }}
+        {/* The garage artwork already shows the CTA painted on it; the
+            entire splash is clickable to enter the showroom. */}
+        <button
+          type="button"
+          onClick={handleEnter}
+          aria-label="Clique para entrar no showroom Galpão 64"
+          className="absolute inset-0 h-full w-full cursor-pointer bg-transparent focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-[#F5D896]"
         />
-
-        {/* CTA stack pinned to the lower-center of the splash */}
-        <div className="relative z-10 mt-auto mb-[10vh] flex w-full flex-col items-center gap-3 px-4">
-          <button
-            type="button"
-            onClick={handleEnter}
-            aria-label="Clique para entrar no showroom Galpão 64"
-            className="group relative inline-flex items-center justify-center rounded-md border-2 border-[#F5D896]/80 bg-black/65 px-8 sm:px-12 py-3.5 sm:py-4 text-xs sm:text-sm font-bold tracking-[0.32em] text-white shadow-[0_0_30px_rgba(245,216,150,0.35)] backdrop-blur-sm transition-all duration-500 hover:bg-[#F5D896] hover:text-black hover:shadow-[0_0_50px_rgba(245,216,150,0.85)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#F5D896] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
-          >
-            CLIQUE PARA ENTRAR NO SHOWROOM
-          </button>
-
-          <p
-            className="text-[10px] sm:text-[11px] uppercase tracking-[0.32em] sm:tracking-[0.4em] text-white/85 text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]"
-            style={{ fontFamily: "'Montserrat', sans-serif" }}
-          >
-            Conheça nossa curadoria de miniaturas lendárias 1:64
-          </p>
-        </div>
       </div>
     </div>
   );
