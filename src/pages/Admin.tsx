@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Flame, Loader2, LogOut, Plus, Pencil, Trash2, Upload, X, Film, FileText } from "lucide-react";
+import { CalendarIcon, Flame, Loader2, Lock, LogOut, Pencil, Plus, Trash2, Upload, X, Film, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,6 +12,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +40,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+type ProductStatus = "disponivel" | "reservado" | "vendido";
+
 type Product = {
   id: string;
   title: string;
@@ -39,6 +53,15 @@ type Product = {
   video_url: string | null;
   is_published: boolean;
   display_order: number;
+  status: ProductStatus;
+  reservation_started_at: string | null;
+};
+
+type Collector = {
+  id: string;
+  display_name: string;
+  city: string;
+  state: string;
 };
 
 const productSchema = z.object({
@@ -61,12 +84,22 @@ const emptyForm = {
   is_published: true,
   images: [] as string[],
   video_url: "" as string,
+  status: "disponivel" as ProductStatus,
+  collectorId: "" as string, // "" = não vincular
+  reservationDate: undefined as Date | undefined,
+};
+
+const STATUS_LABEL: Record<ProductStatus, string> = {
+  disponivel: "Disponível",
+  reservado: "Reservado",
+  vendido: "Vendido",
 };
 
 const Admin = () => {
   const navigate = useNavigate();
   const { user, isAdmin, loading: authLoading } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
+  const [collectors, setCollectors] = useState<Collector[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
@@ -93,8 +126,19 @@ const Admin = () => {
     setLoading(false);
   };
 
+  const fetchCollectors = async () => {
+    const { data, error } = await supabase
+      .from("reservation_collectors")
+      .select("id, display_name, city, state")
+      .order("display_name", { ascending: true });
+    if (!error) setCollectors((data ?? []) as Collector[]);
+  };
+
   useEffect(() => {
-    if (user && isAdmin) fetchProducts();
+    if (user && isAdmin) {
+      fetchProducts();
+      fetchCollectors();
+    }
   }, [user, isAdmin]);
 
   const openCreate = () => {
@@ -114,6 +158,9 @@ const Admin = () => {
       is_published: p.is_published,
       images: p.images,
       video_url: p.video_url ?? "",
+      status: p.status ?? "disponivel",
+      collectorId: "",
+      reservationDate: p.reservation_started_at ? new Date(p.reservation_started_at) : undefined,
     });
     setDialogOpen(true);
   };
@@ -168,6 +215,13 @@ const Admin = () => {
       toast.error(parsed.error.issues[0].message);
       return;
     }
+
+    // Se status virou "reservado" sem data, define data atual.
+    const reservationDate =
+      form.status === "reservado"
+        ? form.reservationDate ?? new Date()
+        : null;
+
     setSaving(true);
     const payload = {
       title: parsed.data.title,
@@ -178,6 +232,8 @@ const Admin = () => {
       images: form.images,
       video_url: form.video_url || null,
       is_published: form.is_published,
+      status: form.status,
+      reservation_started_at: reservationDate ? reservationDate.toISOString() : null,
     };
     const { error } = editing
       ? await supabase.from("products").update(payload).eq("id", editing.id)
@@ -187,6 +243,23 @@ const Admin = () => {
       toast.error("Erro ao salvar", { description: error.message });
       return;
     }
+
+    // Se vinculou a um colecionador, cria o item no álbum dele.
+    if (form.collectorId && form.images[0]) {
+      const { error: itemErr } = await supabase.from("reservation_items").insert({
+        collector_id: form.collectorId,
+        title: parsed.data.title,
+        image_url: form.images[0],
+      });
+      if (itemErr) {
+        toast.warning("Produto salvo, mas falhou ao vincular ao colecionador", {
+          description: itemErr.message,
+        });
+      } else {
+        toast.success("Vinculado ao álbum do colecionador");
+      }
+    }
+
     toast.success(editing ? "Miniatura atualizada" : "Miniatura adicionada");
     setDialogOpen(false);
     fetchProducts();
