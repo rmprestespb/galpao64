@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import cyberHex from "@/assets/cyber-garage-hex.jpg";
+import showroomSplash from "@/assets/galpao-showroom-splash.jpg";
 
 interface SplashScreenProps {
   onEnter: () => void;
