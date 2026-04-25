@@ -537,6 +537,104 @@ const Admin = () => {
                 onCheckedChange={(v) => setForm({ ...form, is_published: v })}
               />
             </div>
+
+            {/* Reserva / Venda */}
+            <div className="space-y-3 rounded border border-border p-3 bg-muted/20">
+              <div className="flex items-center gap-2">
+                <Lock className="h-4 w-4 text-accent" />
+                <Label className="text-sm font-bold uppercase tracking-wider">
+                  Reserva &amp; Venda
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground -mt-1">
+                Pagamento via PIX direto. Marque o status e (opcionalmente) vincule
+                ao álbum de um colecionador.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select
+                    value={form.status}
+                    onValueChange={(v: ProductStatus) =>
+                      setForm({ ...form, status: v })
+                    }
+                  >
+                    <SelectTrigger id="status">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="disponivel">Disponível</SelectItem>
+                      <SelectItem value="reservado">Reservado</SelectItem>
+                      <SelectItem value="vendido">Vendido</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="reservation-date">
+                    Início da reserva (90 dias)
+                  </Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        id="reservation-date"
+                        variant="outline"
+                        disabled={form.status !== "reservado"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !form.reservationDate && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="h-4 w-4" />
+                        {form.reservationDate
+                          ? format(form.reservationDate, "PPP", { locale: ptBR })
+                          : "Hoje (padrão)"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={form.reservationDate}
+                        onSelect={(d) =>
+                          setForm({ ...form, reservationDate: d })
+                        }
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="collector">Vincular ao álbum (opcional)</Label>
+                <Select
+                  value={form.collectorId || "none"}
+                  onValueChange={(v) =>
+                    setForm({ ...form, collectorId: v === "none" ? "" : v })
+                  }
+                >
+                  <SelectTrigger id="collector">
+                    <SelectValue placeholder="Nenhum colecionador" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Não vincular</SelectItem>
+                    {collectors.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.display_name} — {c.city}/{c.state.toUpperCase()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {form.collectorId && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Ao salvar, esta miniatura será adicionada ao álbum do colecionador
+                    selecionado.
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
