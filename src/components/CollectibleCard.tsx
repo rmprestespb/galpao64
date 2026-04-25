@@ -44,6 +44,23 @@ const CollectibleCard = ({
   const status = product.status ?? "disponivel";
   const isLocked = status === "reservado" || status === "vendido";
 
+  const description =
+    product.description ??
+    `${product.title}${product.series ? ` — Série ${product.series}` : ""}. Peça curada pelo Galpão 64 em escala 1:64, com acabamento premium e tampografia detalhada.`;
+
+  const lightboxMedia: LightboxMedia[] = [
+    ...product.images.map((src) => ({ type: "image" as const, src, alt: product.alt ?? product.title })),
+    ...(product.videoUrl ? [{ type: "video" as const, src: product.videoUrl }] : []),
+  ];
+
+  const specs: SpecSheet = {
+    brand: product.brand ?? "Hot Wheels",
+    series: product.series ?? null,
+    scale: product.scale ?? "1:64",
+    color: product.color ?? null,
+    condition: product.condition ?? "Na cartela",
+  };
+
   const openDetail = (mediaSrc?: string) => {
     const i = mediaSrc ? lightboxMedia.findIndex((m) => m.src === mediaSrc) : 0;
     setLightboxIndex(i >= 0 ? i : 0);
@@ -69,23 +86,6 @@ const CollectibleCard = ({
       description: `Continue a conversa no WhatsApp para combinar o PIX e o frete.`,
     });
     setLightboxOpen(false);
-  };
-
-  const description =
-    product.description ??
-    `${product.title}${product.series ? ` — Série ${product.series}` : ""}. Peça curada pelo Galpão 64 em escala 1:64, com acabamento premium e tampografia detalhada.`;
-
-  const lightboxMedia: LightboxMedia[] = [
-    ...product.images.map((src) => ({ type: "image" as const, src, alt: product.alt ?? product.title })),
-    ...(product.videoUrl ? [{ type: "video" as const, src: product.videoUrl }] : []),
-  ];
-
-  const specs: SpecSheet = {
-    brand: product.brand ?? "Hot Wheels",
-    series: product.series ?? null,
-    scale: product.scale ?? "1:64",
-    color: product.color ?? null,
-    condition: product.condition ?? "Na cartela",
   };
 
   return (
