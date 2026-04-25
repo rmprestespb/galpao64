@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import CollectibleCard from "@/components/CollectibleCard";
 import ferrariRedline from "@/assets/car-ferrari-redline.jpg";
 import camaroPurple from "@/assets/car-camaro-purple.jpg";
 import bumblebee from "@/assets/car-bumblebee.jpg";
@@ -566,7 +567,24 @@ const Collection = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {products.map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <CollectibleCard
+                key={p.id}
+                product={{
+                  id: p.id,
+                  title: p.title,
+                  series: p.series,
+                  rarity: p.rarity,
+                  price_cents: p.price_cents,
+                  images: p.images,
+                  alt: p.alt,
+                }}
+                actionLabel="Reservar"
+                onAction={(item) =>
+                  toast.success("Item reservado", {
+                    description: `${item.title} foi adicionado à sua reserva.`,
+                  })
+                }
+              />
             ))}
           </div>
         )}
