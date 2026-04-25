@@ -234,6 +234,9 @@ const Receipts = () => {
       payments.length ? `Pagamento: ${payments.join(", ")}` : "",
       notes && `Obs: ${notes}`,
       "",
+      includePix && pixPayload && `*PIX (Banco C6) — Copia e Cola:*\n${pixPayload}`,
+      includePix && pixPayload && `Chave: ${pixKey} (${pixName})`,
+      "",
       "_A Arte do Diecast_",
     ]
       .filter(Boolean)
