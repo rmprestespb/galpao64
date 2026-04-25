@@ -281,14 +281,19 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
           <img
             src={galpaoLogo}
             alt="Galpão 64 — A Arte do Diecast"
-            className="w-[320px] md:w-[440px] lg:w-[520px] h-auto drop-shadow-[0_0_60px_rgba(201,169,106,0.35)]"
+            className="w-[320px] md:w-[440px] lg:w-[520px] h-auto"
             style={{
               // Crop bottom portion of the PNG that contains the embedded
-              // "GALPÃO 64" button and "CLIQUE PARA ACELERAR" caption,
-              // so only the artwork remains and the external button/caption
-              // below are not duplicated.
+              // "GALPÃO 64" button and "CLIQUE PARA ACELERAR" caption.
               clipPath: "inset(0 0 18% 0)",
               marginBottom: "-3rem",
+              // Dissolve the rectangular dark frame of the PNG into the
+              // black splash background using a soft radial fade mask.
+              WebkitMaskImage:
+                "radial-gradient(ellipse 70% 60% at 50% 45%, #000 55%, transparent 100%)",
+              maskImage:
+                "radial-gradient(ellipse 70% 60% at 50% 45%, #000 55%, transparent 100%)",
+              filter: "drop-shadow(0 0 60px rgba(201,169,106,0.35))",
             }}
           />
         </div>
