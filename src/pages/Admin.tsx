@@ -270,17 +270,31 @@ const Admin = () => {
       }
       if (kind === "saleImage") {
         const originalUrl = uploaded[0];
-        setProcessingSaleImage(true);
-        const processedUrl = await processSaleImage(originalUrl);
+        // Persist the original IMMEDIATELY so the user can save without waiting
+        // for the AI background-removal model (which can take 30-60s on first run).
         setForm((f) => ({
           ...f,
           sale_image_original_url: originalUrl,
-          sale_image_processed_url: processedUrl,
+          // Fallback: use the original as the processed url until AI finishes.
+          sale_image_processed_url: f.sale_image_processed_url || originalUrl,
           sale_image_crop: null,
-          images: f.images.length ? f.images : [processedUrl],
+          images: f.images.length ? f.images : [originalUrl],
         }));
-        setProcessingSaleImage(false);
-        toast.success("Foto de venda salva", { description: "Original e versão tratada foram vinculadas ao produto." });
+        toast.success("Foto de venda salva", {
+          description: "Você já pode salvar. O recorte automático roda em segundo plano.",
+        });
+        // Fire-and-forget background processing — does NOT block save button.
+        setProcessingSaleImage(true);
+        processSaleImage(originalUrl)
+          .then((processedUrl) => {
+            if (processedUrl && processedUrl !== originalUrl) {
+              setForm((f) => ({ ...f, sale_image_processed_url: processedUrl }));
+              toast.success("Recorte automático pronto", {
+                description: "Versão sem fundo aplicada à Página de Venda.",
+              });
+            }
+          })
+          .finally(() => setProcessingSaleImage(false));
       } else if (kind === "image") {
         setForm((f) => ({ ...f, images: [...f.images, ...uploaded] }));
         toast.success("Foto(s) enviada(s)");
@@ -294,7 +308,6 @@ const Admin = () => {
       toast.error("Falha no upload", { description: msg, duration: 8000 });
     } finally {
       setUploading(false);
-      setProcessingSaleImage(false);
       e.target.value = "";
     }
   };
@@ -858,7 +871,7 @@ const Admin = () => {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSave} disabled={saving || uploading || processingSaleImage || manualProcessing}>
+            <Button onClick={handleSave} disabled={saving || uploading || manualProcessing}>
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Salvar
             </Button>
