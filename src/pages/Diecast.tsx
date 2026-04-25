@@ -2,12 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
+  ArrowRight,
   CalendarDays,
+  Crosshair,
   Flag,
   MapPin,
+  Radio,
+  ScanLine,
   Sparkles,
   Trophy,
-  Users,
   Zap,
 } from "lucide-react";
 import {
@@ -17,7 +20,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Badge } from "@/components/ui/badge";
+import LaserScan from "@/components/diecast/LaserScan";
+import XRayMagnifier from "@/components/diecast/XRayMagnifier";
 import galpaoLogo from "@/assets/galpao64-logo.png";
 import monsterHero from "@/assets/diecast-monster-hero.jpg";
 import salao from "@/assets/diecast-salao.jpg";
@@ -25,254 +29,359 @@ import trocas from "@/assets/diecast-trocas.jpg";
 import destaque from "@/assets/diecast-destaque.jpg";
 import legends from "@/assets/diecast-legends.jpg";
 
-// Curitiba Monster Trucks Live — agosto 2026 (target: 15/08/2026)
+// Monster Trucks Live Curitiba — agosto 2026
 const TARGET_DATE = new Date("2026-08-15T20:00:00-03:00");
 
-const useCountdown = () => {
-  const [days, setDays] = useState(() =>
-    Math.max(0, Math.ceil((TARGET_DATE.getTime() - Date.now()) / 86400000)),
-  );
+interface CountdownParts {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
+const computeCountdown = (): CountdownParts => {
+  const ms = Math.max(0, TARGET_DATE.getTime() - Date.now());
+  const days = Math.floor(ms / 86_400_000);
+  const hours = Math.floor((ms % 86_400_000) / 3_600_000);
+  const minutes = Math.floor((ms % 3_600_000) / 60_000);
+  const seconds = Math.floor((ms % 60_000) / 1000);
+  return { days, hours, minutes, seconds };
+};
+
+const useCountdown = (): CountdownParts => {
+  const [parts, setParts] = useState<CountdownParts>(() => computeCountdown());
   useEffect(() => {
-    const id = setInterval(() => {
-      setDays(Math.max(0, Math.ceil((TARGET_DATE.getTime() - Date.now()) / 86400000)));
-    }, 60_000);
+    const id = setInterval(() => setParts(computeCountdown()), 1000);
     return () => clearInterval(id);
   }, []);
-  return days;
+  return parts;
 };
 
 const events = [
   {
+    code: "EVT_05_2026",
     when: "MAIO / 2026",
-    title: "Hot Wheels Legends Tour Brasil",
+    title: "Hot Wheels Legends Tour — Inscrições Brasil",
     detail:
-      "Abertura das inscrições para a etapa brasileira. Prepare seu custom — o Galpão 64 estará acompanhando cada finalista de perto.",
+      "Abertura oficial das inscrições para a etapa brasileira. O Galpão 64 vai mapear cada finalista nacional.",
+    location: "ONLINE · BR",
     icon: Trophy,
-    accent: "text-accent",
+    status: "PRIORITY: HIGH",
   },
   {
+    code: "EVT_08_2026",
     when: "AGOSTO / 2026",
     title: "Monster Trucks Live — Curitiba",
-    detail: "Pedreira Paulo Leminski. A adrenalina dos motores em tamanho real, bem perto de casa.",
-    icon: Flag,
-    accent: "text-primary",
-  },
-  {
-    when: "OUTUBRO / 2026",
-    title: "Salão Diecast — São Paulo",
     detail:
-      "Maior encontro de colecionadores 1:64 do Brasil. Dioramas premiados, designers convidados e mesa de trocas histórica.",
-    icon: Sparkles,
-    accent: "text-accent",
+      "Pedreira Paulo Leminski recebe a maior arena de Monster Trucks do país. Cobertura completa do Galpão 64.",
+    location: "PEDREIRA PAULO LEMINSKI · CWB",
+    icon: Flag,
+    status: "PRIORITY: CRITICAL",
   },
-];
+] as const;
 
 const gallery = [
   {
     src: salao,
+    code: "GAL_001",
     title: "Salão Diecast — São Paulo",
     caption:
-      "Dioramas premiados, expositores lotados e designers internacionais (como Jun Imai) autografando minis raras.",
+      "Expositores e designers internacionais. Dioramas premiados em vitrines blindadas.",
   },
   {
     src: trocas,
+    code: "GAL_002",
     title: "Coração das Trocas",
     caption:
-      "Mesas repletas de raridades — STHs, Redlines e Premiums passando de mão em mão entre colecionadores brasileiros.",
+      "Mesas repletas de raridades. STHs, Redlines e Premiums circulando entre colecionadores BR.",
   },
   {
     src: legends,
+    code: "GAL_003",
     title: "Legends Tour — Etapa Brasil",
     caption:
-      "Customs nacionais disputando uma vaga para virar miniatura oficial Hot Wheels distribuída no mundo todo.",
+      "Customs nacionais disputando vaga para virar miniatura oficial Hot Wheels global.",
   },
 ];
 
+const PADDED = (n: number, len = 2) => String(n).padStart(len, "0");
+
 const Diecast = () => {
-  const days = useCountdown();
-  const counterDigits = useMemo(() => String(days).padStart(3, "0").split(""), [days]);
+  const cd = useCountdown();
+  const dayDigits = useMemo(() => PADDED(cd.days, 3).split(""), [cd.days]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md border-b border-border/40">
-        <div className="container flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 group">
-            <img
-              src={galpaoLogo}
-              alt="Galpão 64"
-              className="h-9 w-auto transition-transform group-hover:scale-105"
-            />
+    <div className="diecast-scope min-h-screen di-carbon">
+      {/* ============ HEADER / TERMINAL BAR ============ */}
+      <header className="sticky top-0 z-40 backdrop-blur-md bg-[#0a0a0a]/85 border-b border-[color:var(--di-line)]">
+        <div className="container flex h-14 items-center justify-between gap-4">
+          <Link to="/" className="di-click flex items-center gap-3 group">
+            <img src={galpaoLogo} alt="Galpão 64" className="h-8 w-auto" />
+            <span className="hidden sm:inline font-mono-tech text-[10px] uppercase tracking-[0.3em] text-[color:var(--di-neon)]/80 group-hover:text-[color:var(--di-neon)]">
+              SYS://G64_DIECAST.MODULE
+            </span>
           </Link>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.2em] text-foreground/80 hover:text-accent transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            VOLTAR
-          </Link>
+          <div className="flex items-center gap-4">
+            <span className="hidden md:inline-flex items-center gap-2 font-mono-tech text-[10px] uppercase tracking-[0.25em] text-[color:var(--di-text-dim)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--di-neon)] di-blink" />
+              ONLINE · SECURED
+            </span>
+            <Link
+              to="/"
+              className="di-click inline-flex items-center gap-2 font-mono-tech text-[10px] uppercase tracking-[0.3em] text-[color:var(--di-text)] hover:text-[color:var(--di-neon)] transition-colors"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              [EXIT_MODULE]
+            </Link>
+          </div>
         </div>
       </header>
 
       <main>
-        {/* 1. CABEÇALHO DINÂMICO */}
-        <section className="relative overflow-hidden border-b border-border/40">
-          <div className="absolute inset-0">
-            <img
-              src={monsterHero}
-              alt="Monster Truck real e versão Hot Wheels 1:64 lado a lado"
-              className="h-full w-full object-cover opacity-70"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
-            <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-background/80" />
-          </div>
-
-          <div className="relative container py-20 md:py-32">
-            <div className="max-w-3xl">
-              <p className="inline-flex items-center gap-2 text-[10px] md:text-xs font-bold tracking-[0.35em] text-accent uppercase mb-5">
-                <Zap className="h-3.5 w-3.5" />
-                Diecast Live · Edição 2026
+        {/* ============ 1. HERO / CABEÇALHO DINÂMICO ============ */}
+        <section className="relative overflow-hidden border-b border-[color:var(--di-line)] di-scanlines">
+          <div className="absolute inset-0 di-grid opacity-40" />
+          <div className="container relative grid lg:grid-cols-12 gap-8 py-16 md:py-24">
+            {/* Left: copy */}
+            <div className="lg:col-span-5 flex flex-col justify-center">
+              <p className="font-mono-tech inline-flex items-center gap-2 text-[10px] md:text-xs uppercase tracking-[0.35em] text-[color:var(--di-neon)] mb-5">
+                <Radio className="h-3.5 w-3.5" />
+                [DIECAST_LIVE] · 2026
               </p>
-              <h1 className="font-display text-4xl sm:text-5xl md:text-7xl font-extrabold leading-[0.95] tracking-tight mb-6">
+              <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[0.95] tracking-tight mb-6 uppercase">
                 A escala muda.
                 <br />
-                A <span className="text-primary">paixão</span> é a mesma.
+                A <span className="di-neon-text">paixão</span>
+                <br />é a mesma.
               </h1>
-              <p className="text-base md:text-xl text-muted-foreground max-w-xl leading-relaxed">
-                O <span className="text-foreground font-semibold">Galpão 64</span> no coração dos
-                maiores eventos diecast do Brasil — do rugido dos motores reais ao detalhe
-                milimétrico do 1:64.
+              <p className="font-mono-tech text-sm md:text-base text-[color:var(--di-text-dim)] max-w-md leading-relaxed">
+                {"> "}O <span className="text-[color:var(--di-text)]">Galpão 64</span> no
+                coração dos maiores eventos diecast do Brasil — do rugido dos motores reais ao
+                detalhe milimétrico do 1:64.
               </p>
+              <div className="mt-8 flex items-center gap-3">
+                <a
+                  href="#radar"
+                  className="di-click di-neon-border bg-[color:var(--di-neon)] text-black px-5 py-3 font-mono-tech text-[11px] uppercase tracking-[0.25em] font-bold hover:brightness-110 transition"
+                  style={{ boxShadow: "var(--di-neon-glow)" }}
+                >
+                  [INICIAR_VARREDURA]
+                </a>
+                <a
+                  href="#acervo"
+                  className="di-click border border-[color:var(--di-line-strong)] px-5 py-3 font-mono-tech text-[11px] uppercase tracking-[0.25em] text-[color:var(--di-neon)] hover:bg-[color:var(--di-neon)]/10 transition"
+                >
+                  [ACESSAR_GARAGEM]
+                </a>
+              </div>
+            </div>
+
+            {/* Right: split-frame with laser scan */}
+            <div className="lg:col-span-7 relative">
+              <div className="relative di-panel di-brackets aspect-[16/10] overflow-hidden">
+                <LaserScan
+                  src={monsterHero}
+                  alt="Monster Truck real e versão Hot Wheels 1:64 lado a lado"
+                  className="absolute inset-0"
+                />
+                {/* HUD overlays */}
+                <div className="pointer-events-none absolute top-3 left-3 right-3 flex items-center justify-between font-mono-tech text-[10px] uppercase tracking-[0.25em] text-[color:var(--di-neon)]">
+                  <span className="flex items-center gap-1.5">
+                    <ScanLine className="h-3 w-3" />
+                    SCAN_MODE: ACTIVE
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    REAL ⟷ 1:64
+                    <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--di-neon)] di-blink" />
+                  </span>
+                </div>
+                <div className="pointer-events-none absolute bottom-3 left-3 right-3 flex items-center justify-between font-mono-tech text-[10px] uppercase tracking-[0.25em] text-[color:var(--di-text-dim)]">
+                  <span>SUBJECT: MONSTER_TRUCK</span>
+                  <span>FIDELITY: 99.7%</span>
+                </div>
+              </div>
+              {/* Telemetry strip */}
+              <div className="mt-3 grid grid-cols-3 gap-2 font-mono-tech text-[10px] uppercase tracking-[0.2em]">
+                {[
+                  ["LAT", "-25.4284"],
+                  ["LON", "-49.2733"],
+                  ["TIME", new Date().toISOString().slice(11, 19)],
+                ].map(([k, v]) => (
+                  <div
+                    key={k}
+                    className="border border-[color:var(--di-line)] bg-black/40 px-3 py-2 flex items-center justify-between"
+                  >
+                    <span className="text-[color:var(--di-text-dim)]">{k}</span>
+                    <span className="text-[color:var(--di-neon)]">{v}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          {/* bottom fade for seamless next section */}
-          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
         </section>
 
-        {/* 2. RADAR DIECAST BRASIL */}
-        <section className="container py-20 md:py-28">
-          <div className="mb-12 max-w-2xl">
-            <p className="text-xs font-bold tracking-[0.3em] text-accent uppercase mb-3 inline-flex items-center gap-2">
-              <CalendarDays className="h-3.5 w-3.5" />
-              Radar Diecast Brasil
-            </p>
-            <h2 className="font-display text-3xl md:text-5xl font-extrabold leading-[1.05] mb-3">
-              O hub de tudo que acontece no país.
-            </h2>
-            <p className="text-sm md:text-base text-muted-foreground">
-              Acompanhamos cada lançamento, cada encontro e cada etapa para que sua coleção
-              esteja sempre um passo à frente.
-            </p>
-          </div>
+        {/* ============ 2. RADAR DIECAST BRASIL ============ */}
+        <section id="radar" className="relative border-b border-[color:var(--di-line)] py-20 md:py-28">
+          <div className="container">
+            <div className="mb-12 max-w-2xl">
+              <p className="font-mono-tech inline-flex items-center gap-2 text-[10px] md:text-xs uppercase tracking-[0.3em] text-[color:var(--di-neon)] mb-3">
+                <CalendarDays className="h-3.5 w-3.5" />
+                [RADAR_DIECAST_BRASIL // INTEL_FEED]
+              </p>
+              <h2 className="font-display text-3xl md:text-5xl font-extrabold leading-[1.05] mb-3 uppercase">
+                Monitoramento de inteligência.
+              </h2>
+              <p className="font-mono-tech text-sm md:text-base text-[color:var(--di-text-dim)]">
+                {"> "}Próximos sinais captados em território nacional.
+              </p>
+            </div>
 
-          <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-            {/* Agenda */}
-            <ul className="space-y-4">
-              {events.map((e) => {
-                const Icon = e.icon;
-                return (
-                  <li
-                    key={e.title}
-                    className="group relative overflow-hidden rounded-xl border border-border/60 bg-card/60 p-5 md:p-6 backdrop-blur-sm transition-all hover:border-accent/60 hover:shadow-[0_8px_30px_-10px_hsl(var(--accent)/0.45)]"
-                  >
-                    <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-accent via-primary to-accent opacity-70 group-hover:opacity-100 transition-opacity" />
-                    <div className="flex items-start gap-4">
-                      <div className="shrink-0 rounded-lg border border-border/60 bg-background/60 p-3">
-                        <Icon className={`h-5 w-5 ${e.accent}`} />
+            <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
+              {/* Event list — terminal feed */}
+              <ul className="space-y-4">
+                {events.map((e) => {
+                  const Icon = e.icon;
+                  return (
+                    <li
+                      key={e.code}
+                      className="di-panel di-brackets group p-5 md:p-6 transition-all hover:border-[color:var(--di-neon)]/60 hover:shadow-[0_0_30px_-8px_rgba(255,215,0,0.4)]"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="shrink-0 border border-[color:var(--di-line-strong)] bg-black/60 p-3">
+                          <Icon className="h-5 w-5 text-[color:var(--di-neon)]" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2 font-mono-tech text-[10px] uppercase tracking-[0.25em]">
+                            <span className="text-[color:var(--di-neon)]">{e.code}</span>
+                            <span className="text-[color:var(--di-text-dim)]">|</span>
+                            <span className="text-[color:var(--di-text)]">{e.when}</span>
+                            <span className="text-[color:var(--di-text-dim)]">|</span>
+                            <span className="text-[color:var(--di-neon)]/80 flex items-center gap-1">
+                              <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--di-neon)] di-blink" />
+                              {e.status}
+                            </span>
+                          </div>
+                          <h3 className="font-display text-lg md:text-xl font-bold leading-tight uppercase mb-1.5">
+                            {e.title}
+                          </h3>
+                          <p className="font-mono-tech text-xs md:text-sm text-[color:var(--di-text-dim)] leading-relaxed mb-2">
+                            {e.detail}
+                          </p>
+                          <p className="font-mono-tech inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-[color:var(--di-neon)]/80">
+                            <MapPin className="h-3 w-3" />
+                            {e.location}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <p className={`text-[10px] md:text-xs font-bold tracking-[0.3em] ${e.accent} uppercase mb-1`}>
-                          {e.when}
-                        </p>
-                        <h3 className="font-display text-lg md:text-xl font-bold leading-tight mb-1">
-                          {e.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          {e.detail}
-                        </p>
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+                    </li>
+                  );
+                })}
+              </ul>
 
-            {/* Countdown Widget */}
-            <div className="relative overflow-hidden rounded-xl border border-accent/30 bg-gradient-to-br from-card via-card to-background p-6 md:p-8">
-              <div className="absolute -top-20 -right-20 h-56 w-56 rounded-full bg-accent/15 blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
-              <div className="relative">
-                <p className="text-[10px] md:text-xs font-bold tracking-[0.3em] text-accent uppercase mb-3 inline-flex items-center gap-2">
+              {/* Countdown widget */}
+              <div className="di-panel di-brackets relative overflow-hidden p-6 md:p-7">
+                <div
+                  className="absolute -top-24 -right-24 h-56 w-56 rounded-full pointer-events-none"
+                  style={{ background: "radial-gradient(circle, rgba(255,215,0,0.18), transparent 70%)" }}
+                />
+                <p className="font-mono-tech inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[color:var(--di-neon)] mb-3">
                   <Flag className="h-3.5 w-3.5" />
-                  Contador Regressivo
+                  [COUNTDOWN_LOCK_ON]
                 </p>
-                <h3 className="font-display text-xl md:text-2xl font-bold leading-tight mb-6">
-                  Faltam para o rugido dos motores em Curitiba
+                <h3 className="font-display text-lg md:text-xl font-bold leading-tight uppercase mb-1">
+                  Monster Trucks Live
                 </h3>
-                <div className="flex items-end gap-2 mb-4">
-                  {counterDigits.map((d, i) => (
+                <p className="font-mono-tech text-[11px] uppercase tracking-[0.2em] text-[color:var(--di-text-dim)] mb-5">
+                  CURITIBA · AGO/2026
+                </p>
+
+                {/* Days big counter */}
+                <div className="flex items-end gap-1.5 mb-4">
+                  {dayDigits.map((d, i) => (
                     <div
                       key={i}
-                      className="flex h-20 w-16 md:h-24 md:w-20 items-center justify-center rounded-lg border border-border/60 bg-background/80 font-display text-4xl md:text-5xl font-extrabold text-primary shadow-inner shadow-black/40"
+                      className="relative h-16 w-12 md:h-20 md:w-16 flex items-center justify-center border border-[color:var(--di-neon)]/50 bg-black/70 font-display text-3xl md:text-4xl font-extrabold di-neon-text"
+                      style={{ boxShadow: "inset 0 0 18px rgba(255,215,0,0.12)" }}
                     >
                       {d}
                     </div>
                   ))}
-                  <span className="ml-2 mb-2 text-xs font-bold tracking-[0.25em] text-muted-foreground uppercase">
-                    dias
+                  <span className="ml-2 mb-1 font-mono-tech text-[10px] uppercase tracking-[0.3em] text-[color:var(--di-text-dim)]">
+                    DIAS
                   </span>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  O Galpão 64 estará presente na{" "}
-                  <span className="text-foreground font-semibold">Pedreira Paulo Leminski</span>,
-                  Curitiba/PR, com curadoria exclusiva de miniaturas Monster Trucks.
+
+                {/* HMS row */}
+                <div className="grid grid-cols-3 gap-2 mb-5">
+                  {[
+                    ["HRS", PADDED(cd.hours)],
+                    ["MIN", PADDED(cd.minutes)],
+                    ["SEC", PADDED(cd.seconds)],
+                  ].map(([k, v]) => (
+                    <div
+                      key={k}
+                      className="border border-[color:var(--di-line)] bg-black/50 py-2 text-center"
+                    >
+                      <div className="font-display text-xl font-bold di-neon-text">{v}</div>
+                      <div className="font-mono-tech text-[9px] uppercase tracking-[0.25em] text-[color:var(--di-text-dim)]">
+                        {k}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="font-mono-tech text-[11px] text-[color:var(--di-text-dim)] leading-relaxed">
+                  {"> "}LOCAL: PEDREIRA PAULO LEMINSKI
+                  <br />
+                  {"> "}CURADORIA: G64_MONSTER_DROP
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 3. MEMÓRIA DE ELITE */}
-        <section className="relative border-y border-border/40 bg-gradient-to-b from-black via-[hsl(0_0%_5%)] to-black py-20 md:py-28">
+        {/* ============ 3. CORAÇÃO DAS TROCAS / GALERIA ============ */}
+        <section className="relative border-b border-[color:var(--di-line)] py-20 md:py-28">
           <div className="container">
             <div className="mb-12 max-w-2xl">
-              <p className="text-xs font-bold tracking-[0.3em] text-primary uppercase mb-3 inline-flex items-center gap-2">
-                <Users className="h-3.5 w-3.5" />
-                Memória de Elite
+              <p className="font-mono-tech inline-flex items-center gap-2 text-[10px] md:text-xs uppercase tracking-[0.3em] text-[color:var(--di-neon)] mb-3">
+                <Sparkles className="h-3.5 w-3.5" />
+                [CORAÇÃO_DAS_TROCAS // ARCHIVE]
               </p>
-              <h2 className="font-display text-3xl md:text-5xl font-extrabold leading-[1.05] mb-3">
+              <h2 className="font-display text-3xl md:text-5xl font-extrabold leading-[1.05] mb-3 uppercase">
                 Eventos que moldam a cultura.
               </h2>
-              <p className="text-sm md:text-base text-muted-foreground">
-                Não é apenas venda — é cultura. Participamos ativamente dos maiores clubes de
-                trocas do Brasil para trazer o melhor do mundo diecast para o nosso acervo.
+              <p className="font-mono-tech text-sm md:text-base text-[color:var(--di-text-dim)]">
+                {"> "}Mesas, expositores e designers — a engrenagem viva do diecast brasileiro.
               </p>
             </div>
 
-            <Carousel
-              opts={{ align: "start", loop: true }}
-              className="w-full"
-            >
+            <Carousel opts={{ align: "start", loop: true }} className="w-full">
               <CarouselContent className="-ml-4">
                 {gallery.map((g) => (
-                  <CarouselItem
-                    key={g.title}
-                    className="pl-4 md:basis-2/3 lg:basis-1/2"
-                  >
-                    <figure className="group relative overflow-hidden rounded-xl border border-border/60 bg-card">
-                      <div className="aspect-[4/3] overflow-hidden">
+                  <CarouselItem key={g.code} className="pl-4 md:basis-2/3 lg:basis-1/2">
+                    <figure className="di-panel di-brackets">
+                      {/* Terminal frame header */}
+                      <div className="flex items-center justify-between border-b border-[color:var(--di-line)] bg-black/60 px-3 py-1.5 font-mono-tech text-[10px] uppercase tracking-[0.25em]">
+                        <span className="flex items-center gap-2 text-[color:var(--di-neon)]">
+                          <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--di-neon)] di-blink" />
+                          {g.code}
+                        </span>
+                        <span className="text-[color:var(--di-text-dim)]">VISUAL_FEED.LIVE</span>
+                      </div>
+                      <div className="aspect-[4/3] overflow-hidden bg-black">
                         <img
                           src={g.src}
                           alt={g.title}
                           loading="lazy"
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
                         />
                       </div>
-                      <figcaption className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/95 via-black/40 to-transparent p-5 md:p-6">
-                        <p className="text-[10px] md:text-xs font-bold tracking-[0.3em] text-accent uppercase mb-1.5">
+                      <figcaption className="border-t border-[color:var(--di-line)] p-4 md:p-5 bg-black/40">
+                        <p className="font-mono-tech text-[10px] uppercase tracking-[0.25em] text-[color:var(--di-neon)] mb-1.5">
                           {g.title}
                         </p>
-                        <p className="text-sm md:text-base text-foreground/95 leading-snug max-w-md">
+                        <p className="font-mono-tech text-xs md:text-sm text-[color:var(--di-text-dim)] leading-snug">
                           {g.caption}
                         </p>
                       </figcaption>
@@ -280,95 +389,102 @@ const Diecast = () => {
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="hidden md:flex -left-4 bg-background/80 border-border/60 hover:bg-accent hover:text-accent-foreground" />
-              <CarouselNext className="hidden md:flex -right-4 bg-background/80 border-border/60 hover:bg-accent hover:text-accent-foreground" />
+              <CarouselPrevious className="hidden md:flex -left-4 border-[color:var(--di-line-strong)] bg-black/80 text-[color:var(--di-neon)] hover:bg-[color:var(--di-neon)] hover:text-black" />
+              <CarouselNext className="hidden md:flex -right-4 border-[color:var(--di-line-strong)] bg-black/80 text-[color:var(--di-neon)] hover:bg-[color:var(--di-neon)] hover:text-black" />
             </Carousel>
           </div>
         </section>
 
-        {/* 4. CONEXÃO COM O ACERVO */}
-        <section className="container py-20 md:py-28">
-          <div className="mb-12 max-w-2xl">
-            <p className="text-xs font-bold tracking-[0.3em] text-accent uppercase mb-3 inline-flex items-center gap-2">
-              <Sparkles className="h-3.5 w-3.5" />
-              Conexão com o Acervo
-            </p>
-            <h2 className="font-display text-3xl md:text-5xl font-extrabold leading-[1.05] mb-3">
-              Cada peça da Garagem tem história.
-            </h2>
-            <p className="text-sm md:text-base text-muted-foreground">
-              As miniaturas que passam pelo Galpão 64 carregam o DNA dos eventos onde foram
-              celebradas. É curadoria, não acaso.
-            </p>
-          </div>
+        {/* ============ 4. X-RAY VIEW / ACERVO ============ */}
+        <section id="acervo" className="relative py-20 md:py-28">
+          <div className="container">
+            <div className="mb-10 max-w-2xl">
+              <p className="font-mono-tech inline-flex items-center gap-2 text-[10px] md:text-xs uppercase tracking-[0.3em] text-[color:var(--di-neon)] mb-3">
+                <Crosshair className="h-3.5 w-3.5" />
+                [X_RAY_VIEW // PRECISION_SCAN]
+              </p>
+              <h2 className="font-display text-3xl md:text-5xl font-extrabold leading-[1.05] mb-3 uppercase">
+                Mira de precisão.
+              </h2>
+              <p className="font-mono-tech text-sm md:text-base text-[color:var(--di-text-dim)]">
+                {"> "}Passe o cursor sobre as peças do acervo. Cada item é autenticado pelo
+                sistema G64_SCAN_PRO.
+              </p>
+            </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Destaque do Mês */}
-            <article className="group relative overflow-hidden rounded-xl border border-border/60 bg-card">
-              <div className="aspect-[4/3] overflow-hidden bg-black">
-                <img
-                  src={destaque}
-                  alt="Miniatura destaque inspirada no vencedor do Hot Wheels Legends Tour"
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-              </div>
-              <div className="p-6">
-                <Badge className="bg-primary/15 text-primary border border-primary/40 hover:bg-primary/20 mb-3">
-                  <Trophy className="mr-1.5 h-3 w-3" />
-                  Destaque do Mês
-                </Badge>
-                <h3 className="font-display text-xl md:text-2xl font-bold leading-tight mb-3">
-                  Inspirada num vencedor do Legends Tour.
-                </h3>
-                <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                  Esta peça foi inspirada no vencedor do{" "}
-                  <span className="text-foreground font-semibold">Legends Tour</span> e é uma das
-                  mais desejadas por colecionadores que buscam fidelidade extrema ao custom
-                  original — proporções, paleta de pintura e até as rodas reproduzidas em escala 1:64.
-                </p>
-              </div>
-            </article>
+            <div className="grid gap-6 lg:grid-cols-2">
+              {[
+                {
+                  src: destaque,
+                  code: "ITM_001",
+                  badge: "DESTAQUE_DO_MES",
+                  title: "Inspirada num vencedor do Legends Tour",
+                  text:
+                    "Esta peça foi inspirada no vencedor do Legends Tour. Uma das mais desejadas por colecionadores que buscam fidelidade extrema — proporções, paleta de pintura e até as rodas reproduzidas em escala 1:64.",
+                },
+                {
+                  src: legends,
+                  code: "ITM_002",
+                  badge: "VISTO_NO_SALAO",
+                  title: "Acabamento Premium · Salão Diecast SP",
+                  text:
+                    "Modelo exclusivo com acabamento Premium, destaque na última edição do Salão Diecast em São Paulo. Spectraflame, Real Riders e tampografia detalhada.",
+                },
+              ].map((item) => (
+                <article key={item.code} className="di-panel di-brackets">
+                  <div className="flex items-center justify-between border-b border-[color:var(--di-line)] bg-black/60 px-3 py-1.5 font-mono-tech text-[10px] uppercase tracking-[0.25em]">
+                    <span className="flex items-center gap-2 text-[color:var(--di-neon)]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--di-neon)] di-blink" />
+                      {item.code} · {item.badge}
+                    </span>
+                    <span className="text-[color:var(--di-text-dim)]">G64_SCAN_PRO</span>
+                  </div>
+                  <XRayMagnifier
+                    src={item.src}
+                    alt={item.title}
+                    className="aspect-[4/3] bg-black"
+                  />
+                  <div className="border-t border-[color:var(--di-line)] p-5 md:p-6 bg-black/40">
+                    <h3 className="font-display text-lg md:text-xl font-bold leading-tight uppercase mb-2">
+                      {item.title}
+                    </h3>
+                    <p className="font-mono-tech text-xs md:text-sm text-[color:var(--di-text-dim)] leading-relaxed">
+                      {"> "}
+                      {item.text}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
 
-            {/* Visto no Salão */}
-            <article className="group relative overflow-hidden rounded-xl border border-border/60 bg-card">
-              <div className="aspect-[4/3] overflow-hidden bg-black">
-                <img
-                  src={legends}
-                  alt="Modelo Premium destaque na última edição do Salão Diecast em São Paulo"
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-              </div>
-              <div className="p-6">
-                <Badge className="bg-accent/15 text-accent border border-accent/40 hover:bg-accent/20 mb-3">
-                  <MapPin className="mr-1.5 h-3 w-3" />
-                  Visto no Salão
-                </Badge>
-                <h3 className="font-display text-xl md:text-2xl font-bold leading-tight mb-3">
-                  Acabamento Premium, presença no Salão.
-                </h3>
-                <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                  Modelo exclusivo com acabamento{" "}
-                  <span className="text-foreground font-semibold">Premium</span>, destaque na
-                  última edição do <span className="text-foreground font-semibold">Salão
-                  Diecast em São Paulo</span>. Pintura Spectraflame, Real Riders e tampografia
-                  detalhada — uma peça que só faz sentido na mão de quem entende o jogo.
-                </p>
-              </div>
-            </article>
-          </div>
-
-          <div className="mt-14 flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
-            <Link
-              to="/album"
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-7 py-3.5 text-xs font-bold tracking-[0.25em] text-primary-foreground uppercase shadow-[0_8px_30px_-8px_hsl(var(--primary)/0.6)] transition-all hover:bg-primary/95 hover:shadow-[0_12px_40px_-8px_hsl(var(--primary)/0.8)] active:scale-[0.98]"
-            >
-              Ver a Garagem dos Colecionadores
-              <ArrowLeft className="h-4 w-4 rotate-180" />
-            </Link>
+            {/* CTA */}
+            <div className="mt-14 flex flex-col items-center gap-4 text-center">
+              <p className="font-mono-tech text-[11px] uppercase tracking-[0.3em] text-[color:var(--di-text-dim)]">
+                {"> "}TRANSFERIR PARA MÓDULO DE VENDAS
+              </p>
+              <Link
+                to="/album"
+                className="di-click di-neon-border bg-[color:var(--di-neon)] text-black px-8 py-4 font-mono-tech text-xs uppercase tracking-[0.3em] font-bold hover:brightness-110 inline-flex items-center gap-3 transition"
+                style={{ boxShadow: "var(--di-neon-glow)" }}
+              >
+                <Zap className="h-4 w-4" />
+                [ACESSAR_GARAGEM]
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
         </section>
+
+        {/* Footer terminal */}
+        <footer className="border-t border-[color:var(--di-line)] bg-black/60">
+          <div className="container py-6 flex flex-col md:flex-row items-center justify-between gap-3 font-mono-tech text-[10px] uppercase tracking-[0.25em] text-[color:var(--di-text-dim)]">
+            <span>{"> "}G64_DIECAST.MODULE · v2.6.2026</span>
+            <span className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--di-neon)] di-blink" />
+              SECURE_LINK · AUTHENTIC_ITEMS_ONLY
+            </span>
+          </div>
+        </footer>
       </main>
     </div>
   );
