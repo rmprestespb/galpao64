@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, HelpCircle, Loader2, MapPin, PackageCheck, Search, Warehouse } from "lucide-react";
+import { ArrowLeft, HelpCircle, Loader2, MapPin, MessageCircle, PackageCheck, Search, Truck, Warehouse } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -39,6 +40,21 @@ type Collector = {
 const STATUS_LABEL: Record<ReservationStatus, string> = {
   na_garagem: "Na Garagem",
   aguardando_envio: "Aguardando Envio",
+};
+
+const WHATSAPP_NUMBER = "5546999350070";
+
+const buildShippingMessage = (collector: Collector) => {
+  const lines = [
+    `Olá Robson! Sou ${collector.display_name} (${collector.city}/${collector.state.toUpperCase()}).`,
+    "",
+    "Gostaria de combinar o envio das miniaturas que estão no meu Álbum:",
+    "",
+    ...collector.reservation_items.map((it, i) => `${i + 1}. ${it.title}`),
+    "",
+    "Pode me passar o valor do frete e os próximos passos?",
+  ];
+  return encodeURIComponent(lines.join("\n"));
 };
 
 const Album = () => {
