@@ -293,8 +293,11 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
             style={{
               width: "min(88vw, 540px)",
               maxHeight: "min(62vh, 560px)",
-              clipPath: "inset(0 0 18% 0)",
-              marginBottom: "-12%",
+              // Crop more of the bottom to fully hide the embedded
+              // "GALPÃO 64" button + "CLIQUE PARA ACELERAR" caption
+              // baked into the PNG.
+              clipPath: "inset(0 0 30% 0)",
+              marginBottom: "-20%",
               filter: "drop-shadow(0 0 60px rgba(201,169,106,0.35))",
             }}
           />
