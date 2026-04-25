@@ -184,3 +184,179 @@ All colors MUST be HSL.
     box-shadow: none !important;
   }
 }
+
+/* =============================================================
+   /diecast — Cyber Industrial scope
+   Scoped via .diecast-scope so it doesn't leak into the rest of the site.
+   ============================================================= */
+.diecast-scope {
+  --di-bg: #121212;
+  --di-bg-2: #0a0a0a;
+  --di-panel: #161616;
+  --di-line: rgba(255, 215, 0, 0.18);
+  --di-line-strong: rgba(255, 215, 0, 0.55);
+  --di-neon: #ffd700;
+  --di-neon-glow: 0 0 12px rgba(255, 215, 0, 0.55), 0 0 28px rgba(255, 215, 0, 0.25);
+  --di-text: #e8e8e8;
+  --di-text-dim: #8a8a8a;
+  background: var(--di-bg);
+  color: var(--di-text);
+  font-family: 'Rajdhani', 'Oxanium', 'Inter', system-ui, sans-serif;
+}
+
+/* Carbon fiber / brushed metal texture */
+.diecast-scope .di-carbon {
+  background-color: #121212;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.025) 0 2px,
+      transparent 2px 4px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(0, 0, 0, 0.5) 0 2px,
+      transparent 2px 4px
+    ),
+    radial-gradient(ellipse at top, #1a1a1a 0%, #0a0a0a 80%);
+}
+
+.diecast-scope .di-grid {
+  background-image:
+    linear-gradient(rgba(255, 215, 0, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 215, 0, 0.06) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+.diecast-scope .font-mono-tech {
+  font-family: 'JetBrains Mono', 'Share Tech Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.04em;
+}
+
+.diecast-scope .di-neon-text {
+  color: var(--di-neon);
+  text-shadow: var(--di-neon-glow);
+}
+
+.diecast-scope .di-neon-border {
+  border: 1px solid var(--di-line-strong);
+  box-shadow: 0 0 0 1px rgba(255, 215, 0, 0.08), inset 0 0 24px rgba(255, 215, 0, 0.05);
+}
+
+.diecast-scope .di-panel {
+  position: relative;
+  background: linear-gradient(180deg, #161616 0%, #0e0e0e 100%);
+  border: 1px solid var(--di-line);
+}
+
+/* Terminal-style corner brackets */
+.diecast-scope .di-brackets::before,
+.diecast-scope .di-brackets::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--di-neon);
+  border-style: solid;
+  pointer-events: none;
+}
+.diecast-scope .di-brackets::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+.diecast-scope .di-brackets::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+/* Laser scanner: top half grayscale, line sweeps down revealing color */
+@keyframes di-laser-sweep {
+  0%   { --y: 0%; }
+  45%  { --y: 100%; }
+  55%  { --y: 100%; }
+  100% { --y: 0%; }
+}
+.diecast-scope .di-laser {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --y: 0%;
+  animation: di-laser-sweep 5.5s ease-in-out infinite;
+}
+.diecast-scope .di-laser .di-laser-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.diecast-scope .di-laser .di-laser-bw {
+  filter: grayscale(1) contrast(1.05) brightness(0.85);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black var(--y), transparent var(--y), transparent 100%);
+          mask-image: linear-gradient(to bottom, black 0%, black var(--y), transparent var(--y), transparent 100%);
+}
+.diecast-scope .di-laser .di-laser-color {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent var(--y), black var(--y), black 100%);
+          mask-image: linear-gradient(to bottom, transparent 0%, transparent var(--y), black var(--y), black 100%);
+}
+.diecast-scope .di-laser .di-laser-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--y);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ffd700 50%, transparent);
+  box-shadow: 0 0 14px 2px rgba(255, 215, 0, 0.85), 0 0 36px rgba(255, 215, 0, 0.45);
+  transform: translateY(-1px);
+  pointer-events: none;
+}
+.diecast-scope .di-laser .di-laser-glow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--y);
+  height: 80px;
+  transform: translateY(-80px);
+  background: linear-gradient(to bottom, transparent, rgba(255, 215, 0, 0.18));
+  pointer-events: none;
+}
+
+/* Scanline overlay */
+.diecast-scope .di-scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.03) 0 1px,
+    transparent 1px 3px
+  );
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* Mechanical click pulse */
+@keyframes di-click {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+.diecast-scope .di-click:active {
+  animation: di-click 0.18s ease-out;
+}
+
+/* Blink for status dots */
+@keyframes di-blink {
+  0%, 60% { opacity: 1; }
+  80%, 100% { opacity: 0.25; }
+}
+.diecast-scope .di-blink {
+  animation: di-blink 1.4s steps(2, end) infinite;
+}
+
+/* X-Ray cursor crosshair */
+.diecast-scope .di-xray {
+  cursor: crosshair;
+}
