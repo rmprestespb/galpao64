@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play, X, ShoppingBag, MessageCircle } from "lucide-react";
+import { Play, ShoppingBag, MessageCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import CollectibleLightbox, { type LightboxMedia } from "./CollectibleLightbox";
 
 export type CollectibleCardData = {
   id: string;
@@ -40,8 +41,9 @@ const CollectibleCard = ({
   whatsappNumber = "5546999350070",
 }: Props) => {
   const [activeImage, setActiveImage] = useState(product.images[0]);
-  const [videoOpen, setVideoOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   const hasGallery = product.images.length > 1;
 
   const handleBuyClick = () => {
@@ -68,6 +70,17 @@ const CollectibleCard = ({
     product.description ??
     `${product.title}${product.series ? ` — Série ${product.series}` : ""}. Peça curada pelo Galpão 64 em escala 1:64, com acabamento premium e tampografia detalhada.`;
 
+  const lightboxMedia: LightboxMedia[] = [
+    ...product.images.map((src) => ({ type: "image" as const, src, alt: product.alt ?? product.title })),
+    ...(product.videoUrl ? [{ type: "video" as const, src: product.videoUrl }] : []),
+  ];
+
+  const openLightbox = (mediaSrc?: string) => {
+    const i = mediaSrc ? lightboxMedia.findIndex((m) => m.src === mediaSrc) : 0;
+    setLightboxIndex(i >= 0 ? i : 0);
+    setLightboxOpen(true);
+  };
+
   return (
     <>
       <article
@@ -85,18 +98,25 @@ const CollectibleCard = ({
       >
         {/* Image stage */}
         <div className="relative aspect-square overflow-hidden bg-black">
-          <img
-            src={activeImage}
-            alt={product.alt ?? product.title}
-            width={768}
-            height={768}
-            loading="lazy"
-            className={cn(
-              "h-full w-full object-cover transition-all duration-[400ms] ease-out",
-              "group-hover:scale-110 group-focus-within:scale-110",
-              "group-hover:blur-[2px] group-focus-within:blur-[2px]",
-            )}
-          />
+          <button
+            type="button"
+            onClick={() => openLightbox(activeImage)}
+            aria-label={`Ampliar foto de ${product.title}`}
+            className="absolute inset-0 z-0 cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <img
+              src={activeImage}
+              alt={product.alt ?? product.title}
+              width={768}
+              height={768}
+              loading="lazy"
+              className={cn(
+                "h-full w-full object-cover transition-all duration-[400ms] ease-out",
+                "group-hover:scale-110 group-focus-within:scale-110",
+                "group-hover:blur-[2px] group-focus-within:blur-[2px]",
+              )}
+            />
+          </button>
 
           {/* Subtle vignette */}
           <div
@@ -107,7 +127,7 @@ const CollectibleCard = ({
           {/* Discreet price (initial state) */}
           <div
             className={cn(
-              "absolute right-3 top-3 rounded-full px-3 py-1",
+              "pointer-events-none absolute right-3 top-3 rounded-full px-3 py-1",
               "bg-black/55 backdrop-blur-md border border-white/10",
               "text-[13px] font-extrabold tracking-tight",
               "text-[#FFD27A]",
@@ -121,7 +141,7 @@ const CollectibleCard = ({
           {/* Glassmorphism reveal layer */}
           <div
             className={cn(
-              "absolute inset-x-0 bottom-0 p-4 sm:p-5",
+              "absolute inset-x-0 bottom-0 z-10 p-4 sm:p-5 pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto",
               "translate-y-4 opacity-0",
               "group-hover:translate-y-0 group-hover:opacity-100",
               "group-focus-within:translate-y-0 group-focus-within:opacity-100",
@@ -173,11 +193,11 @@ const CollectibleCard = ({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setVideoOpen(true);
+                      openLightbox(product.videoUrl);
                     }}
                     aria-label="Assistir vídeo de demonstração"
                     className={cn(
-                      "ml-auto inline-flex h-10 w-10 items-center justify-center rounded-full",
+                      "relative z-10 ml-auto inline-flex h-10 w-10 items-center justify-center rounded-full",
                       "bg-accent/90 text-accent-foreground hover:bg-accent transition-colors",
                       "shadow-[0_6px_20px_-4px_rgba(0,229,255,0.6)]",
                     )}
@@ -278,30 +298,21 @@ const CollectibleCard = ({
         </DialogContent>
       </Dialog>
 
-      {product.videoUrl && (
-        <Dialog open={videoOpen} onOpenChange={setVideoOpen}>
-          <DialogContent className="max-w-3xl bg-black border-white/10 p-0 overflow-hidden">
-            <DialogHeader className="sr-only">
-              <DialogTitle>{product.title}</DialogTitle>
-            </DialogHeader>
-            <button
-              onClick={() => setVideoOpen(false)}
-              className="absolute right-3 top-3 z-10 rounded-full bg-black/60 p-2 text-white hover:bg-black/80"
-              aria-label="Fechar vídeo"
-            >
-              <X className="h-4 w-4" />
-            </button>
-            <div className="aspect-video w-full bg-black">
-              <video
-                src={product.videoUrl}
-                controls
-                autoPlay
-                className="h-full w-full"
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      <CollectibleLightbox
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        title={product.title}
+        series={product.series}
+        rarity={product.rarity}
+        priceLabel={formatBRL(product.price_cents)}
+        description={description}
+        media={lightboxMedia}
+        initialIndex={lightboxIndex}
+        onBuy={() => {
+          setLightboxOpen(false);
+          setConfirmOpen(true);
+        }}
+      />
     </>
   );
 };

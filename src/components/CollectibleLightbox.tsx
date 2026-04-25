@@ -1,0 +1,249 @@
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Play, ShoppingBag, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+export type LightboxMedia = {
+  type: "image" | "video";
+  src: string;
+  alt?: string;
+};
+
+type Props = {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  series?: string | null;
+  rarity?: number | null;
+  priceLabel: string;
+  description: string;
+  media: LightboxMedia[];
+  initialIndex?: number;
+  onBuy?: () => void;
+};
+
+const CollectibleLightbox = ({
+  open,
+  onClose,
+  title,
+  series,
+  rarity,
+  priceLabel,
+  description,
+  media,
+  initialIndex = 0,
+  onBuy,
+}: Props) => {
+  const [index, setIndex] = useState(initialIndex);
+
+  useEffect(() => {
+    if (open) setIndex(initialIndex);
+  }, [open, initialIndex]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") setIndex((i) => (i + 1) % media.length);
+      if (e.key === "ArrowLeft") setIndex((i) => (i - 1 + media.length) % media.length);
+    };
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [open, media.length, onClose]);
+
+  if (!open) return null;
+
+  const current = media[index];
+  const hasMultiple = media.length > 1;
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 animate-fade-in"
+    >
+      {/* Overlay (click outside to close) */}
+      <button
+        type="button"
+        aria-label="Fechar"
+        onClick={onClose}
+        className="absolute inset-0 bg-black/85 backdrop-blur-md"
+      />
+
+      {/* Close button */}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Fechar"
+        className="fixed right-4 top-4 z-[110] inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-colors"
+      >
+        <X className="h-5 w-5" />
+      </button>
+
+      {/* Content shell */}
+      <div
+        className={cn(
+          "relative z-[105] w-full max-w-6xl max-h-[92vh]",
+          "grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]",
+          "rounded-2xl overflow-hidden",
+          "bg-[hsl(0_0%_5%)]/90 backdrop-blur-xl border border-white/10",
+          "shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]",
+          "animate-scale-in",
+        )}
+      >
+        {/* Media side */}
+        <div className="relative bg-black flex items-center justify-center min-h-[55vh] lg:min-h-[80vh]">
+          {current.type === "image" ? (
+            <img
+              key={current.src}
+              src={current.src}
+              alt={current.alt ?? title}
+              className="max-h-full max-w-full object-contain animate-fade-in"
+            />
+          ) : (
+            <video
+              key={current.src}
+              src={current.src}
+              controls
+              autoPlay
+              className="max-h-full max-w-full"
+            />
+          )}
+
+          {hasMultiple && (
+            <>
+              <button
+                type="button"
+                onClick={() => setIndex((i) => (i - 1 + media.length) % media.length)}
+                aria-label="Anterior"
+                className="absolute left-3 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center rounded-full bg-black/55 backdrop-blur-md border border-white/15 text-white hover:bg-black/80 transition-colors"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setIndex((i) => (i + 1) % media.length)}
+                aria-label="Próximo"
+                className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center rounded-full bg-black/55 backdrop-blur-md border border-white/15 text-white hover:bg-black/80 transition-colors"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+
+              {/* Thumbnails */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full bg-black/60 backdrop-blur-md border border-white/10 px-2 py-1.5">
+                {media.map((m, i) => (
+                  <button
+                    key={`${m.src}-${i}`}
+                    type="button"
+                    onClick={() => setIndex(i)}
+                    aria-label={`Ver mídia ${i + 1}`}
+                    className={cn(
+                      "relative h-10 w-10 rounded-md overflow-hidden border transition-all",
+                      i === index
+                        ? "border-accent shadow-[0_0_0_2px_rgba(0,229,255,0.3)]"
+                        : "border-white/15 hover:border-white/40",
+                    )}
+                  >
+                    {m.type === "image" ? (
+                      <img src={m.src} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center bg-black text-white">
+                        <Play className="h-4 w-4" fill="currentColor" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Info side */}
+        <aside className="relative bg-black/60 backdrop-blur-xl border-t lg:border-t-0 lg:border-l border-white/10 p-6 sm:p-8 flex flex-col gap-5 overflow-y-auto">
+          {series && (
+            <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-accent">
+              {series}
+            </p>
+          )}
+          <h2
+            className="text-2xl sm:text-3xl font-extrabold leading-tight text-white"
+            style={{ fontFamily: "Inter, system-ui, sans-serif" }}
+          >
+            {title}
+          </h2>
+
+          <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+            <p className="text-[10px] uppercase tracking-[0.25em] text-white/50">
+              Valor
+            </p>
+            <p
+              className="text-3xl sm:text-4xl font-extrabold text-[#FFD27A] mt-1"
+              style={{ fontFamily: "Inter, system-ui, sans-serif" }}
+            >
+              {priceLabel}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.25em] text-white/50 mb-2">
+              Descrição
+            </p>
+            <p className="text-sm leading-relaxed text-white/85">{description}</p>
+          </div>
+
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.25em] text-white/50 mb-2">
+              Ficha técnica
+            </p>
+            <dl className="grid grid-cols-2 gap-3 text-sm">
+              <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                <dt className="text-[10px] uppercase tracking-wider text-white/50">Escala</dt>
+                <dd className="text-white font-semibold mt-0.5">1:64</dd>
+              </div>
+              {series && (
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                  <dt className="text-[10px] uppercase tracking-wider text-white/50">Série</dt>
+                  <dd className="text-white font-semibold mt-0.5 truncate">{series}</dd>
+                </div>
+              )}
+              {typeof rarity === "number" && (
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                  <dt className="text-[10px] uppercase tracking-wider text-white/50">Raridade</dt>
+                  <dd className="text-accent font-semibold mt-0.5">{rarity}%</dd>
+                </div>
+              )}
+              <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                <dt className="text-[10px] uppercase tracking-wider text-white/50">Curadoria</dt>
+                <dd className="text-white font-semibold mt-0.5">Galpão 64</dd>
+              </div>
+            </dl>
+          </div>
+
+          {onBuy && (
+            <button
+              type="button"
+              onClick={onBuy}
+              className={cn(
+                "mt-auto w-full inline-flex items-center justify-center gap-2",
+                "rounded-full px-5 py-3 text-xs font-bold uppercase tracking-[0.22em]",
+                "bg-primary text-primary-foreground",
+                "shadow-[0_10px_30px_-8px_rgba(255,140,0,0.6)]",
+                "hover:brightness-110 active:scale-[0.98] transition-all",
+              )}
+            >
+              <ShoppingBag className="h-4 w-4" strokeWidth={2.5} />
+              Comprar agora
+            </button>
+          )}
+        </aside>
+      </div>
+    </div>
+  );
+};
+
+export default CollectibleLightbox;
