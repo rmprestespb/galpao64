@@ -616,7 +616,7 @@ const Collection = () => {
             <Loader2 className="h-8 w-8 animate-spin text-accent" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          <div className="flex flex-col gap-10 lg:gap-14">
             {products.map((p) => (
               <GarageProShowcase
                 key={p.id}
