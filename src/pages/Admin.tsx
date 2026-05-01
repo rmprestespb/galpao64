@@ -315,6 +315,27 @@ const Admin = () => {
 
       if (error) throw error;
 
+      // Envia dados ao webhook do Make (não bloqueia o fluxo se falhar)
+      try {
+        await fetch("https://hook.us2.make.com/as7w2gx4dvdgowp7j8bcx5actbwjvdll", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nome_produto: parsed.data.title,
+            descricao: form.description || "",
+            preco: (parsed.data.price_cents / 100).toFixed(2),
+            imagem_url:
+              form.sale_image_processed_url ||
+              form.sale_image_original_url ||
+              form.images[0] ||
+              "",
+          }),
+        });
+      } catch (webhookErr) {
+        console.error("Webhook Make falhou", webhookErr);
+        toast.warning("Produto salvo, mas o webhook falhou");
+      }
+
       // Se vinculou a um colecionador, cria o item no álbum dele.
       if (form.collectorId && form.images[0]) {
         const { error: itemErr } = await supabase.from("reservation_items").insert({
