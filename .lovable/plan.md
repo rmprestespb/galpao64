@@ -1,51 +1,56 @@
+Vou redesenhar a página de produto (Garage Pro Showcase) inspirada em sites de carros de luxo, conforme o mockup enviado.
 
-# Vitrine de Miniaturas — E-commerce Hot Wheels Luxury
+## Estética geral
+- Fundo preto puro (`#000`) com detalhes em **dourado champanhe** (`#D4AF7A` / `#E9C77B`) e cinza metálico.
+- Tipografia: títulos em fonte Serif elegante (Playfair Display) para marca/seção; nome do produto em sans-serif Bold (Montserrat / Inter Black).
+- Bordas arredondadas suaves, sombras profundas, leve brilho dourado nos hovers.
 
-Site one-page de alto padrão para colecionadores de Hot Wheels raros, com tema dark mode focado em exclusividade e luxo.
+## Layout (desktop)
+```
+┌─────────────────────────────────────────────────────┐
+│            CATÁLOGO DE ELITE  (serif dourado)       │
+├──────────┬──────────────────────────────────────────┤
+│ Thumb 1  │                                          │
+│ Thumb 2  │       PALCO PRINCIPAL (foto/vídeo)       │
+│ Thumb 3  │       16:9, bordas suaves                │
+│ Thumb ▶  │       legenda inferior overlay           │
+├──────────┴──────────────────────────────────────────┤
+│  GLASS CARD: Nome bold + Série + Descrição          │
+│              + Tags Raridade / Acabamento           │
+├─────────────────────────────────────────────────────┤
+│  GLASS CARD: Preço destaque dourado  [CTA dourado]  │
+└─────────────────────────────────────────────────────┘
+```
+- Coluna esquerda: 4 thumbs verticais (3 fotos + 1 vídeo com ícone Play).
+- Coluna direita: palco principal grande (até ~720px wide), alterna foto ↔ vídeo MP4 fullscreen com autoplay loop muted.
+- Overlay sutil "VIDEO EM LOOP (CINEMATOGRÁFICO)" quando for vídeo.
 
-## Estrutura da página
+## Glassmorphism
+Os cards de descrição e preço terão:
+- `bg-white/5`, `backdrop-blur-xl`, `border border-white/10`
+- gradient highlight dourado no topo (`shadow-[inset_0_1px_0_rgba(212,175,122,0.25)]`)
+- leve transparência para o palco aparecer atrás (vídeo continua tocando ao fundo).
 
-**Header fixo (fundo preto #000000)**
-- Logo "HOT WHEELS LUXURY" à esquerda com ícone de chama estilizada, ambos em laranja vibrante (#FF5500)
-- Menu à direita: COLEÇÃO · RARIDADES · SOBRE · ÁLBUM/RESERVAS (branco, sans-serif moderna)
+## Especificações Técnicas
+Nova seção em grid 4 colunas com ícones Lucide modernos:
+- **Marca** (`Award`)
+- **Série** (`Layers`)
+- **Ano** (`Calendar`)
+- **Raridade** (`Sparkles`)
 
-**Hero / Título principal**
-- Centralizado: "VITRINE DE **MINIATURAS**"
-- "MINIATURAS" em ciano neon (#00FFFF) com leve glow
-- Subtítulo curto reforçando exclusividade ("Peças raras para colecionadores exigentes")
+Cada item: ícone dourado + label cinza maiúsculo espaçado + valor branco bold. Cards glass com hover dourado.
 
-**Grade de produtos — 4 cards em linha (responsivo: 4 → 2 → 1)**
-- Fundo do card dark grey (#1A1A1A), bordas suaves, hover com leve elevação e glow ciano
-- Imagem do produto em destaque com fundo de estúdio (gradiente escuro + reflexo no chão)
-- Hierarquia de texto:
-  - Título branco bold (ex: "Red Line Club Exclusive")
-  - Série em cinza claro #AAAAAA (ex: "SÉR: Red Line Club")
-  - Raridade em ciano neon #00FFFF (ex: "RARIDADE: 98%")
-  - Preço em laranja vibrante #FF5500 (ex: "PREÇO: R$ 2.600")
-- Botão CTA "COMPRAR ›" laranja sólido, largura total do card
+## CTA
+- Botão "VER DETALHES NA LOJA" / "SOLICITAR DISPONIBILIDADE" em dourado sólido com texto preto bold, sombra dourada difusa, hover com brilho.
+- Preço grande em dourado (`text-3xl font-black tracking-tight`).
 
-**Conteúdo dos 4 cards**
-1. Ferrari vermelha — Red Line Club Exclusive — R$ 2.600 — Raridade 98%
-2. Muscle car roxo (Camaro) — Super Treasure Hunt Purple — R$ 3.200 — Raridade 95%
-3. Camaro Bumblebee amarelo — Bumblebee Transformers — R$ 5.000 — Raridade 99%
-4. Ferrari vermelha — Vintage Treasure — R$ 1.800 — Raridade 92%
+## Mudanças no código
+- **`src/components/GarageProShowcase.tsx`**: refazer todo o layout com a nova estrutura (palco + thumbs verticais + cards glass + grid de especificações). Manter API atual (looseImage, blisterImage, videoUrl, status, price_cents, series, description) e adicionar suporte opcional a `brand`, `year`, `rarity`.
+- **`src/index.css`**: adicionar tokens semânticos `--gold`, `--gold-soft`, `--gold-glow` no design system (HSL) e fonte Playfair Display via Google Fonts.
+- **`tailwind.config.ts`**: registrar `gold`, `gold-soft` e família `font-serif-display`.
+- **`src/pages/Index.tsx`**: passar `rarity` (já existe no banco) para o componente; título da seção "CATÁLOGO DE ELITE" em serif dourado.
 
-**Footer minimalista**
-- Logo, links rápidos e copyright em fundo preto
-
-## Design system
-
-- **Cores**: background #000000, surface #1A1A1A, accent laranja #FF5500, neon ciano #00FFFF, texto branco #FFFFFF / cinza #AAAAAA
-- **Tipografia**: Montserrat (geométrica, moderna) via Google Fonts — pesos 400/600/800
-- **Tema**: dark mode permanente
-- **Detalhes**: leves glows neon nos hovers, transições suaves, espaçamentos generosos para sensação de luxo
-
-## Imagens dos produtos
-
-Geradas com IA (Lovable AI Gateway) em estilo estúdio fotorealista com iluminação dramática e reflexo no chão, salvas como assets estáticos para carregamento rápido.
-
-## Interações
-
-- Botão "COMPRAR" exibe toast de confirmação ("Item reservado") — checkout real pode ser adicionado depois
-- Links do menu fazem scroll suave para seções (placeholders por enquanto)
-- Totalmente responsivo (mobile, tablet, desktop)
+## Não muda
+- Banco de dados, RLS, upload, webhook do Make.
+- Lógica de WhatsApp e fluxo de reserva.
+- Página /admin.
