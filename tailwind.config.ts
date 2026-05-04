@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         sans: ["Montserrat", "system-ui", "sans-serif"],
         display: ["Montserrat", "system-ui", "sans-serif"],
+        serifDisplay: ["'Playfair Display'", "'Cormorant Garamond'", "Georgia", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -23,6 +24,11 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          soft: "hsl(var(--gold-soft))",
+          deep: "hsl(var(--gold-deep))",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
