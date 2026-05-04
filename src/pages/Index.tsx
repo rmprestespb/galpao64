@@ -611,6 +611,15 @@ const Collection = () => {
   return (
     <section id="colecao" className="pt-4 pb-12 sm:pt-6 sm:pb-20">
       <div className="container">
+        <header className="mb-8 sm:mb-10 text-center">
+          <h2 className="font-serifDisplay text-4xl sm:text-5xl lg:text-6xl font-semibold text-gold tracking-wide">
+            Catálogo de Elite
+          </h2>
+          <div className="mx-auto mt-3 h-px w-32 bg-gradient-to-r from-transparent via-gold/60 to-transparent" />
+          <p className="mt-3 text-[11px] sm:text-xs uppercase tracking-[0.4em] text-white/40">
+            Peças selecionadas para o colecionador exigente
+          </p>
+        </header>
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-accent" />
@@ -628,9 +637,11 @@ const Collection = () => {
                   price_cents: p.price_cents,
                   looseImage: p.images[0] ?? "",
                   blisterImage: p.images[1] ?? null,
+                  extraImages: p.images.slice(2),
                   videoUrl: p.video_url,
                   alt: p.alt,
                   status: p.status,
+                  rarity: p.rarity,
                 }}
               />
             ))}
