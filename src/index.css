@@ -98,6 +98,13 @@ All colors MUST be HSL.
     --shadow-card: 0 20px 40px -20px hsl(0 0% 0% / 0.9);
     --gradient-stage: radial-gradient(ellipse at center, hsl(0 0% 8%) 0%, hsl(0 0% 0%) 70%);
 
+    /* Luxury gold palette — Catálogo de Elite */
+    --gold: 38 55% 65%;             /* #D4AF7A */
+    --gold-soft: 42 70% 78%;        /* #E9C77B */
+    --gold-deep: 35 45% 38%;        /* dark champagne */
+    --gold-glow: 0 0 28px hsl(38 55% 65% / 0.45);
+    --gradient-gold: linear-gradient(135deg, hsl(42 70% 78%) 0%, hsl(38 55% 65%) 50%, hsl(35 45% 38%) 100%);
+
     --sidebar-background: 0 0% 98%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -177,6 +184,40 @@ All colors MUST be HSL.
   }
   .bg-stage {
     background: var(--gradient-stage);
+  }
+  .text-gold {
+    color: hsl(var(--gold));
+  }
+  .bg-gold {
+    background-color: hsl(var(--gold));
+  }
+  .bg-gradient-gold {
+    background-image: var(--gradient-gold);
+  }
+  .shadow-gold-glow {
+    box-shadow: var(--gold-glow);
+  }
+  .font-serif-display {
+    font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  }
+  /* Glassmorphism card for the luxury PDP */
+  .glass-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(212, 175, 122, 0.18),
+      0 30px 60px -30px rgba(0, 0, 0, 0.9);
+  }
+  .glass-card-hover {
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  .glass-card-hover:hover {
+    border-color: rgba(212, 175, 122, 0.35);
+    box-shadow:
+      inset 0 1px 0 rgba(212, 175, 122, 0.3),
+      0 30px 80px -30px rgba(212, 175, 122, 0.25);
   }
 }
 

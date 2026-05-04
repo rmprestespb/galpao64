@@ -1,20 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Award,
-  Boxes,
-  ChevronLeft,
-  ChevronRight,
-  Cog,
-  MapPin,
+  Calendar,
+  Layers,
   MessageCircle,
-  Package,
   Play,
-  Ruler,
-  ShieldCheck,
-  Truck,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import galpaoLogo from "@/assets/galpao64-logo.png";
 import ProductLightbox, { LightboxMedia } from "@/components/ProductLightbox";
 
 export type GarageProShowcaseData = {
@@ -27,6 +20,8 @@ export type GarageProShowcaseData = {
   looseImage: string;
   /** Visão 2 — Foto real do blister, mantendo o fundo original */
   blisterImage?: string | null;
+  /** Imagens adicionais (3ª foto, detalhes, etc.) */
+  extraImages?: string[];
   /** Visão 3 — vídeo MP4 em loop (giro 360º) */
   videoUrl?: string | null;
   status?: "disponivel" | "reservado" | "vendido";
@@ -35,6 +30,8 @@ export type GarageProShowcaseData = {
   scale?: string;
   origin?: string;
   shipping?: string;
+  year?: string | number | null;
+  rarity?: number | null;
 };
 
 const formatBRL = (cents: number) =>
@@ -49,50 +46,24 @@ type MediaSlide =
   | { kind: "image"; url: string; label: string }
   | { kind: "video"; url: string; label: string };
 
-const SpecRow = ({
+const SpecCard = ({
   icon: Icon,
   label,
   value,
-  highlight,
 }: {
-  icon: typeof Cog;
+  icon: typeof Award;
   label: string;
   value: string;
-  highlight?: boolean;
 }) => (
-  <div
-    className={cn(
-      "flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-colors",
-      "bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))]",
-      highlight
-        ? "border-[#FFB347]/35 hover:border-[#FFB347]/55"
-        : "border-white/10 hover:border-[#00FFFF]/40",
-    )}
-  >
-    <div
-      className={cn(
-        "shrink-0 grid place-items-center h-9 w-9 rounded-md border",
-        highlight
-          ? "border-[#FFB347]/40 bg-[linear-gradient(180deg,#3a2a1a,#0e0e0e)]"
-          : "border-white/15 bg-[linear-gradient(180deg,#1f1f1f,#0a0a0a)]",
-      )}
-    >
-      <Icon
-        className={cn("h-4 w-4", highlight ? "text-[#FFD27A]" : "text-[#9ad9ff]")}
-        strokeWidth={2}
-      />
+  <div className="glass-card glass-card-hover rounded-xl px-4 py-4 flex items-center gap-3 group">
+    <div className="shrink-0 grid place-items-center h-11 w-11 rounded-lg border border-gold/30 bg-[linear-gradient(180deg,rgba(212,175,122,0.12),rgba(0,0,0,0.4))]">
+      <Icon className="h-5 w-5 text-gold group-hover:text-gold-soft transition-colors" strokeWidth={1.75} />
     </div>
     <div className="min-w-0 flex-1">
-      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/45 leading-none">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/45 leading-none">
         {label}
       </p>
-      <p
-        className={cn(
-          "mt-1 text-[13px] font-semibold truncate",
-          highlight ? "text-[#FFD27A]" : "text-white/95",
-        )}
-        title={value}
-      >
+      <p className="mt-1.5 text-sm font-bold text-white truncate" title={value}>
         {value}
       </p>
     </div>
@@ -105,19 +76,20 @@ const GarageProShowcase = ({
 }: Props) => {
   const status = product.status ?? "disponivel";
   const isLocked = status === "reservado" || status === "vendido";
-  const hasBlister = Boolean(product.blisterImage);
-  const hasVideo = Boolean(product.videoUrl);
 
   const slides = useMemo<MediaSlide[]>(() => {
     const arr: MediaSlide[] = [];
     if (product.looseImage)
-      arr.push({ kind: "image", url: product.looseImage, label: "Loose" });
+      arr.push({ kind: "image", url: product.looseImage, label: "Frente" });
     if (product.blisterImage)
-      arr.push({ kind: "image", url: product.blisterImage, label: "Blister" });
+      arr.push({ kind: "image", url: product.blisterImage, label: "Detalhe" });
+    (product.extraImages ?? []).forEach((url, i) => {
+      if (url) arr.push({ kind: "image", url, label: `Ângulo ${i + 1}` });
+    });
     if (product.videoUrl)
-      arr.push({ kind: "video", url: product.videoUrl, label: "360º" });
+      arr.push({ kind: "video", url: product.videoUrl, label: "Cinemático" });
     return arr;
-  }, [product.looseImage, product.blisterImage, product.videoUrl]);
+  }, [product.looseImage, product.blisterImage, product.extraImages, product.videoUrl]);
 
   const [index, setIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -156,23 +128,22 @@ const GarageProShowcase = ({
 
   const specs = useMemo(
     () => [
-      { icon: Ruler, label: "Escala", value: product.scale ?? "1:64" },
-      { icon: MapPin, label: "Origem", value: product.origin ?? "Importado" },
+      { icon: Award, label: "Marca", value: product.brand ?? "Hot Wheels" },
+      { icon: Layers, label: "Série", value: product.series ?? "Coleção" },
+      { icon: Calendar, label: "Ano", value: product.year ? String(product.year) : "—" },
       {
-        icon: hasBlister ? Package : ShieldCheck,
-        label: "Condição",
-        value: hasBlister ? "Mint in Blister" : "Loose / Avulso",
-        highlight: hasBlister,
+        icon: Sparkles,
+        label: "Raridade",
+        value: product.rarity != null ? `${product.rarity}%` : "Premium",
       },
-      { icon: Truck, label: "Frete", value: product.shipping ?? "A combinar" },
     ],
-    [product, hasBlister],
+    [product],
   );
 
   const statusBadge = isLocked ? (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] backdrop-blur border",
+        "inline-flex items-center rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] backdrop-blur border",
         status === "reservado"
           ? "bg-amber-500/20 text-amber-200 border-amber-400/40"
           : "bg-red-500/20 text-red-200 border-red-400/40",
@@ -181,84 +152,95 @@ const GarageProShowcase = ({
       {status === "reservado" ? "Reservado" : "Vendido"}
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] backdrop-blur border bg-emerald-500/15 text-emerald-200 border-emerald-400/40">
-      <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 animate-pulse" />
+    <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] backdrop-blur border border-gold/40 bg-gold/10 text-gold-soft">
+      <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse" />
       Disponível
     </span>
   );
 
-  return (
-    <article
-      className={cn(
-        "garage-pro-pdp relative isolate overflow-hidden rounded-2xl",
-        "bg-[linear-gradient(135deg,#1d1d1d_0%,#141414_40%,#0b0b0b_100%)]",
-        "border border-white/10",
-        "shadow-[0_40px_100px_-30px_rgba(0,0,0,0.95),inset_0_1px_0_rgba(255,255,255,0.06)]",
-      )}
-      style={{
-        backgroundImage:
-          "repeating-linear-gradient(90deg,rgba(255,255,255,0.018) 0 1px,transparent 1px 4px),linear-gradient(135deg,#1d1d1d 0%,#141414 40%,#0b0b0b 100%)",
-      }}
-    >
-      {/* Header bar */}
-      <header className="relative z-10 flex items-center justify-between gap-3 border-b border-white/10 px-4 sm:px-6 py-3">
-        <div className="flex items-center gap-2.5 rounded-md border border-white/15 bg-black/60 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-          <img src={galpaoLogo} alt="Galpão 64" className="h-5 w-auto" />
-          <span
-            className="text-[10px] font-extrabold tracking-[0.3em] text-white/85"
-            style={{ fontFamily: "Montserrat, system-ui, sans-serif" }}
-          >
-            GARAGE PRO
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          {statusBadge}
-          <span className="hidden sm:inline text-[9px] uppercase tracking-[0.22em] text-white/35">
-            #{product.id.slice(0, 6).toUpperCase()}
-          </span>
-        </div>
-      </header>
+  const isVideo = current?.kind === "video";
 
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] gap-6 lg:gap-10 p-4 sm:p-6 lg:p-8">
-        {/* ============ LEFT — MEDIA GALLERY ============ */}
-        <div className="flex flex-col gap-4">
-          <div
-            className="relative w-full overflow-hidden rounded-xl border border-white/10 aspect-[4/3] lg:aspect-[16/11]"
-            style={{
-              backgroundColor: "#101010",
-              backgroundImage:
-                "linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px),radial-gradient(ellipse at center,rgba(0,229,255,0.08),transparent 65%)",
-              backgroundSize: "26px 26px,26px 26px,100% 100%",
-            }}
-          >
-            {/* Top key light */}
+  return (
+    <article className="relative isolate overflow-hidden rounded-3xl bg-black border border-white/5 shadow-[0_60px_140px_-40px_rgba(0,0,0,1)]">
+      {/* Subtle gold ambient glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-40 -left-40 h-96 w-96 rounded-full opacity-25"
+        style={{ background: "radial-gradient(circle, hsl(38 55% 65% / 0.35), transparent 70%)" }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-40 -right-40 h-96 w-96 rounded-full opacity-20"
+        style={{ background: "radial-gradient(circle, hsl(38 55% 65% / 0.3), transparent 70%)" }}
+      />
+
+      <div className="relative z-10 p-5 sm:p-8 lg:p-10">
+        {/* =============== TOP: GALLERY =============== */}
+        <div className="grid grid-cols-[80px_minmax(0,1fr)] sm:grid-cols-[100px_minmax(0,1fr)] gap-4 sm:gap-5">
+          {/* Vertical thumbs */}
+          <div className="flex flex-col gap-3">
+            {slides.map((s, i) => (
+              <button
+                key={`${s.kind}-${s.url}-${i}`}
+                type="button"
+                onClick={() => setIndex(i)}
+                aria-pressed={i === index}
+                className={cn(
+                  "relative aspect-square w-full overflow-hidden rounded-xl border-2 transition-all duration-300",
+                  i === index
+                    ? "border-gold shadow-[0_0_18px_-2px_hsl(38_55%_65%/0.6)]"
+                    : "border-white/10 hover:border-gold/50 opacity-70 hover:opacity-100",
+                )}
+                title={s.label}
+              >
+                {s.kind === "video" ? (
+                  <>
+                    <video src={s.url} className="h-full w-full object-cover" muted playsInline />
+                    <span className="absolute inset-0 flex items-center justify-center bg-black/40">
+                      <span className="grid place-items-center h-9 w-9 rounded-full bg-black/70 border border-gold/60">
+                        <Play className="h-4 w-4 text-gold" fill="currentColor" />
+                      </span>
+                    </span>
+                  </>
+                ) : (
+                  <img
+                    src={s.url}
+                    alt={s.label}
+                    className="h-full w-full object-cover bg-black"
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Main stage */}
+          <div className="relative w-full overflow-hidden rounded-2xl border border-white/10 bg-black aspect-[16/10]">
+            {/* dramatic radial light */}
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
+              className="pointer-events-none absolute inset-0"
               style={{
                 background:
-                  "radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 45%, transparent 70%)",
+                  "radial-gradient(ellipse at 50% 35%, rgba(212,175,122,0.18) 0%, rgba(0,0,0,0) 55%), radial-gradient(ellipse at center, #1a1a1a 0%, #000 75%)",
               }}
             />
 
-            {/* Slide */}
             <button
               type="button"
               onClick={() => setLightboxOpen(true)}
               aria-label={`Ampliar mídia de ${product.title}`}
-              className="absolute inset-0 flex items-center justify-center p-6 cursor-zoom-in focus:outline-none"
+              className="absolute inset-0 flex items-center justify-center cursor-zoom-in focus:outline-none"
             >
-              {current?.kind === "video" ? (
+              {isVideo && current ? (
                 <video
                   ref={videoRef}
                   key={current.url}
                   src={current.url}
-                  className="max-h-full max-w-full object-contain rounded-md"
+                  className="h-full w-full object-cover"
                   autoPlay
                   loop
                   muted
                   playsInline
-                  controls
                 />
               ) : current ? (
                 <img
@@ -268,166 +250,106 @@ const GarageProShowcase = ({
                   className="max-h-full max-w-full object-contain animate-fade-in"
                   style={{
                     filter:
-                      "brightness(1.06) contrast(1.1) saturate(1.12) drop-shadow(0 24px 30px rgba(0,0,0,0.85))",
+                      "brightness(1.05) contrast(1.08) saturate(1.1) drop-shadow(0 30px 40px rgba(0,0,0,0.95))",
                   }}
                 />
               ) : null}
             </button>
 
-            {/* Prev / Next */}
+            {/* Status (top-left) + counter (top-right) */}
+            <div className="absolute left-4 top-4 z-10">{statusBadge}</div>
             {slides.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  onClick={goPrev}
-                  aria-label="Anterior"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-black/60 border border-white/20 text-white hover:bg-black/80 hover:border-[#00FFFF]/60 transition-colors flex items-center justify-center"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={goNext}
-                  aria-label="Próxima"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-black/60 border border-white/20 text-white hover:bg-black/80 hover:border-[#00FFFF]/60 transition-colors flex items-center justify-center"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </>
-            )}
-
-            {/* Counter */}
-            {slides.length > 1 && (
-              <div className="absolute right-3 top-3 z-10 rounded-md bg-black/65 border border-white/15 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white/85">
+              <div className="absolute right-4 top-4 z-10 rounded-full bg-black/70 border border-white/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-white/85">
                 {index + 1} / {slides.length}
               </div>
             )}
 
-            {/* Label */}
-            {current && (
-              <div className="absolute left-3 bottom-3 z-10 rounded-md bg-black/65 border border-white/15 px-2.5 py-1">
-                <p className="text-[9px] font-extrabold uppercase tracking-[0.25em] text-[#00FFFF]">
-                  {current.label}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Thumbs */}
-          {slides.length > 1 && (
-            <div className="flex gap-2.5 overflow-x-auto pb-1">
-              {slides.map((s, i) => (
-                <button
-                  key={`${s.kind}-${s.url}-${i}`}
-                  type="button"
-                  onClick={() => setIndex(i)}
-                  aria-pressed={i === index}
-                  className={cn(
-                    "relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 rounded-md overflow-hidden border-2 transition-all",
-                    i === index
-                      ? "border-[#00FFFF] shadow-[0_0_14px_rgba(0,229,255,0.7)]"
-                      : "border-white/15 hover:border-white/40",
-                  )}
-                  title={s.label}
-                >
-                  {s.kind === "video" ? (
-                    <>
-                      <video src={s.url} className="h-full w-full object-cover" muted playsInline />
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/45">
-                        <Play className="h-5 w-5 text-[#00FFFF]" fill="currentColor" />
-                      </span>
-                    </>
-                  ) : (
-                    <img src={s.url} alt={s.label} className="h-full w-full object-cover bg-black" />
-                  )}
-                  <span className="absolute inset-x-0 bottom-0 bg-black/70 text-[8px] font-bold uppercase tracking-wider text-white text-center py-0.5">
-                    {s.label}
-                  </span>
-                </button>
-              ))}
+            {/* Bottom overlay caption */}
+            <div
+              className="absolute inset-x-0 bottom-0 z-10 px-5 py-3 text-center"
+              style={{
+                background:
+                  "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.85) 100%)",
+              }}
+            >
+              <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.4em] text-white/70">
+                {isVideo ? "Vídeo em loop (cinematográfico)" : current?.label ?? "Foto de Estúdio"}
+              </p>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* ============ RIGHT — PRODUCT INFO ============ */}
-        <div className="flex flex-col">
-          {product.series && (
-            <span className="self-start inline-flex items-center gap-1.5 rounded-full border border-[#00FFFF]/40 bg-[#00FFFF]/10 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.25em] text-[#9ff5ff]">
-              <Boxes className="h-3 w-3" />
-              {product.series}
-            </span>
-          )}
+        {/* =============== TITLE / DESCRIPTION CARD =============== */}
+        <div className="mt-5 glass-card glass-card-hover rounded-2xl p-5 sm:p-7">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
+            <div className="min-w-0 flex-1">
+              {product.series && (
+                <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.4em] text-gold mb-2.5">
+                  {product.series}
+                </p>
+              )}
+              <h2 className="text-2xl sm:text-3xl lg:text-[36px] font-black leading-tight text-white tracking-tight">
+                {product.title}
+              </h2>
+              {product.description && (
+                <p className="mt-3 text-[13px] sm:text-sm leading-relaxed text-white/65 max-w-xl">
+                  {product.description}
+                </p>
+              )}
+            </div>
 
-          <h2
-            className="mt-3 text-2xl sm:text-3xl lg:text-[34px] font-extrabold leading-tight text-white"
-            style={{ fontFamily: "Montserrat, system-ui, sans-serif" }}
-          >
-            {product.title}
-          </h2>
+            {/* Mini badges */}
+            <div className="flex gap-2.5 shrink-0">
+              {product.rarity != null && (
+                <div className="glass-card rounded-lg px-3.5 py-2.5 text-center">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-white/50">Raridade</p>
+                  <p className="mt-0.5 text-base font-extrabold text-white">{product.rarity}%</p>
+                </div>
+              )}
+              <div className="glass-card rounded-lg px-3.5 py-2.5 text-center">
+                <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-white/50">Acabamento</p>
+                <p className="mt-0.5 text-base font-extrabold text-gold-soft">PREMIUM</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-          {/* Specs grid */}
-          <div className="mt-5 grid grid-cols-2 gap-2.5">
+        {/* =============== TECHNICAL SPECS =============== */}
+        <div className="mt-5">
+          <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.4em] text-white/40 mb-3 ml-1">
+            Especificações Técnicas
+          </p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {specs.map((s) => (
-              <SpecRow
-                key={s.label}
-                icon={s.icon}
-                label={s.label}
-                value={s.value}
-                highlight={s.highlight}
-              />
+              <SpecCard key={s.label} icon={s.icon} label={s.label} value={s.value} />
             ))}
           </div>
+        </div>
 
-          {/* Price */}
-          <div className="mt-6 rounded-xl border border-white/10 bg-[linear-gradient(180deg,#161616,#0a0a0a)] p-4 sm:p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-white/45">
-              Valor
-            </p>
-            <p
-              className="mt-1 text-3xl sm:text-4xl font-extrabold text-[#FFD27A] leading-tight drop-shadow-[0_0_12px_rgba(255,179,71,0.35)]"
-              style={{ fontFamily: "Montserrat, system-ui, sans-serif" }}
-            >
+        {/* =============== PRICE + CTA =============== */}
+        <div className="mt-5 glass-card glass-card-hover rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-5">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/45">Valor</p>
+            <p className="mt-1 text-3xl sm:text-4xl font-black text-gold-soft leading-none drop-shadow-[0_0_24px_hsl(38_55%_65%/0.45)]">
               {formatBRL(product.price_cents)}
             </p>
           </div>
 
-          {/* Description */}
-          {product.description && (
-            <div className="mt-5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-white/45">
-                Descrição
-              </p>
-              <p className="mt-2 text-[13px] sm:text-sm leading-relaxed text-white/80 whitespace-pre-line">
-                {product.description}
-              </p>
-            </div>
-          )}
-
-          {/* CTA */}
-          <div className="mt-6 sm:sticky sm:bottom-4">
-            <button
-              type="button"
-              onClick={sendToWhatsApp}
-              disabled={isLocked}
-              aria-label={`Solicitar disponibilidade de ${product.title} no WhatsApp`}
-              className={cn(
-                "w-full inline-flex items-center justify-center gap-2.5",
-                "rounded-xl px-5 py-4 text-[12px] sm:text-[13px] font-extrabold uppercase tracking-[0.22em]",
-                "border-2 transition-all duration-300",
-                isLocked
-                  ? "bg-white/5 text-white/30 border-white/10 cursor-not-allowed"
-                  : "bg-[linear-gradient(180deg,#0a0a0a,#000)] text-white border-[#00FFFF]/80 shadow-[0_0_24px_-2px_rgba(0,229,255,0.55),inset_0_0_14px_rgba(0,229,255,0.10)] hover:shadow-[0_0_36px_-2px_rgba(0,229,255,0.85),inset_0_0_18px_rgba(0,229,255,0.20)] hover:border-[#00FFFF] active:scale-[0.99]",
-              )}
-              style={{ fontFamily: "Montserrat, system-ui, sans-serif" }}
-            >
-              <MessageCircle className="h-5 w-5 text-[#25D366]" strokeWidth={2.5} />
-              Solicitar disponibilidade
-            </button>
-            <p className="mt-2 text-center text-[10px] uppercase tracking-[0.22em] text-white/35">
-              <Award className="inline h-3 w-3 text-[#00FFFF] mr-1" />
-              Atendimento direto via WhatsApp
-            </p>
-          </div>
+          <button
+            type="button"
+            onClick={sendToWhatsApp}
+            disabled={isLocked}
+            aria-label={`Solicitar disponibilidade de ${product.title} no WhatsApp`}
+            className={cn(
+              "group relative inline-flex items-center justify-center gap-2.5 rounded-xl px-7 py-4 text-[12px] sm:text-[13px] font-extrabold uppercase tracking-[0.3em] transition-all duration-300",
+              isLocked
+                ? "bg-white/5 text-white/30 border border-white/10 cursor-not-allowed"
+                : "bg-gradient-gold text-black shadow-[0_10px_40px_-10px_hsl(38_55%_65%/0.6)] hover:shadow-[0_18px_60px_-10px_hsl(38_55%_65%/0.85)] hover:scale-[1.02] active:scale-[0.99]",
+            )}
+          >
+            <MessageCircle className="h-5 w-5" strokeWidth={2.5} />
+            Solicitar disponibilidade
+          </button>
         </div>
       </div>
 
