@@ -1,1 +1,3 @@
 project_id = "drqkgkbczhkkwukeihty"
+[functions.rotate-admin-password]
+verify_jwt = false
