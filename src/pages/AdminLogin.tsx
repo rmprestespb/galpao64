@@ -17,10 +17,9 @@ const schema = z.object({
 const AdminLogin = () => {
   const navigate = useNavigate();
   const { user, isAdmin, loading: authLoading } = useAuth();
-  const [email, setEmail] = useState("admin@galpao64.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
 
   useEffect(() => {
     if (!authLoading && user && isAdmin) navigate("/admin", { replace: true });
@@ -34,31 +33,17 @@ const AdminLogin = () => {
       return;
     }
     setSubmitting(true);
-    const { error } =
-      mode === "signup"
-        ? await supabase.auth.signUp({
-            email: parsed.data.email,
-            password: parsed.data.password,
-            options: { emailRedirectTo: `${window.location.origin}/admin` },
-          })
-        : await supabase.auth.signInWithPassword({
-            email: parsed.data.email,
-            password: parsed.data.password,
-          });
+    const { error } = await supabase.auth.signInWithPassword({
+      email: parsed.data.email,
+      password: parsed.data.password,
+    });
     setSubmitting(false);
     if (error) {
-      toast.error(mode === "signup" ? "Falha no cadastro" : "Falha no login", {
-        description: error.message,
-      });
+      toast.error("Falha no login", { description: error.message });
       return;
     }
-    if (mode === "signup") {
-      toast.success("Conta criada! Faça login para entrar.");
-      setMode("signin");
-    } else {
-      toast.success("Bem-vindo ao painel");
-      navigate("/admin", { replace: true });
-    }
+    toast.success("Bem-vindo ao painel");
+    navigate("/admin", { replace: true });
   };
 
   return (
@@ -101,17 +86,8 @@ const AdminLogin = () => {
           </div>
           <Button type="submit" disabled={submitting} className="w-full font-bold tracking-widest">
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-            {mode === "signup" ? "CRIAR CONTA" : "ENTRAR"}
+            ENTRAR
           </Button>
-          <button
-            type="button"
-            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-            className="w-full text-xs text-muted-foreground hover:text-accent transition-colors"
-          >
-            {mode === "signin"
-              ? "Primeira vez? Criar conta admin"
-              : "Já tenho conta · Entrar"}
-          </button>
         </form>
       </div>
     </div>
