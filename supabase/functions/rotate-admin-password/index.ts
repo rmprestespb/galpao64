@@ -9,6 +9,15 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const expected = Deno.env.get("ADMIN_ROTATE_SECRET");
+    const provided = req.headers.get("x-admin-secret");
+    if (!expected || !provided || provided !== expected) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const newPassword = Deno.env.get("ADMIN_PASSWORD");
     if (!newPassword) {
       return new Response(JSON.stringify({ error: "ADMIN_PASSWORD secret not set" }), {
