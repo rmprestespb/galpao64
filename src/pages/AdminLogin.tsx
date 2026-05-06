@@ -17,7 +17,7 @@ const schema = z.object({
 const AdminLogin = () => {
   const navigate = useNavigate();
   const { user, isAdmin, loading: authLoading } = useAuth();
-  const [email, setEmail] = useState("admin@galpao64.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
