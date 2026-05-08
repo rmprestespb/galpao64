@@ -609,15 +609,15 @@ const Collection = () => {
   }, []);
 
   return (
-    <section id="colecao" className="pt-4 pb-12 sm:pt-6 sm:pb-20">
+    <section id="colecao" className="pt-16 pb-12 sm:pt-24 sm:pb-20">
       <div className="container">
         <header className="mb-8 sm:mb-10 text-center">
-          <h2 className="font-serifDisplay text-4xl sm:text-5xl lg:text-6xl font-semibold text-gold tracking-wide">
-            Catálogo de Elite
+          <h2 className="font-serifDisplay text-4xl sm:text-5xl lg:text-6xl font-bold text-gold tracking-wide">
+            Garagem Galpão 64
           </h2>
           <div className="mx-auto mt-3 h-px w-32 bg-gradient-to-r from-transparent via-gold/60 to-transparent" />
-          <p className="mt-3 text-[11px] sm:text-xs uppercase tracking-[0.4em] text-white/40">
-            Peças selecionadas para o colecionador exigente
+          <p className="mt-3 text-[11px] sm:text-xs uppercase tracking-[0.4em] text-white/50 max-w-xl mx-auto">
+            Curadoria técnica e exemplares exclusivos para o colecionador de alto nível.
           </p>
         </header>
         {loading ? (
@@ -705,7 +705,7 @@ const Index = () => {
           href="https://wa.me/5546999350070"
           target="_blank"
           rel="noopener noreferrer"
-          className="fixed bottom-6 right-6 z-50 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-all hover:scale-110 flex items-center justify-center"
+          className="fixed bottom-6 right-6 z-50 bg-green-500 text-white p-4 rounded-full shadow-[0_0_0_0_rgba(34,197,94,0.6)] hover:bg-green-600 transition-all hover:scale-110 flex items-center justify-center animate-pulse"
           aria-label="Contato WhatsApp"
         >
           <MessageCircle size={28} />
