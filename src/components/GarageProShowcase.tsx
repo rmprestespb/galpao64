@@ -128,12 +128,12 @@ const GarageProShowcase = ({
 
   const specs = useMemo(
     () => [
-      { icon: Award, label: "Marca", value: product.brand ?? "Hot Wheels" },
-      { icon: Layers, label: "Série", value: product.series ?? "Coleção" },
-      { icon: Calendar, label: "Ano", value: product.year ? String(product.year) : "—" },
+      { icon: Award, label: "Curadoria", value: product.brand ?? "Hot Wheels" },
+      { icon: Layers, label: "Segmento", value: product.series ?? "Coleção" },
+      { icon: Calendar, label: "Edição", value: product.year ? String(product.year) : "—" },
       {
         icon: Sparkles,
-        label: "Raridade",
+        label: "Status",
         value: product.rarity != null ? `${product.rarity}%` : "Premium",
       },
     ],
@@ -285,17 +285,15 @@ const GarageProShowcase = ({
             <div className="min-w-0 flex-1">
               {product.series && (
                 <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.4em] text-gold mb-2.5">
-                  {product.series}
+                  Curadoria Exclusiva // {product.series}
                 </p>
               )}
               <h2 className="text-2xl sm:text-3xl lg:text-[36px] font-black leading-tight text-white tracking-tight">
                 {product.title}
               </h2>
-              {product.description && (
-                <p className="mt-3 text-[13px] sm:text-sm leading-relaxed text-white/65 max-w-xl">
-                  {product.description}
-                </p>
-              )}
+              <p className="mt-3 text-[13px] sm:text-sm leading-relaxed text-white/65 max-w-xl italic">
+                Integrante da série HW Reverse Rake (Unidade 03/05), este exemplar é uma representação fiel da cultura automotiva, apresentando acabamento em Preto Metálico de alta densidade. Os detalhes em verde e amarelo conferem um contraste agressivo e moderno, típico de uma peça com selo Premium. Um casting icônico da Mattel essencial para fechar a série com autoridade.
+              </p>
             </div>
 
             {/* Mini badges */}
@@ -348,7 +346,7 @@ const GarageProShowcase = ({
             )}
           >
             <MessageCircle className="h-5 w-5" strokeWidth={2.5} />
-            Solicitar disponibilidade
+            Solicitar inclusão no acervo
           </button>
         </div>
       </div>
