@@ -55,7 +55,7 @@ const SpecCard = ({
   label: string;
   value: string;
 }) => (
-  <div className="glass-card glass-card-hover rounded-xl px-4 py-4 flex items-center gap-3 group">
+  <div className="rounded-xl px-4 py-4 flex items-center gap-3 group border border-gold/20 bg-white/[0.03] backdrop-blur-xl shadow-[inset_0_1px_0_rgba(212,175,122,0.12)] hover:border-gold/45 hover:bg-white/[0.06] transition-all duration-300">
     <div className="shrink-0 grid place-items-center h-11 w-11 rounded-lg border border-gold/30 bg-[linear-gradient(180deg,rgba(212,175,122,0.12),rgba(0,0,0,0.4))]">
       <Icon className="h-5 w-5 text-gold group-hover:text-gold-soft transition-colors" strokeWidth={1.75} />
     </div>
@@ -130,13 +130,13 @@ const GarageProShowcase = ({
     () => [
       { icon: Award, label: "Curadoria", value: product.brand ?? "Hot Wheels" },
       { icon: Layers, label: "Segmento", value: product.series ?? "Coleção" },
-      { icon: Calendar, label: "Edição", value: product.year ? String(product.year) : "—" },
+      { icon: Calendar, label: "Edição", value: product.year ? String(product.year) : "" },
       {
         icon: Sparkles,
         label: "Status",
         value: product.rarity != null ? `${product.rarity}%` : "Premium",
       },
-    ],
+    ].filter((s) => s.value && s.value.trim() !== ""),
     [product],
   );
 
