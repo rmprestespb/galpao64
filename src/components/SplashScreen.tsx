@@ -260,18 +260,6 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
         }}
       />
 
-      {/* Center seam glow on opening */}
-      <div
-        className={`absolute top-0 left-1/2 h-full w-[2px] -translate-x-1/2 transition-opacity duration-700 ${
-          opening ? "opacity-100" : "opacity-0"
-        }`}
-        style={{
-          background:
-            "linear-gradient(180deg, transparent, rgba(201,169,106,0.9), transparent)",
-          boxShadow: "0 0 40px rgba(201,169,106,0.8)",
-        }}
-      />
-
       {/* Centered content (sits above doors but disappears as they slide) */}
       <div
         className={`absolute inset-0 flex flex-col items-center justify-center gap-6 px-4 py-6 pointer-events-auto transition-opacity duration-500 ${
