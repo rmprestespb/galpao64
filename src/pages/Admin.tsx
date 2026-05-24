@@ -73,7 +73,6 @@ const productSchema = z.object({
   series: z.string().trim().max(80).optional().or(z.literal("")),
   description: z.string().trim().max(2000).optional().or(z.literal("")),
   rarity: z.number().min(0).max(100).optional(),
-  price_cents: z.number().min(0).max(100_000_00),
 });
 
 const formatBRL = (cents: number) =>
@@ -84,7 +83,6 @@ const emptyForm = {
   series: "",
   description: "",
   rarity: "",
-  priceReais: "",
   is_published: true,
   images: [] as string[],
   video_url: "" as string,
@@ -166,7 +164,6 @@ const Admin = () => {
       series: p.series ?? "",
       description: p.description ?? "",
       rarity: p.rarity?.toString() ?? "",
-      priceReais: (p.price_cents / 100).toString(),
       is_published: p.is_published,
       images: p.images,
       video_url: p.video_url ?? "",
@@ -271,14 +268,12 @@ const Admin = () => {
   const handleSave = async () => {
     if (saving || uploading) return;
 
-    const priceCents = Math.round(parseFloat(form.priceReais || "0") * 100);
     const rarityNum = form.rarity ? parseInt(form.rarity, 10) : undefined;
     const parsed = productSchema.safeParse({
       title: form.title,
       series: form.series,
       description: form.description,
       rarity: rarityNum,
-      price_cents: isNaN(priceCents) ? 0 : priceCents,
     });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
@@ -298,7 +293,7 @@ const Admin = () => {
         series: form.series || null,
         description: form.description || null,
         rarity: rarityNum ?? null,
-        price_cents: parsed.data.price_cents,
+        price_cents: 0,
         images: form.images,
         video_url: form.video_url || null,
         sale_image_original_url: form.sale_image_original_url || null,
@@ -321,7 +316,7 @@ const Admin = () => {
           body: {
             nome_produto: parsed.data.title,
             descricao: form.description || "",
-            preco: (parsed.data.price_cents / 100).toFixed(2),
+            preco: "0.00",
             imagem_url:
               form.sale_image_processed_url ||
               form.sale_image_original_url ||
@@ -545,18 +540,6 @@ const Admin = () => {
                   onChange={(e) => setForm({ ...form, rarity: e.target.value })}
                 />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="price">Preço (R$) *</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                min={0}
-                value={form.priceReais}
-                onChange={(e) => setForm({ ...form, priceReais: e.target.value })}
-                placeholder="2600.00"
-              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Descrição</Label>
