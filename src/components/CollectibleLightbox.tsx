@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
+  Instagram,
   MessageCircle,
   Play,
   ShieldCheck,
