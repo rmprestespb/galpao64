@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
-  MessageCircle,
+  Instagram,
   Play,
-  ShieldCheck,
   Truck,
   X,
 } from "lucide-react";
@@ -263,11 +262,11 @@ const CollectibleLightbox = ({
           </div>
 
           <div className="flex items-start gap-2 rounded-lg border border-accent/20 bg-accent/5 p-3 text-[12px] text-white/85">
-            <ShieldCheck className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+            <Instagram className="h-4 w-4 text-accent mt-0.5 shrink-0" />
             <p>
-              <span className="font-semibold text-accent">Pagamento via PIX.</span>{" "}
-              Após clicar em garantir, você será atendido pessoalmente para
-              combinar PIX, frete e envio.
+              <span className="font-semibold text-accent">Vitrine de catálogo.</span>{" "}
+              Todas as reservas e vendas são tratadas diretamente via Direct no
+              Instagram <span className="text-white/90">@galpao64diecast</span>.
             </p>
           </div>
 
@@ -329,13 +328,13 @@ const CollectibleLightbox = ({
               className={cn(
                 "mt-auto w-full inline-flex items-center justify-center gap-2.5",
                 "rounded-full px-5 py-3.5 text-[13px] font-extrabold uppercase tracking-[0.2em]",
-                "bg-[#25D366] text-black",
-                "shadow-[0_14px_40px_-10px_rgba(37,211,102,0.75)]",
+                "bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white",
+                "shadow-[0_14px_40px_-10px_rgba(221,42,123,0.6)]",
                 "hover:brightness-110 active:scale-[0.98] transition-all",
               )}
             >
-              <MessageCircle className="h-4 w-4" strokeWidth={2.75} />
-              Garantir esta peça
+              <Instagram className="h-4 w-4" strokeWidth={2.75} />
+              Comprar via Instagram
             </button>
           ) : null}
         </aside>

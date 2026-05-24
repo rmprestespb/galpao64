@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Award,
   Calendar,
+  Instagram,
   Layers,
-  MessageCircle,
   Play,
   Sparkles,
 } from "lucide-react";
@@ -39,7 +39,7 @@ const formatBRL = (cents: number) =>
 
 type Props = {
   product: GarageProShowcaseData;
-  whatsappNumber?: string;
+  instagramUrl?: string;
 };
 
 type MediaSlide =
@@ -72,7 +72,7 @@ const SpecCard = ({
 
 const GarageProShowcase = ({
   product,
-  whatsappNumber = "5546999350070",
+  instagramUrl = "https://www.instagram.com/galpao64diecast/",
 }: Props) => {
   const status = product.status ?? "disponivel";
   const isLocked = status === "reservado" || status === "vendido";
@@ -117,13 +117,8 @@ const GarageProShowcase = ({
     setIndex((i) => (i - 1 + slides.length) % slides.length);
   const goNext = () => setIndex((i) => (i + 1) % slides.length);
 
-  const sendToWhatsApp = () => {
-    const message = encodeURIComponent(
-      `Olá! Tenho interesse em saber a disponibilidade do modelo "${product.title}"` +
-        (product.series ? ` (${product.series})` : "") +
-        ` — ${formatBRL(product.price_cents)}.`,
-    );
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
+  const openInstagram = () => {
+    window.open(instagramUrl, "_blank", "noopener,noreferrer");
   };
 
   const specs = useMemo(
@@ -335,9 +330,9 @@ const GarageProShowcase = ({
 
           <button
             type="button"
-            onClick={sendToWhatsApp}
+            onClick={openInstagram}
             disabled={isLocked}
-            aria-label={`Solicitar disponibilidade de ${product.title} no WhatsApp`}
+            aria-label={`Comprar ${product.title} via Instagram`}
             className={cn(
               "group relative inline-flex items-center justify-center gap-2.5 rounded-xl px-7 py-4 text-[12px] sm:text-[13px] font-extrabold uppercase tracking-[0.3em] transition-all duration-300",
               isLocked
@@ -345,8 +340,8 @@ const GarageProShowcase = ({
                 : "bg-gradient-gold text-black shadow-[0_10px_40px_-10px_hsl(38_55%_65%/0.6)] hover:shadow-[0_18px_60px_-10px_hsl(38_55%_65%/0.85)] hover:scale-[1.02] active:scale-[0.99]",
             )}
           >
-            <MessageCircle className="h-5 w-5" strokeWidth={2.5} />
-            Solicitar inclusão no acervo
+            <Instagram className="h-5 w-5" strokeWidth={2.5} />
+            Comprar via Instagram
           </button>
         </div>
       </div>

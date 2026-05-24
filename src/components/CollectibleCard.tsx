@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Play, MessageCircle, ShieldCheck, Truck, Lock } from "lucide-react";
-import { toast } from "sonner";
+import { Play, Instagram, Truck, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import CollectibleLightbox, { type LightboxMedia, type SpecSheet } from "./CollectibleLightbox";
 
@@ -28,14 +27,14 @@ type Props = {
   product: CollectibleCardData;
   onAction?: (product: CollectibleCardData) => void;
   actionLabel?: string;
-  whatsappNumber?: string;
+  instagramUrl?: string;
 };
 
 const CollectibleCard = ({
   product,
   onAction,
-  actionLabel = "Garantir esta peça",
-  whatsappNumber = "5546999350070",
+  actionLabel = "Comprar via Instagram",
+  instagramUrl = "https://www.instagram.com/galpao64diecast/",
 }: Props) => {
   const [activeImage, setActiveImage] = useState(product.images[0]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -73,18 +72,8 @@ const CollectibleCard = ({
     openDetail(activeImage);
   };
 
-  const sendToWhatsApp = () => {
-    const message = encodeURIComponent(
-      `Olá! Vi a miniatura ${product.title}` +
-        (product.series ? ` (${product.series})` : "") +
-        ` no site e quero garantir ela.` +
-        ` Valor: ${formatBRL(product.price_cents)}.\n\n` +
-        `Como prosseguimos com o PIX?`,
-    );
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
-    toast.success("Peça garantida", {
-      description: `Continue a conversa no WhatsApp para combinar o PIX e o frete.`,
-    });
+  const openInstagram = () => {
+    window.open(instagramUrl, "_blank", "noopener,noreferrer");
     setLightboxOpen(false);
   };
 
@@ -189,8 +178,8 @@ const CollectibleCard = ({
               </p>
 
               <div className="flex items-center gap-2 text-[10px] text-white/70">
-                <ShieldCheck className="h-3 w-3 text-accent" />
-                <span>Pagamento via PIX · atendimento pessoal pelo WhatsApp</span>
+                <Instagram className="h-3 w-3 text-accent" />
+                <span>Reservas e vendas exclusivamente via Direct no Instagram</span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -263,7 +252,7 @@ const CollectibleCard = ({
           <button
             type="button"
             onClick={handleCardCtaClick}
-            aria-label={isLocked ? `${product.title} indisponível` : `Ver detalhes e garantir ${product.title}`}
+            aria-label={isLocked ? `${product.title} indisponível` : `Ver detalhes de ${product.title} e comprar via Instagram`}
             disabled={isLocked}
             className={cn(
               "w-full inline-flex items-center justify-center gap-2",
@@ -280,7 +269,7 @@ const CollectibleCard = ({
               </>
             ) : (
               <>
-                <MessageCircle className="h-4 w-4" strokeWidth={2.5} />
+                <Instagram className="h-4 w-4" strokeWidth={2.5} />
                 {actionLabel}
               </>
             )}
@@ -300,7 +289,7 @@ const CollectibleCard = ({
         initialIndex={lightboxIndex}
         status={status}
         specs={specs}
-        onBuy={isLocked ? undefined : sendToWhatsApp}
+        onBuy={isLocked ? undefined : openInstagram}
       />
     </>
   );

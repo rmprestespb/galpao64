@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChevronRight, Disc3, Loader2, MessageCircle } from "lucide-react";
-import { toast } from "sonner";
+import { Disc3, Instagram, Loader2, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAlbumBadge } from "@/hooks/useAlbumBadge";
 import {
@@ -324,9 +323,11 @@ const Hero = () => {
 
 const ProductCard = ({ product }: { product: Product }) => {
   const handleBuy = () => {
-    toast.success("Item reservado", {
-      description: `${product.title} foi adicionado à sua reserva.`,
-    });
+    window.open(
+      "https://www.instagram.com/galpao64diecast/",
+      "_blank",
+      "noopener,noreferrer",
+    );
   };
   return (
     <article className="group flex flex-col rounded-lg bg-card/85 backdrop-blur-sm border border-border/60 overflow-hidden transition-all duration-300 hover:border-accent/60 hover:-translate-y-1 hover:shadow-glow-cyan">
@@ -358,10 +359,10 @@ const ProductCard = ({ product }: { product: Product }) => {
         <button
           onClick={handleBuy}
           className="mt-4 w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-bold tracking-[0.2em] text-sm uppercase py-3 rounded-md transition-all hover:shadow-glow-orange hover:bg-primary/95 active:scale-[0.98]"
-          aria-label={`Comprar ${product.title}`}
+          aria-label={`Comprar ${product.title} via Instagram`}
         >
-          COMPRAR
-          <ChevronRight className="h-4 w-4" strokeWidth={3} />
+          <Instagram className="h-4 w-4" strokeWidth={2.5} />
+          Comprar via Instagram
         </button>
       </div>
     </article>
@@ -620,6 +621,20 @@ const Collection = () => {
             Curadoria técnica e exemplares exclusivos para o colecionador de alto nível.
           </p>
         </header>
+        <a
+          href="https://www.instagram.com/galpao64diecast/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group mx-auto mb-10 sm:mb-12 flex max-w-3xl items-center justify-center gap-3 rounded-full border border-gold/30 bg-white/[0.03] backdrop-blur-xl px-5 py-3 text-center transition-all hover:border-gold/60 hover:bg-white/[0.06]"
+          aria-label="Abrir perfil do Galpão 64 no Instagram"
+        >
+          <Instagram className="h-4 w-4 shrink-0 text-gold" strokeWidth={2} />
+          <p className="text-[11px] sm:text-xs leading-relaxed tracking-[0.12em] text-white/75">
+            Este site é uma <span className="text-gold-soft font-semibold">vitrine de catálogo</span>. Todas as reservas e vendas são realizadas
+            diretamente via Direct no Instagram
+            <span className="text-white/95 font-semibold"> @galpao64diecast</span>.
+          </p>
+        </a>
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-accent" />
