@@ -3,9 +3,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Instagram,
-  MessageCircle,
   Play,
-  ShieldCheck,
   Truck,
   X,
 } from "lucide-react";
