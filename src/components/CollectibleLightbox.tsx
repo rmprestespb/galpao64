@@ -330,13 +330,13 @@ const CollectibleLightbox = ({
               className={cn(
                 "mt-auto w-full inline-flex items-center justify-center gap-2.5",
                 "rounded-full px-5 py-3.5 text-[13px] font-extrabold uppercase tracking-[0.2em]",
-                "bg-[#25D366] text-black",
-                "shadow-[0_14px_40px_-10px_rgba(37,211,102,0.75)]",
+                "bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white",
+                "shadow-[0_14px_40px_-10px_rgba(221,42,123,0.6)]",
                 "hover:brightness-110 active:scale-[0.98] transition-all",
               )}
             >
-              <MessageCircle className="h-4 w-4" strokeWidth={2.75} />
-              Garantir esta peça
+              <Instagram className="h-4 w-4" strokeWidth={2.75} />
+              Comprar via Instagram
             </button>
           ) : null}
         </aside>
