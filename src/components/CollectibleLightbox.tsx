@@ -263,11 +263,11 @@ const CollectibleLightbox = ({
           </div>
 
           <div className="flex items-start gap-2 rounded-lg border border-accent/20 bg-accent/5 p-3 text-[12px] text-white/85">
-            <ShieldCheck className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+            <Instagram className="h-4 w-4 text-accent mt-0.5 shrink-0" />
             <p>
-              <span className="font-semibold text-accent">Pagamento via PIX.</span>{" "}
-              Após clicar em garantir, você será atendido pessoalmente para
-              combinar PIX, frete e envio.
+              <span className="font-semibold text-accent">Vitrine de catálogo.</span>{" "}
+              Todas as reservas e vendas são tratadas diretamente via Direct no
+              Instagram <span className="text-white/90">@galpao64diecast</span>.
             </p>
           </div>
 
