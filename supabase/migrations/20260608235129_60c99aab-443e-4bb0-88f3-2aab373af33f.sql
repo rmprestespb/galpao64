@@ -1,0 +1,1 @@
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS exibir_preco_publico boolean NOT NULL DEFAULT true;

@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           description: string | null
           display_order: number
+          exibir_preco_publico: boolean
           id: string
           images: string[]
           is_published: boolean
@@ -38,6 +39,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          exibir_preco_publico?: boolean
           id?: string
           images?: string[]
           is_published?: boolean
@@ -57,6 +59,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          exibir_preco_publico?: boolean
           id?: string
           images?: string[]
           is_published?: boolean
