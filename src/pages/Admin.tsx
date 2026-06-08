@@ -50,6 +50,7 @@ type Product = {
   description: string | null;
   rarity: number | null;
   price_cents: number;
+  exibir_preco_publico: boolean;
   images: string[];
   video_url: string | null;
   sale_image_original_url?: string | null;
@@ -83,6 +84,8 @@ const emptyForm = {
   series: "",
   description: "",
   rarity: "",
+  price: "",
+  exibir_preco_publico: true,
   is_published: true,
   images: [] as string[],
   video_url: "" as string,
@@ -164,6 +167,8 @@ const Admin = () => {
       series: p.series ?? "",
       description: p.description ?? "",
       rarity: p.rarity?.toString() ?? "",
+      price: p.price_cents ? (p.price_cents / 100).toFixed(2).replace(".", ",") : "",
+      exibir_preco_publico: p.exibir_preco_publico ?? true,
       is_published: p.is_published,
       images: p.images,
       video_url: p.video_url ?? "",
@@ -286,6 +291,13 @@ const Admin = () => {
         ? form.reservationDate ?? new Date()
         : null;
 
+    const priceCents = (() => {
+      const raw = (form.price || "").trim().replace(/\./g, "").replace(",", ".");
+      if (!raw) return 0;
+      const num = parseFloat(raw);
+      return Number.isFinite(num) && num >= 0 ? Math.round(num * 100) : 0;
+    })();
+
     setSaving(true);
     try {
       const payload = {
@@ -293,7 +305,8 @@ const Admin = () => {
         series: form.series || null,
         description: form.description || null,
         rarity: rarityNum ?? null,
-        price_cents: 0,
+        price_cents: priceCents,
+        exibir_preco_publico: form.exibir_preco_publico,
         images: form.images,
         video_url: form.video_url || null,
         sale_image_original_url: form.sale_image_original_url || null,
@@ -482,7 +495,14 @@ const Admin = () => {
                 <div className="p-4 flex-1 flex flex-col gap-2">
                   <h3 className="font-bold leading-tight">{p.title}</h3>
                   <p className="text-xs text-muted-foreground">{p.series ?? "—"}</p>
-                  <p className="text-primary font-extrabold">{formatBRL(p.price_cents)}</p>
+                  <p className="text-primary font-extrabold">
+                    {formatBRL(p.price_cents)}
+                    {!p.exibir_preco_publico && (
+                      <span className="ml-2 align-middle text-[10px] font-bold uppercase tracking-wider text-amber-300 border border-amber-400/50 rounded px-1.5 py-0.5">
+                        Oculto
+                      </span>
+                    )}
+                  </p>
                   <div className="flex gap-2 mt-auto pt-3">
                     <Button size="sm" variant="outline" className="flex-1" onClick={() => openEdit(p)}>
                       <Pencil className="h-3.5 w-3.5" /> Editar
@@ -549,6 +569,39 @@ const Admin = () => {
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
               />
+            </div>
+
+            <div className="rounded border border-border p-3 space-y-3 bg-muted/10">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
+                <div className="space-y-2">
+                  <Label htmlFor="price">Valor (R$)</Label>
+                  <Input
+                    id="price"
+                    inputMode="decimal"
+                    placeholder="0,00"
+                    value={form.price}
+                    onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Valor de controle interno. Será exibido publicamente apenas se a opção abaixo estiver ativada.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-3 rounded border border-amber-400/30 bg-amber-400/5 p-3">
+                <div>
+                  <Label htmlFor="show-price" className="text-amber-200">
+                    Exibir preço publicamente no catálogo
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Se desativado, o site mostra <span className="text-amber-300 font-semibold">"Sob Consulta"</span> no lugar do valor.
+                  </p>
+                </div>
+                <Switch
+                  id="show-price"
+                  checked={form.exibir_preco_publico}
+                  onCheckedChange={(v) => setForm({ ...form, exibir_preco_publico: v })}
+                />
+              </div>
             </div>
 
             <div className="space-y-2">

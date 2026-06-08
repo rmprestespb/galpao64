@@ -33,6 +33,7 @@ type Product = {
   description?: string | null;
   rarity: number | null;
   price_cents: number;
+  exibir_preco_publico?: boolean;
   images: string[];
   video_url?: string | null;
   alt?: string;
@@ -585,7 +586,7 @@ const Collection = () => {
   useEffect(() => {
     supabase
       .from("products")
-      .select("id, title, series, description, rarity, price_cents, images, video_url, status")
+      .select("id, title, series, description, rarity, price_cents, exibir_preco_publico, images, video_url, status")
       .eq("is_published", true)
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: false })
@@ -599,6 +600,7 @@ const Collection = () => {
               description: (d as any).description ?? null,
               rarity: d.rarity,
               price_cents: d.price_cents,
+              exibir_preco_publico: (d as any).exibir_preco_publico ?? true,
               images: d.images?.length ? d.images : [ferrariRedline],
               video_url: (d as any).video_url ?? null,
               status: (d as any).status ?? "disponivel",
@@ -650,6 +652,7 @@ const Collection = () => {
                   series: p.series,
                   description: p.description,
                   price_cents: p.price_cents,
+                  exibir_preco_publico: p.exibir_preco_publico,
                   looseImage: p.images[0] ?? "",
                   blisterImage: p.images[1] ?? null,
                   extraImages: p.images.slice(2),
