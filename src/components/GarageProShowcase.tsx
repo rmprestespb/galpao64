@@ -16,6 +16,8 @@ export type GarageProShowcaseData = {
   series?: string | null;
   description?: string | null;
   price_cents: number;
+  /** Quando false, o catálogo público exibe "Sob Consulta" no lugar do valor. */
+  exibir_preco_publico?: boolean;
   /** Visão 1 — Loose: foto fotorealística do carro fora do blister (sem IA) */
   looseImage: string;
   /** Visão 2 — Foto real do blister, mantendo o fundo original */
@@ -323,9 +325,17 @@ const GarageProShowcase = ({
         <div className="mt-5 glass-card glass-card-hover rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-5">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/45">Valor</p>
-            <p className="mt-1 text-3xl sm:text-4xl font-black text-gold-soft leading-none drop-shadow-[0_0_24px_hsl(38_55%_65%/0.45)]">
-              {formatBRL(product.price_cents)}
-            </p>
+            {product.exibir_preco_publico === false ? (
+              <div className="mt-1 inline-flex items-center gap-2">
+                <span className="inline-flex items-center rounded-md border border-gold-soft/50 bg-gold-soft/10 px-3 py-1.5 text-sm font-extrabold uppercase tracking-[0.25em] text-gold-soft">
+                  Sob Consulta
+                </span>
+              </div>
+            ) : (
+              <p className="mt-1 text-3xl sm:text-4xl font-black text-gold-soft leading-none drop-shadow-[0_0_24px_hsl(38_55%_65%/0.45)]">
+                {formatBRL(product.price_cents)}
+              </p>
+            )}
           </div>
 
           <button
