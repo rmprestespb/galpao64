@@ -165,6 +165,18 @@ const Header = () => {
               </a>
             );
           })}
+          <a
+            href="/mystery-box"
+            aria-label="Abrir Mystery Box — caixa misteriosa de miniaturas"
+            className="relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-300 hover:scale-105 active:scale-95 bg-gradient-to-r from-amber-500 to-yellow-400 text-black shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:shadow-[0_0_25px_rgba(245,158,11,0.7)]"
+          >
+            <PackageOpen className="w-4 h-4" />
+            Mystery Box
+            <span className="absolute -top-1 -right-1 flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+          </a>
         </nav>
       </div>
     </header>
