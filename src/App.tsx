@@ -13,6 +13,7 @@ import Album from "./pages/Album.tsx";
 import Receipts from "./pages/Receipts.tsx";
 import Diecast from "./pages/Diecast.tsx";
 import Showroom from "./pages/Showroom.tsx";
+import MysteryBox from "./pages/MysteryBox.tsx";
 import SplashScreen from "./components/SplashScreen.tsx";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => {
             <Route path="/album" element={<Album />} />
             <Route path="/diecast" element={<Diecast />} />
             <Route path="/showroom" element={<Showroom />} />
+            <Route path="/mystery-box" element={<MysteryBox />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
