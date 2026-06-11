@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { PixGeneratorDialog } from "@/components/PixGeneratorDialog";
+import MysteryLotControl from "@/components/admin/MysteryLotControl";
 import {
   Dialog,
   DialogContent,
@@ -424,6 +425,7 @@ const Admin = () => {
       </header>
 
       <main className="container py-10">
+        <MysteryLotControl />
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-display font-black uppercase">
