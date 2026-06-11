@@ -15,7 +15,6 @@ import Diecast from "./pages/Diecast.tsx";
 import Showroom from "./pages/Showroom.tsx";
 import MysteryBox from "./pages/MysteryBox.tsx";
 import SplashScreen from "./components/SplashScreen.tsx";
-import Header from "./components/Header.tsx";
 
 const queryClient = new QueryClient();
 
