@@ -14,6 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
+      mystery_boxes: {
+        Row: {
+          collector_name: string | null
+          created_at: string
+          id: string
+          lot_id: string
+          number: number
+          product_image_url: string | null
+          product_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          collector_name?: string | null
+          created_at?: string
+          id?: string
+          lot_id: string
+          number: number
+          product_image_url?: string | null
+          product_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          collector_name?: string | null
+          created_at?: string
+          id?: string
+          lot_id?: string
+          number?: number
+          product_image_url?: string | null
+          product_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mystery_boxes_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "mystery_lots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mystery_lots: {
+        Row: {
+          closed_at: string | null
+          created_at: string
+          id: string
+          is_closed: boolean
+          name: string
+          sold_count: number
+          total_boxes: number
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          is_closed?: boolean
+          name: string
+          sold_count?: number
+          total_boxes?: number
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          is_closed?: boolean
+          name?: string
+          sold_count?: number
+          total_boxes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           created_at: string
