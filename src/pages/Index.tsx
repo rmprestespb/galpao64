@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Disc3, Instagram, Loader2, MessageCircle } from "lucide-react";
+import { Disc3, Instagram, Loader2, MessageCircle, PackageOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAlbumBadge } from "@/hooks/useAlbumBadge";
 import {
