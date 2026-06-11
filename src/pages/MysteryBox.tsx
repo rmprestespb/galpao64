@@ -196,6 +196,114 @@ export default function MysteryBox() {
         </div>
       </header>
 
+      {/* ========== COMO FUNCIONA ========== */}
+      <section id="como-funciona" className="border-y border-border/60 bg-gradient-to-b from-background via-surface to-background">
+        <div className="container mx-auto px-4 py-16 md:py-20">
+          <div className="mx-auto max-w-4xl text-center">
+            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
+              <span className="bg-gradient-to-r from-gold-soft via-gold to-gold-deep bg-clip-text text-transparent">
+                Como funciona
+              </span>
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              O Jogo da Garagem Misteriosa — transparência total e emoção garantida
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-8 md:grid-cols-2">
+            {/* Step 1 */}
+            <div className="glass-card rounded-xl p-6">
+              <div className="flex items-start gap-4">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-orange-600 font-display text-sm font-bold text-white shadow-glow-orange">
+                  1
+                </span>
+                <div>
+                  <h3 className="font-display text-lg font-semibold text-foreground">
+                    Escolha o seu Número da Sorte
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    Abaixo você verá um painel com 50 caixas compactas numeradas de 1 a 50. Cada caixa é um card misterioso protegido por uma silhueta Cyberpunk. Navegue pela grade, escolha os seus números favoritos e garanta a sua reserva via PIX. Cada número só pode ser comprado por um único colecionador.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="glass-card rounded-xl p-6">
+              <div className="flex items-start gap-4">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent to-cyan-600 font-display text-sm font-bold text-accent-foreground shadow-glow-cyan">
+                  2
+                </span>
+                <div>
+                  <h3 className="font-display text-lg font-semibold text-foreground">
+                    O Conteúdo Blindado (Garantia de Valor)
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    Nenhuma caixa sai perdendo. O lote é dividido rigorosamente assim:
+                  </p>
+                  <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                    <li className="flex gap-2">
+                      <span className="text-cyan-400">▸</span>
+                      <span>
+                        <strong className="text-foreground">49 Caixas Padrão:</strong> 2 Hot Wheels Mainlines Originais de Carros Reais (JDM, Muscle Cars, Porsches, Pickups etc.). Valor médio de R$ 30,00 cada na revenda — você paga R$ 59,90 e recebe o valor exato de volta em minis excelentes.
+                      </span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-fuchsia-400">▸</span>
+                      <span>
+                        <strong className="text-foreground">1 Caixa Premiada:</strong> 1 Mini GT Premium (escala 1:64, metal, pneus de borracha, altíssimo detalhamento) no valor mínimo de R$ 150,00 no lugar dos Hot Wheels.
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="glass-card rounded-xl p-6">
+              <div className="flex items-start gap-4">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-500 to-pink-600 font-display text-sm font-bold text-white">
+                  3
+                </span>
+                <div>
+                  <h3 className="font-display text-lg font-semibold text-foreground">
+                    O Contador do Lote e a Regra de Ouro
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    Para manter o mistério e a integridade do Drop, o conteúdo permanece trancado a sete chaves.
+                  </p>
+                  <div className="mt-3 rounded-lg border border-cyan-400/20 bg-cyan-400/5 p-4">
+                    <p className="text-sm text-cyan-300">
+                      <strong>Enquanto o contador estiver abaixo de 50/50:</strong> ninguém sabe o que tem dentro de nenhuma caixa.
+                    </p>
+                  </div>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                    <strong className="text-foreground">O Efeito "Garagem Aberta":</strong> no segundo exato em que a 50ª caixa for vendida e o lote esgotar, o sistema processará uma animação automática. O desenho misterioso de todos os cards desaparecerá, "virando as cartas" na tela e revelando publicamente quais miniaturas exatas estavam escondidas em cada número, junto com o nome do colecionador que a levou.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 4 */}
+            <div className="glass-card rounded-xl p-6">
+              <div className="flex items-start gap-4">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-gold-soft to-gold font-display text-sm font-bold text-black">
+                  4
+                </span>
+                <div>
+                  <h3 className="font-display text-lg font-semibold text-foreground">
+                    Transparência Gravada em Vídeo
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    Antes de abrirmos o link de vendas, todo o processo de seleção das miniaturas da quinzena, o empacotamento nas caixas compactas, o lacre e o embaralhamento aleatório dos números de 1 a 50 são gravados em vídeo e publicados na íntegra no nosso YouTube, TikTok e Instagram. Nem mesmo a equipe do Galpão 64 sabe onde a Mini GT foi parar depois que os adesivos são colados!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="container mx-auto px-4 py-10">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-10">
           {displayBoxes.map((box) => (
