@@ -36,6 +36,7 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           {!splashDone && <SplashScreen onEnter={handleEnter} />}
+          <Header />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/admin/login" element={<AdminLogin />} />
