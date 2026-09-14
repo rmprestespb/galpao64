@@ -38,6 +38,7 @@ import carBumblebee from "@/assets/car-bumblebee.jpg";
 import carFerrariVintage from "@/assets/car-ferrari-vintage.jpg";
 import garageBg from "@/assets/luxury-garage-bg.jpg";
 import cineFrame from "@/assets/diecast-destaque.jpg";
+import galpaoLogo from "@/assets/galpao64-logo.png";
 
 const INSTAGRAM = "https://www.instagram.com/galpao64diecast/";
 // Mesmo número usado nos outros pontos de contato do site (ProductGarageCard, botão flutuante do Index).
@@ -432,6 +433,120 @@ const VipWhatsAppBanner = () => {
   );
 };
 
+const CarPedestal = ({
+  item, active, onClick,
+}: { item: PreOrder; active: boolean; onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-pressed={active}
+    className={cn(
+      "group flex flex-col items-center gap-2 rounded-xl p-2 text-left transition-all duration-300",
+      active ? "bg-primary/10 ring-1 ring-primary/50" : "hover:bg-white/[0.04]",
+    )}
+  >
+    <div className="relative aspect-square w-full overflow-hidden rounded-lg border border-white/10 bg-gradient-to-b from-[#1c1c1f] to-black">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{ background: "radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.14) 0%, transparent 60%)" }}
+      />
+      <img
+        src={item.image}
+        alt={`${item.brand} ${item.name}`}
+        loading="lazy"
+        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+    </div>
+    {/* reflexo (espelhado + esmaecido, sem precisar de recorte/fundo transparente) */}
+    <div
+      aria-hidden
+      className="relative -mt-1 h-5 w-[82%] overflow-hidden opacity-35"
+      style={{
+        maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.55), transparent)",
+        WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.55), transparent)",
+      }}
+    >
+      <img src={item.image} alt="" className="h-full w-full scale-y-[-1] object-cover" />
+    </div>
+    <p className="text-center text-[9px] font-bold uppercase leading-tight tracking-wide text-white/75">
+      {item.ref} <span className="text-white/45">—</span> {item.name}
+    </p>
+  </button>
+);
+
+const BrandShowcasePanel = ({ items }: { items: PreOrder[] }) => {
+  const [focusIndex, setFocusIndex] = useState(0);
+
+  useEffect(() => {
+    setFocusIndex(0);
+  }, [items]);
+
+  if (items.length === 0) return null;
+  const focused = items[Math.min(focusIndex, items.length - 1)];
+
+  const handleReserve = () => {
+    const msg = buildReserveMessage(focused, "full");
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <div className="relative mt-10 overflow-hidden rounded-3xl border border-white/10 bg-black shadow-[0_40px_100px_-30px_rgba(0,0,0,0.9)]">
+      <img src={garageBg} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-25" />
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/75 to-black" />
+
+      <div className="relative p-5 sm:p-8 md:p-10">
+        {/* Selo flutuante de previsão */}
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-black/70 px-4 py-2 backdrop-blur-md">
+          <CalendarClock className="h-4 w-4 text-primary" />
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-primary sm:text-[11px]">
+            Previsão: {formatEta(focused.eta)}
+          </span>
+        </div>
+
+        {/* Pedestais — os 4 modelos da marca selecionada */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-6">
+          {items.map((item, i) => (
+            <CarPedestal key={item.id} item={item} active={i === focusIndex} onClick={() => setFocusIndex(i)} />
+          ))}
+        </div>
+
+        {/* Modelo em foco: preço + CTA único */}
+        <div className="mt-8 flex flex-col items-center gap-4 border-t border-white/10 pt-6 text-center">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary/80">{focused.ref}</p>
+            <h3 className="mt-1 text-xl font-black tracking-tight text-white sm:text-2xl">{focused.name}</h3>
+            <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-white/45">{focused.brand}</p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-primary">
+              [ Integral: {focused.full} (-5% Off) ]
+            </span>
+            <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-white/80">
+              [ Sinal Reserva: {focused.deposit} ]
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleReserve}
+            className={cn(
+              "inline-flex items-center justify-center gap-2 rounded-full px-8 py-3.5",
+              "bg-gradient-to-r from-primary to-[#ff8a3d] font-mono text-[12px] font-black uppercase tracking-[0.18em] text-black",
+              "shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.8)] transition-all duration-300",
+              "hover:brightness-110 hover:shadow-[0_14px_40px_-8px_hsl(var(--primary)/1)] active:scale-[0.98]",
+            )}
+          >
+            <PackageCheck className="h-4 w-4" strokeWidth={2.5} />
+            [ RESERVAR PARA MINHA GARAGEM ]
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const PreVendas = () => {
   const [brand, setBrand] = useState<Brand>("Todas as Marcas");
 
@@ -453,22 +568,25 @@ const PreVendas = () => {
           className="absolute inset-0 h-full w-full object-cover opacity-25"
         />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/70 via-[#09090b]/85 to-[#09090b]" />
-        <div className="container relative py-14 md:py-20">
-          <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold">Galpão 64 — Pré-vendas oficiais</p>
-          <h1 className="mt-4 max-w-4xl text-3xl font-black uppercase leading-[1.05] tracking-tight md:text-5xl">
-            Garanta seus{" "}
+        <div className="container relative py-14 text-center md:py-20">
+          <img
+            src={galpaoLogo}
+            alt="Galpão 64 — A Arte do Diecast"
+            className="mx-auto h-16 w-auto sm:h-20"
+          />
+          <h1 className="mx-auto mt-6 max-w-4xl text-3xl font-black uppercase leading-[1.05] tracking-tight md:text-5xl">
+            Lote de reservas globais —{" "}
             <span className="bg-gradient-to-r from-primary via-[#ff8a3d] to-gold bg-clip-text text-transparent">
-              Lançamentos 1:64
-            </span>{" "}
-            Antes que Esgotem
+              garanta o inatingível
+            </span>
           </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
-            Reserve miniaturas exclusivas e edições limitadas com garantia de entrega pelo Galpão 64.
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
+            Reserve os próximos lançamentos mundiais das melhores marcas antes de esgotarem.
           </p>
 
           {/* Brand plates */}
           <div className="mt-8 -mx-4 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0">
-            <div className="flex min-w-max items-center gap-2.5">
+            <div className="flex min-w-max items-center justify-center gap-2.5 md:mx-auto">
               {BRANDS.map((b) => {
                 const active = b === brand;
                 return (
@@ -492,8 +610,13 @@ const PreVendas = () => {
             </div>
           </div>
 
+          {/* Vitrine em destaque — 4 modelos da marca selecionada, no estilo "garagem" */}
+          <div key={brand} className="text-left">
+            <BrandShowcasePanel items={filtered.slice(0, 4)} />
+          </div>
+
           {/* Perks */}
-          <div className="mt-10 grid gap-3 sm:grid-cols-3">
+          <div className="mt-10 grid gap-3 text-left sm:grid-cols-3">
             {PERKS.map(({ icon: Icon, title, desc }) => (
               <div
                 key={title}
