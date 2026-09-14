@@ -89,6 +89,11 @@ const navLinks: Array<{ label: string; href: string; ariaLabel: string }> = [
     ariaLabel: "Ir para a seção Garagem — coleção de diecast",
   },
   {
+    label: "PRÉ-VENDA",
+    href: "/pre-vendas",
+    ariaLabel: "Abrir página de Pré-Vendas — reserve lançamentos globais",
+  },
+  {
     label: "DIECAST",
     href: "/diecast",
     ariaLabel: "Abrir página Diecast — raridades em destaque",
