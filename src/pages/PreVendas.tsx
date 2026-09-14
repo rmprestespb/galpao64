@@ -99,6 +99,12 @@ const PRODUCTS: PreOrder[] = [
     specs: ["Chassi de Metal", "Rodas Aro Real", "Licença Oficial"],
   },
   {
+    id: "mgt-04", brand: "Mini GT", ref: "Mini GT #672", name: "Toyota GR Supra A90 Jarama Racing",
+    lot: "LOTE Q2 2027", eta: "MAI-2027", full: "R$ 194,90", deposit: "R$ 58,00",
+    image: carGtr, hoverImage: carSkyline,
+    specs: ["Chassi de Metal", "Pneus de Borracha", "Licença Oficial"],
+  },
+  {
     id: "pop-01", brand: "Pop Race", ref: "Pop Race #001", name: "Toyota GR Yaris Pandem",
     lot: "LOTE Q4 2026", eta: "OUT-2026", full: "R$ 209,90", deposit: "R$ 63,00",
     image: carMustang, hoverImage: carBumblebee,
@@ -117,6 +123,12 @@ const PRODUCTS: PreOrder[] = [
     specs: ["Chassi de Metal", "Interior Detalhado", "Licença Oficial"],
   },
   {
+    id: "pop-04", brand: "Pop Race", ref: "Pop Race #031", name: "Mazda RX-7 FD3S RE Amemiya",
+    lot: "LOTE Q2 2027", eta: "ABR-2027", full: "R$ 219,90", deposit: "R$ 66,00",
+    image: carDatsun, hoverImage: carMustang,
+    specs: ["Chassi de Metal", "Widebody Oficial", "Edição Limitada"],
+  },
+  {
     id: "tw-01", brand: "Tarmac Works", ref: "Tarmac Works T64", name: "McLaren Senna GTR Test Car",
     lot: "LOTE Q4 2026", eta: "DEZ-2026", full: "R$ 239,90", deposit: "R$ 72,00",
     image: carMclaren, hoverImage: carLambo,
@@ -127,6 +139,18 @@ const PRODUCTS: PreOrder[] = [
     lot: "LOTE Q1 2027", eta: "MAR-2027", full: "R$ 249,90", deposit: "R$ 75,00",
     image: carGtr, hoverImage: carPorsche,
     specs: ["Chassi de Metal", "Rodas Aro Real", "Licença Oficial"],
+  },
+  {
+    id: "tw-03", brand: "Tarmac Works", ref: "Tarmac Works T64G", name: "Porsche 911 GT3 Cup Manthey Racing",
+    lot: "LOTE Q4 2026", eta: "JAN-2027", full: "R$ 244,90", deposit: "R$ 73,00",
+    image: carPorsche, hoverImage: carFerrari,
+    specs: ["Chassi de Metal", "Livery Oficial", "Edição Limitada"],
+  },
+  {
+    id: "tw-04", brand: "Tarmac Works", ref: "Tarmac Works T64-GT3", name: "BMW M4 GT3 Team WRT",
+    lot: "LOTE Q2 2027", eta: "MAI-2027", full: "R$ 254,90", deposit: "R$ 76,00",
+    image: carLambo, hoverImage: carGtr,
+    specs: ["Chassi de Metal", "Pneus de Borracha", "Livery Oficial"],
   },
   {
     id: "kh-01", brand: "Kaido House", ref: "Kaido House x MINI GT", name: "Datsun 510 Wagon Kaido GT",
@@ -145,6 +169,12 @@ const PRODUCTS: PreOrder[] = [
     lot: "LOTE Q2 2027", eta: "ABR-2027", full: "R$ 279,90", deposit: "R$ 84,00",
     image: carBumblebee, hoverImage: carMustang,
     specs: ["Chassi de Metal", "Suspensão Detalhada", "Edição Limitada"],
+  },
+  {
+    id: "kh-04", brand: "Kaido House", ref: "Kaido House V5", name: "Toyota Supra Kaido Works V1",
+    lot: "LOTE Q1 2027", eta: "MAR-2027", full: "R$ 274,90", deposit: "R$ 82,00",
+    image: carFerrariVintage, hoverImage: carDatsun,
+    specs: ["Chassi de Metal", "Peças Fotogravadas", "Edição Limitada"],
   },
 ];
 
