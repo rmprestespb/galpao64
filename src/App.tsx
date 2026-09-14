@@ -15,6 +15,7 @@ import Diecast from "./pages/Diecast.tsx";
 import Showroom from "./pages/Showroom.tsx";
 import MysteryBox from "./pages/MysteryBox.tsx";
 import PreVendas from "./pages/PreVendas.tsx";
+import PreVendasMarca from "./pages/PreVendasMarca.tsx";
 import SplashScreen from "./components/SplashScreen.tsx";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => {
             <Route path="/showroom" element={<Showroom />} />
             <Route path="/mystery-box" element={<MysteryBox />} />
             <Route path="/pre-vendas" element={<PreVendas />} />
+            <Route path="/pre-vendas/:marca" element={<PreVendasMarca />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
