@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { BRAND_SHOWCASE, BRAND_SLUGS, PRODUCTS, SingleBrand } from "@/data/preVendas";
+import { BRAND_SHOWCASE, BRAND_SLUGS, PreOrder, SingleBrand } from "@/data/preVendas";
 
 // Ordem fixa de exibição do showroom — uma marca por card, sempre os mesmos 4.
 const BRAND_ORDER: SingleBrand[] = ["Mini GT", "Pop Race", "Tarmac Works", "Kaido House"];
@@ -8,12 +8,13 @@ const BRAND_ORDER: SingleBrand[] = ["Mini GT", "Pop Race", "Tarmac Works", "Kaid
 /**
  * Showroom de marcas: 4 cards clicáveis (um por marca), cada um com a arte de
  * destaque real da marca (recorte de fundo transparente) e a contagem real de
- * referências em pré-venda. Clicar em qualquer card leva direto para /pre-vendas/:marca.
+ * referências em pré-venda (vindas do banco, cadastradas em /admin/pre-vendas).
+ * Clicar em qualquer card leva direto para /pre-vendas/:marca.
  */
-const BrandGrid = () => (
+const BrandGrid = ({ products }: { products: PreOrder[] }) => (
   <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
     {BRAND_ORDER.map((brand) => {
-      const items = PRODUCTS.filter((p) => p.brand === brand);
+      const items = products.filter((p) => p.brand === brand);
       const showcase = BRAND_SHOWCASE[brand];
       if (items.length === 0) return null;
 

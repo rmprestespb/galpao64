@@ -7,13 +7,15 @@ import {
   Truck,
   Play,
   Instagram,
+  Loader2,
 } from "lucide-react";
 import Header from "@/components/Header";
 import BrandGrid from "@/components/preVendas/BrandGrid";
 import ProductCard from "@/components/preVendas/ProductCard";
 import VipWhatsAppBanner from "@/components/preVendas/VipWhatsAppBanner";
 import FaqSection from "@/components/preVendas/FaqSection";
-import { INSTAGRAM, PRODUCTS } from "@/data/preVendas";
+import { INSTAGRAM } from "@/data/preVendas";
+import { usePresaleProducts } from "@/hooks/usePresaleProducts";
 
 import garageBg from "@/assets/luxury-garage-bg.jpg";
 import cineFrame from "@/assets/diecast-destaque.jpg";
@@ -33,6 +35,8 @@ const STEPS = [
 ];
 
 const PreVendas = () => {
+  const { products, loading, error } = usePresaleProducts();
+
   return (
     <div className="min-h-screen bg-[#09090b] text-white">
       <Header />
@@ -63,7 +67,13 @@ const PreVendas = () => {
 
           {/* Showroom — 4 marcas, cada uma leva direto para sua página de pré-venda */}
           <div className="mt-10 text-left">
-            <BrandGrid />
+            {loading ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <BrandGrid products={products} />
+            )}
           </div>
 
           {/* Perks */}
@@ -91,15 +101,29 @@ const PreVendas = () => {
             Vitrine de pré-vendas
           </h2>
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/40">
-            {PRODUCTS.length} modelos em reserva
+            {products.length} modelo{products.length === 1 ? "" : "s"} em reserva
           </span>
         </div>
 
-        <div className="grid animate-premium-fade-in gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-          {PRODUCTS.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        ) : error ? (
+          <p className="py-16 text-center text-sm text-white/50">
+            Não foi possível carregar a vitrine agora. Tenta recarregar a página.
+          </p>
+        ) : products.length === 0 ? (
+          <p className="py-16 text-center text-sm text-white/50">
+            Nenhuma pré-venda aberta no momento — volte em breve.
+          </p>
+        ) : (
+          <div className="grid animate-premium-fade-in gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            {products.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        )}
 
         <VipWhatsAppBanner />
       </section>

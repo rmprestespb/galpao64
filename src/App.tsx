@@ -8,6 +8,7 @@ import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
 import Admin from "./pages/Admin.tsx";
+import AdminPreVendas from "./pages/AdminPreVendas.tsx";
 import Aura from "./pages/Aura.tsx";
 import Album from "./pages/Album.tsx";
 import Receipts from "./pages/Receipts.tsx";
@@ -41,6 +42,7 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/pre-vendas" element={<AdminPreVendas />} />
             <Route path="/admin/recibos" element={<Receipts />} />
             <Route path="/aura" element={<Aura />} />
             <Route path="/album" element={<Album />} />

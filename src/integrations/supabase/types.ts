@@ -88,6 +88,63 @@ export type Database = {
         }
         Relationships: []
       }
+      presale_products: {
+        Row: {
+          brand: string
+          created_at: string
+          deposit_price_cents: number
+          display_order: number
+          eta_date: string | null
+          full_price_cents: number
+          hover_image_url: string | null
+          id: string
+          image_url: string
+          is_published: boolean
+          lot_closes_at: string | null
+          lot_code: string | null
+          name: string
+          ref: string
+          specs: string[]
+          updated_at: string
+        }
+        Insert: {
+          brand: string
+          created_at?: string
+          deposit_price_cents?: number
+          display_order?: number
+          eta_date?: string | null
+          full_price_cents?: number
+          hover_image_url?: string | null
+          id?: string
+          image_url: string
+          is_published?: boolean
+          lot_closes_at?: string | null
+          lot_code?: string | null
+          name: string
+          ref: string
+          specs?: string[]
+          updated_at?: string
+        }
+        Update: {
+          brand?: string
+          created_at?: string
+          deposit_price_cents?: number
+          display_order?: number
+          eta_date?: string | null
+          full_price_cents?: number
+          hover_image_url?: string | null
+          id?: string
+          image_url?: string
+          is_published?: boolean
+          lot_closes_at?: string | null
+          lot_code?: string | null
+          name?: string
+          ref?: string
+          specs?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           created_at: string

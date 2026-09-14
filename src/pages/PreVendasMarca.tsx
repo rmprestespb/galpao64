@@ -1,10 +1,11 @@
 import { Link, Navigate, useParams } from "react-router-dom";
-import { ArrowLeft, CalendarClock } from "lucide-react";
+import { ArrowLeft, CalendarClock, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import ProductCard from "@/components/preVendas/ProductCard";
 import VipWhatsAppBanner from "@/components/preVendas/VipWhatsAppBanner";
 import FaqSection from "@/components/preVendas/FaqSection";
-import { PRODUCTS, SLUG_TO_BRAND, formatEta } from "@/data/preVendas";
+import { SLUG_TO_BRAND, formatEta } from "@/data/preVendas";
+import { usePresaleProducts } from "@/hooks/usePresaleProducts";
 
 import garageBg from "@/assets/luxury-garage-bg.jpg";
 import galpaoLogo from "@/assets/galpao64-logo.png";
@@ -12,14 +13,15 @@ import galpaoLogo from "@/assets/galpao64-logo.png";
 const PreVendasMarca = () => {
   const { marca } = useParams<{ marca: string }>();
   const brand = marca ? SLUG_TO_BRAND[marca] : undefined;
+  const { products, loading } = usePresaleProducts();
 
   // Slug desconhecido — volta para a vitrine geral de pré-vendas.
   if (!brand) {
     return <Navigate to="/pre-vendas" replace />;
   }
 
-  const items = PRODUCTS.filter((p) => p.brand === brand);
-  const earliestEta = items[0]?.eta;
+  const items = products.filter((p) => p.brand === brand);
+  const earliestEta = items[0]?.etaDate;
 
   return (
     <div className="min-h-screen bg-[#09090b] text-white">
@@ -52,10 +54,12 @@ const PreVendasMarca = () => {
             </span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
-            {items.length} modelo{items.length === 1 ? "" : "s"} em reserva aberta — garanta o seu antes que o lote feche.
+            {loading
+              ? "Carregando reservas abertas…"
+              : `${items.length} modelo${items.length === 1 ? "" : "s"} em reserva aberta — garanta o seu antes que o lote feche.`}
           </p>
 
-          {earliestEta && (
+          {!loading && earliestEta && (
             <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-black/70 px-4 py-2 backdrop-blur-md">
               <CalendarClock className="h-4 w-4 text-primary" />
               <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-primary sm:text-[11px]">
@@ -68,7 +72,11 @@ const PreVendasMarca = () => {
 
       {/* GRID da marca */}
       <section className="container py-12 md:py-16">
-        {items.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        ) : items.length === 0 ? (
           <p className="py-16 text-center text-sm text-white/50">
             Nenhuma pré-venda aberta para essa marca no momento.{" "}
             <Link to="/pre-vendas" className="text-primary underline underline-offset-4">

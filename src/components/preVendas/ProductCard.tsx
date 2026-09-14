@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PackageCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { LOT_INFO, PreOrder, formatEta, openReserveWhatsApp } from "@/data/preVendas";
+import { PreOrder, formatEta, openReserveWhatsApp } from "@/data/preVendas";
 import LotCountdown from "./LotCountdown";
 
 const PaymentOption = ({
@@ -27,7 +27,6 @@ const PaymentOption = ({
 
 const ProductCard = ({ product }: { product: PreOrder }) => {
   const [mode, setMode] = useState<"full" | "deposit">("full");
-  const lotInfo = LOT_INFO[product.lot];
 
   return (
     <article
@@ -43,9 +42,9 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
         <span className="inline-flex items-center rounded-full border border-primary/50 bg-primary/10 px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.14em] text-primary">
           [ PRÉ-VENDA ]
         </span>
-        {lotInfo && (
+        {product.lotCode && (
           <span className="inline-flex items-center rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.14em] text-gold">
-            [ {lotInfo.code} - RESERVA ]
+            [ {product.lotCode} - RESERVA ]
           </span>
         )}
         <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-primary">
@@ -77,9 +76,9 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_60%_at_50%_0%,rgba(255,255,255,0.14),transparent_60%)] opacity-60 transition-opacity duration-500 group-hover:opacity-100"
         />
         <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black to-transparent" />
-        {lotInfo && (
+        {product.lotClosesAt && (
           <div className="absolute bottom-2 left-2 z-10">
-            <LotCountdown closesAt={lotInfo.closesAt} />
+            <LotCountdown closesAt={product.lotClosesAt} />
           </div>
         )}
       </div>
@@ -104,7 +103,7 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
 
         {/* Caixa informativa da pré-venda */}
         <div className="space-y-1.5 rounded-lg border border-white/[0.07] bg-white/[0.02] p-3 text-[11px] leading-relaxed text-white/70">
-          <p>📅 <span className="text-white/90 font-semibold">Data estimada de chegada:</span> {formatEta(product.eta)}</p>
+          <p>📅 <span className="text-white/90 font-semibold">Data estimada de chegada:</span> {formatEta(product.etaDate)}</p>
           <p>📦 <span className="text-white/90 font-semibold">Envio do lote:</span> despachado assim que o lote físico der entrada no Galpão 64.</p>
           <p>🛡️ <span className="text-white/90 font-semibold">Garantia de reserva:</span> item 100% garantido com fornecedores oficiais.</p>
         </div>
