@@ -1,5 +1,3 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import {
   ShieldCheck,
   Warehouse,
@@ -9,23 +7,13 @@ import {
   Truck,
   Play,
   Instagram,
-  CalendarClock,
-  ArrowRight,
 } from "lucide-react";
 import Header from "@/components/Header";
-import { cn } from "@/lib/utils";
+import BrandGrid from "@/components/preVendas/BrandGrid";
 import ProductCard from "@/components/preVendas/ProductCard";
 import VipWhatsAppBanner from "@/components/preVendas/VipWhatsAppBanner";
 import FaqSection from "@/components/preVendas/FaqSection";
-import {
-  BRANDS,
-  BRAND_SLUGS,
-  Brand,
-  INSTAGRAM,
-  PRODUCTS,
-  PreOrder,
-  formatEta,
-} from "@/data/preVendas";
+import { INSTAGRAM, PRODUCTS } from "@/data/preVendas";
 
 import garageBg from "@/assets/luxury-garage-bg.jpg";
 import cineFrame from "@/assets/diecast-destaque.jpg";
@@ -44,104 +32,7 @@ const STEPS = [
   { icon: Truck, title: "Envio Consolidado", desc: "Junte múltiplos lotes e pague apenas um frete quando quiser." },
 ];
 
-const CarPedestal = ({ item }: { item: PreOrder }) => (
-  <Link
-    to={`/pre-vendas/${BRAND_SLUGS[item.brand]}`}
-    className="group flex flex-col items-center gap-2 rounded-xl p-2 text-left transition-all duration-300 hover:bg-white/[0.04]"
-  >
-    <div className="relative aspect-square w-full overflow-hidden rounded-lg border border-white/10 bg-gradient-to-b from-[#1c1c1f] to-black transition-all duration-300 group-hover:border-primary/50">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{ background: "radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.14) 0%, transparent 60%)" }}
-      />
-      <img
-        src={item.image}
-        alt={`${item.brand} ${item.name}`}
-        loading="lazy"
-        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-      />
-    </div>
-    {/* reflexo (espelhado + esmaecido, sem precisar de recorte/fundo transparente) */}
-    <div
-      aria-hidden
-      className="relative -mt-1 h-5 w-[82%] overflow-hidden opacity-35"
-      style={{
-        maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.55), transparent)",
-        WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.55), transparent)",
-      }}
-    >
-      <img src={item.image} alt="" className="h-full w-full scale-y-[-1] object-cover" />
-    </div>
-    <p className="text-center text-[9px] font-bold uppercase leading-tight tracking-wide text-white/75 group-hover:text-primary">
-      {item.ref} <span className="text-white/45 group-hover:text-primary/60">—</span> {item.name}
-    </p>
-  </Link>
-);
-
-const BrandShowcasePanel = ({ items, activeBrand }: { items: PreOrder[]; activeBrand: Brand }) => {
-  if (items.length === 0) return null;
-  const earliestEta = items[0].eta;
-
-  return (
-    <div className="relative mt-10 overflow-hidden rounded-3xl border border-white/10 bg-black shadow-[0_40px_100px_-30px_rgba(0,0,0,0.9)]">
-      <img src={garageBg} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-25" />
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/75 to-black" />
-
-      <div className="relative p-5 sm:p-8 md:p-10">
-        {/* Selo flutuante de previsão */}
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-black/70 px-4 py-2 backdrop-blur-md">
-          <CalendarClock className="h-4 w-4 text-primary" />
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-primary sm:text-[11px]">
-            Previsão: {formatEta(earliestEta)}
-          </span>
-        </div>
-
-        {/* Pedestais — os 4 modelos da marca selecionada, cada um abre a página da marca */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-6">
-          {items.map((item) => (
-            <CarPedestal key={item.id} item={item} />
-          ))}
-        </div>
-
-        {/* CTA para a página completa da marca */}
-        <div className="mt-8 flex flex-col items-center gap-3 border-t border-white/10 pt-6 text-center">
-          {activeBrand === "Todas as Marcas" ? (
-            <p className="max-w-md text-[12px] leading-relaxed text-white/55">
-              Escolha uma marca acima ou clique em um carrinho para abrir a página de pré-vendas com todos os
-              detalhes, preço e reserva.
-            </p>
-          ) : (
-            <>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-white/45">{activeBrand}</p>
-              <Link
-                to={`/pre-vendas/${BRAND_SLUGS[activeBrand]}`}
-                className={cn(
-                  "inline-flex items-center justify-center gap-2 rounded-full px-8 py-3.5",
-                  "bg-gradient-to-r from-primary to-[#ff8a3d] font-mono text-[12px] font-black uppercase tracking-[0.18em] text-black",
-                  "shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.8)] transition-all duration-300",
-                  "hover:brightness-110 hover:shadow-[0_14px_40px_-8px_hsl(var(--primary)/1)] active:scale-[0.98]",
-                )}
-              >
-                [ VER PRÉ-VENDAS {activeBrand.toUpperCase()} ]
-                <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
-              </Link>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const PreVendas = () => {
-  const [brand, setBrand] = useState<Brand>("Todas as Marcas");
-
-  const filtered = useMemo(
-    () => (brand === "Todas as Marcas" ? PRODUCTS : PRODUCTS.filter((p) => p.brand === brand)),
-    [brand],
-  );
-
   return (
     <div className="min-h-screen bg-[#09090b] text-white">
       <Header />
@@ -161,45 +52,18 @@ const PreVendas = () => {
             alt="Galpão 64 — A Arte do Diecast"
             className="mx-auto h-16 w-auto sm:h-20"
           />
-          <h1 className="mx-auto mt-6 max-w-4xl text-3xl font-black uppercase leading-[1.05] tracking-tight md:text-5xl">
-            Lote de reservas globais —{" "}
+          <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-black uppercase leading-[1.05] tracking-tight md:text-6xl">
             <span className="bg-gradient-to-r from-primary via-[#ff8a3d] to-gold bg-clip-text text-transparent">
-              garanta o inatingível
+              Pré-venda
             </span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
             Reserve os próximos lançamentos mundiais das melhores marcas antes de esgotarem.
           </p>
 
-          {/* Brand plates */}
-          <div className="mt-8 -mx-4 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0">
-            <div className="flex min-w-max items-center justify-center gap-2.5 md:mx-auto">
-              {BRANDS.map((b) => {
-                const active = b === brand;
-                return (
-                  <button
-                    key={b}
-                    type="button"
-                    onClick={() => setBrand(b)}
-                    aria-pressed={active}
-                    className={cn(
-                      "relative rounded-md border px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.16em] transition-all duration-300",
-                      "bg-gradient-to-b from-[#27272a] to-[#151517]",
-                      active
-                        ? "border-primary/70 text-primary shadow-[0_0_24px_-4px_hsl(var(--primary)/0.85),inset_0_1px_0_rgba(255,255,255,0.15)]"
-                        : "border-white/10 text-white/55 hover:border-gold/40 hover:text-white",
-                    )}
-                  >
-                    {b}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Vitrine em destaque — 4 modelos da marca selecionada, no estilo "garagem" */}
-          <div key={brand} className="text-left">
-            <BrandShowcasePanel items={filtered.slice(0, 4)} activeBrand={brand} />
+          {/* Showroom — 4 marcas, cada uma leva direto para sua página de pré-venda */}
+          <div className="mt-10 text-left">
+            <BrandGrid />
           </div>
 
           {/* Perks */}
@@ -227,12 +91,12 @@ const PreVendas = () => {
             Vitrine de pré-vendas
           </h2>
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/40">
-            {filtered.length} modelo{filtered.length === 1 ? "" : "s"} · {brand}
+            {PRODUCTS.length} modelos em reserva
           </span>
         </div>
 
-        <div key={brand} className="grid animate-premium-fade-in gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-          {filtered.map((p) => (
+        <div className="grid animate-premium-fade-in gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {PRODUCTS.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
         </div>
