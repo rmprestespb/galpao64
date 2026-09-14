@@ -1,21 +1,21 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { BRAND_SLUGS, PRODUCTS, SingleBrand } from "@/data/preVendas";
+import { BRAND_SHOWCASE, BRAND_SLUGS, PRODUCTS, SingleBrand } from "@/data/preVendas";
 
 // Ordem fixa de exibição do showroom — uma marca por card, sempre os mesmos 4.
 const BRAND_ORDER: SingleBrand[] = ["Mini GT", "Pop Race", "Tarmac Works", "Kaido House"];
 
 /**
- * Showroom de marcas: 4 cards clicáveis (um por marca), cada um em destaque
- * com o primeiro modelo da pré-venda e a contagem real de referências.
- * Clicar em qualquer card leva direto para /pre-vendas/:marca.
+ * Showroom de marcas: 4 cards clicáveis (um por marca), cada um com a arte de
+ * destaque real da marca (recorte de fundo transparente) e a contagem real de
+ * referências em pré-venda. Clicar em qualquer card leva direto para /pre-vendas/:marca.
  */
 const BrandGrid = () => (
   <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
     {BRAND_ORDER.map((brand) => {
       const items = PRODUCTS.filter((p) => p.brand === brand);
-      const highlight = items[0];
-      if (!highlight) return null;
+      const showcase = BRAND_SHOWCASE[brand];
+      if (items.length === 0) return null;
 
       return (
         <Link
@@ -27,27 +27,26 @@ const BrandGrid = () => (
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 opacity-70 transition-opacity duration-300 group-hover:opacity-100"
-              style={{ background: "radial-gradient(60% 55% at 50% 45%, hsl(var(--primary)/0.22), transparent 70%)" }}
+              style={{ background: "radial-gradient(65% 60% at 50% 48%, hsl(var(--primary)/0.22), transparent 72%)" }}
             />
             <div
               aria-hidden
-              className="absolute bottom-8 left-[14%] right-[14%] h-3.5 rounded-full bg-black/70 blur-[2px]"
+              className="absolute bottom-9 left-[14%] right-[14%] h-3.5 rounded-full bg-black/70 blur-[3px]"
             />
             <img
-              src={highlight.image}
-              alt={`${brand} — ${highlight.name}`}
+              src={showcase.image}
+              alt={`${brand} — ${showcase.caption}`}
               loading="lazy"
-              className="relative h-[78%] w-[78%] rounded-xl object-cover shadow-[0_18px_30px_-10px_rgba(0,0,0,0.7)] transition-transform duration-500 group-hover:scale-[1.04]"
+              className="relative h-[80%] w-[86%] object-contain drop-shadow-[0_16px_16px_rgba(0,0,0,0.65)] transition-transform duration-500 group-hover:scale-[1.05]"
             />
-            <div aria-hidden className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/70 to-transparent" />
           </div>
 
           <div className="flex flex-1 flex-col gap-2 border-t border-white/[0.06] p-5">
             <span className="font-mono text-[11px] font-black uppercase tracking-[0.22em] text-primary">
               {brand}
             </span>
-            <span className="text-lg font-black uppercase leading-tight tracking-tight text-white md:text-xl">
-              {highlight.name}
+            <span className="text-base font-black uppercase leading-tight tracking-tight text-white md:text-lg">
+              {showcase.caption}
             </span>
             <span className="text-[12px] text-white/45">
               Escala 1:64 · {items.length} referência{items.length === 1 ? "" : "s"}

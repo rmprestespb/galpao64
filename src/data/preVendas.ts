@@ -11,6 +11,11 @@ import carKombi from "@/assets/car-kombi-red.jpg";
 import carBumblebee from "@/assets/car-bumblebee.jpg";
 import carFerrariVintage from "@/assets/car-ferrari-vintage.jpg";
 
+import brandMiniGt from "@/assets/brand-mini-gt.webp";
+import brandPopRace from "@/assets/brand-pop-race.webp";
+import brandTarmacWorks from "@/assets/brand-tarmac-works.webp";
+import brandKaidoHouse from "@/assets/brand-kaido-house.webp";
+
 export const INSTAGRAM = "https://www.instagram.com/galpao64diecast/";
 // Mesmo número usado nos outros pontos de contato do site (ProductGarageCard, botão flutuante do Index).
 // Troque aqui caso queira usar um link de Grupo/Lista de transmissão do WhatsApp dedicado à Lista VIP.
@@ -45,6 +50,15 @@ export const BRAND_SLUGS: Record<SingleBrand, string> = {
 export const SLUG_TO_BRAND: Record<string, SingleBrand> = Object.fromEntries(
   (Object.entries(BRAND_SLUGS) as [SingleBrand, string][]).map(([brand, slug]) => [slug, brand]),
 ) as Record<string, SingleBrand>;
+
+// Arte de destaque de cada marca no showroom (/pre-vendas) — recorte real do miniatura,
+// usado só como vitrine visual da marca; os preços e specs reais ficam nos PRODUCTS abaixo.
+export const BRAND_SHOWCASE: Record<SingleBrand, { image: string; caption: string }> = {
+  "Mini GT": { image: brandMiniGt, caption: "Toyota Supra — Edição Fast & Furious" },
+  "Pop Race": { image: brandPopRace, caption: "Honda Civic Type R — Edição EVA" },
+  "Tarmac Works": { image: brandTarmacWorks, caption: "Porsche 911 GT3 R — Falken Motorsports" },
+  "Kaido House": { image: brandKaidoHouse, caption: "Chevrolet C10 — HKS x Yokohama" },
+};
 
 // Metadados de cada lote de pré-venda: código de exibição e data/hora de encerramento das reservas.
 // Ajuste "closesAt" sempre que abrir ou prorrogar um lote.
