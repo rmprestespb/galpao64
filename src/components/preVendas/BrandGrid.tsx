@@ -35,18 +35,15 @@ const BrandGrid = () => (
             />
             <img
               src={showcase.image}
-              alt={`${brand} — ${showcase.caption}`}
+              alt={brand}
               loading="lazy"
               className="relative h-[80%] w-[86%] object-contain drop-shadow-[0_16px_16px_rgba(0,0,0,0.65)] transition-transform duration-500 group-hover:scale-[1.05]"
             />
           </div>
 
           <div className="flex flex-1 flex-col gap-2 border-t border-white/[0.06] p-5">
-            <span className="font-mono text-[11px] font-black uppercase tracking-[0.22em] text-primary">
+            <span className="text-lg font-black uppercase leading-tight tracking-tight text-white md:text-xl">
               {brand}
-            </span>
-            <span className="text-base font-black uppercase leading-tight tracking-tight text-white md:text-lg">
-              {showcase.caption}
             </span>
             <span className="text-[12px] text-white/45">
               Escala 1:64 · {items.length} referência{items.length === 1 ? "" : "s"}
