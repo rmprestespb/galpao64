@@ -45,6 +45,16 @@ export default function Header() {
           Álbum / Reservas
         </a>
 
+        <Link
+          to="/pre-vendas"
+          className={`text-xs md:text-sm font-semibold tracking-wider uppercase transition-colors ${
+            isActive('/pre-vendas') ? 'text-orange-500' : 'text-zinc-400 hover:text-white'
+          }`}
+        >
+          Pré-Vendas
+        </Link>
+
+
         {/* Botão Premium Mystery Box */}
         <Link
           to="/mystery-box"
