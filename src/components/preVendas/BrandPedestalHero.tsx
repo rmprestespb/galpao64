@@ -5,6 +5,9 @@ import { cn } from "@/lib/utils";
 import { BRAND_SLUGS, PreOrder, SingleBrand } from "@/data/preVendas";
 import emptyPedestals from "@/assets/prevendas-garage-pedestals.jpg";
 import heroKaidoHouse from "@/assets/prevendas-hero-kaido-house.jpg";
+import heroMiniGt from "@/assets/prevendas-hero-mini-gt.jpg";
+import heroPopRace from "@/assets/prevendas-hero-pop-race.jpg";
+import heroTarmacWorks from "@/assets/prevendas-hero-tarmac-works.jpg";
 
 const BRAND_ORDER: SingleBrand[] = ["Mini GT", "Pop Race", "Tarmac Works", "Kaido House"];
 
@@ -12,6 +15,9 @@ const BRAND_ORDER: SingleBrand[] = ["Mini GT", "Pop Race", "Tarmac Works", "Kaid
 // coladas nos pedestais (arte gerada/tratada fora do site, com sombra e luz batendo
 // com a cena). Sem imagem pronta pra marca, cai no piso vazio como placeholder.
 const BRAND_HERO_IMAGES: Partial<Record<SingleBrand, string>> = {
+  "Mini GT": heroMiniGt,
+  "Pop Race": heroPopRace,
+  "Tarmac Works": heroTarmacWorks,
   "Kaido House": heroKaidoHouse,
 };
 
