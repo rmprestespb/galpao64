@@ -89,7 +89,7 @@ const BrandPedestalHero = ({ products }: { products: PreOrder[] }) => {
           to={brandHref}
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-9 py-3.5 text-sm font-black uppercase tracking-[0.14em] text-black shadow-[0_16px_40px_-14px_hsl(var(--primary)/0.8)] transition-transform hover:scale-[1.03]"
         >
-          Pré-venda
+          Faça sua reserva
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
