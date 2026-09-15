@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { CalendarIcon, Flame, Loader2, Lock, LogOut, Pencil, Plus, Trash2, Upload, X, Film, FileText } from "lucide-react";
+import { CalendarIcon, Flame, Loader2, Lock, LogOut, Pencil, Plus, Trash2, Upload, X, Film, FileText, Package } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -411,6 +411,11 @@ const Admin = () => {
           </Link>
           <div className="flex items-center gap-2">
             <PixGeneratorDialog />
+            <Button asChild variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10">
+              <Link to="/admin/pre-vendas">
+                <Package className="h-4 w-4" /> Pré-vendas
+              </Link>
+            </Button>
             <Button asChild variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10">
               <Link to="/admin/recibos">
                 <FileText className="h-4 w-4" /> Recibos
