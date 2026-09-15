@@ -10,7 +10,7 @@ import {
   Loader2,
 } from "lucide-react";
 import Header from "@/components/Header";
-import BrandGrid from "@/components/preVendas/BrandGrid";
+import BrandPedestalHero from "@/components/preVendas/BrandPedestalHero";
 import ProductCard from "@/components/preVendas/ProductCard";
 import VipWhatsAppBanner from "@/components/preVendas/VipWhatsAppBanner";
 import FaqSection from "@/components/preVendas/FaqSection";
@@ -57,22 +57,21 @@ const PreVendas = () => {
             className="mx-auto h-16 w-auto sm:h-20"
           />
           <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-black uppercase leading-[1.05] tracking-tight md:text-6xl">
-            <span className="bg-gradient-to-r from-primary via-[#ff8a3d] to-gold bg-clip-text text-transparent">
-              Pré-venda
-            </span>
+            Pré Vendas
+            <span className="bg-gradient-to-r from-primary via-[#ff8a3d] to-gold bg-clip-text text-transparent">:</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
             Reserve os próximos lançamentos mundiais das melhores marcas antes de esgotarem.
           </p>
 
-          {/* Showroom — 4 marcas, cada uma leva direto para sua página de pré-venda */}
-          <div className="mt-10 text-left">
+          {/* Garagem com pedestais — escolhe a marca, vê as miniaturas em cena, reserva */}
+          <div className="mt-10">
             {loading ? (
               <div className="flex justify-center py-10">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
             ) : (
-              <BrandGrid products={products} />
+              <BrandPedestalHero products={products} />
             )}
           </div>
 
