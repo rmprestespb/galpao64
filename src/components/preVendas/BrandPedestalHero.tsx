@@ -3,29 +3,29 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BRAND_SLUGS, PreOrder, SingleBrand } from "@/data/preVendas";
-import garageScene from "@/assets/prevendas-garage-pedestals.jpg";
+import emptyPedestals from "@/assets/prevendas-garage-pedestals.jpg";
+import heroKaidoHouse from "@/assets/prevendas-hero-kaido-house.jpg";
 
 const BRAND_ORDER: SingleBrand[] = ["Mini GT", "Pop Race", "Tarmac Works", "Kaido House"];
 
-// Posição de cada um dos 3 pedestais dentro da cena (% da largura/altura da imagem).
-// A imagem tem proporção fixa (aspect-ratio abaixo), então a posição não desloca ao redimensionar.
-const PEDESTAL_SLOTS = [
-  { left: "24%", bottom: "44%", width: "23%" },
-  { left: "51%", bottom: "42%", width: "25%" },
-  { left: "78%", bottom: "44%", width: "23%" },
-];
+// Uma imagem pronta por marca — cada uma já mostra as 3 miniaturas daquela marca
+// coladas nos pedestais (arte gerada/tratada fora do site, com sombra e luz batendo
+// com a cena). Sem imagem pronta pra marca, cai no piso vazio como placeholder.
+const BRAND_HERO_IMAGES: Partial<Record<SingleBrand, string>> = {
+  "Kaido House": heroKaidoHouse,
+};
 
 /**
- * Hero "garagem com pedestais": pills de marca clicáveis trocam quais 3 miniaturas
- * aparecem em cena (uma por pedestal). O botão abaixo leva pra página de pré-venda
- * da marca selecionada — a troca de marca não navega, só troca o que está em cena.
+ * Hero "garagem com pedestais": pills de marca clicáveis trocam qual imagem pronta
+ * aparece em cena (uma por marca, com as 3 miniaturas já compostas na arte). O botão
+ * abaixo leva pra página de pré-venda da marca selecionada.
  */
 const BrandPedestalHero = ({ products }: { products: PreOrder[] }) => {
   const availableBrands = BRAND_ORDER.filter((brand) => products.some((p) => p.brand === brand));
   const [activeBrand, setActiveBrand] = useState<SingleBrand>(availableBrands[0] ?? "Mini GT");
 
-  const items = products.filter((p) => p.brand === activeBrand).slice(0, 3);
   const brandHref = `/pre-vendas/${BRAND_SLUGS[activeBrand]}`;
+  const heroImage = BRAND_HERO_IMAGES[activeBrand] ?? emptyPedestals;
 
   if (availableBrands.length === 0) return null;
 
@@ -54,33 +54,17 @@ const BrandPedestalHero = ({ products }: { products: PreOrder[] }) => {
         })}
       </div>
 
-      {/* Cena da garagem com os pedestais */}
+      {/* Cena da garagem com os pedestais — imagem pronta, uma por marca */}
       <div
         className="relative mt-6 overflow-hidden rounded-2xl border border-white/10 bg-black"
         style={{ aspectRatio: "1737 / 576" }}
       >
-        <img src={garageScene} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
-
-        {items.map((item, i) => {
-          const slot = PEDESTAL_SLOTS[i];
-          if (!slot) return null;
-          return (
-            <Link
-              key={item.id}
-              to={brandHref}
-              title={item.name}
-              className="group absolute bottom-0 -translate-x-1/2 animate-premium-fade-in"
-              style={{ left: slot.left, bottom: slot.bottom, width: slot.width }}
-            >
-              <img
-                src={item.image}
-                alt={item.name}
-                loading="lazy"
-                className="w-full drop-shadow-[0_18px_22px_rgba(0,0,0,0.65)] transition-transform duration-500 group-hover:-translate-y-1.5 group-hover:scale-[1.06]"
-              />
-            </Link>
-          );
-        })}
+        <img
+          key={activeBrand}
+          src={heroImage}
+          alt={`Miniaturas ${activeBrand} em pré-venda`}
+          className="absolute inset-0 h-full w-full animate-premium-fade-in object-cover"
+        />
       </div>
 
       {/* CTA único — vai pra página de pré-venda da marca selecionada */}
