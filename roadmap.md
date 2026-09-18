@@ -1,0 +1,4 @@
+- [x] Cloud/Supabase: já está ativo (confirmado — migração presale_products aplicada)
+- [ ] PreVendas.tsx: ler catálogo do banco (presale_products)
+- [ ] App.tsx: rota /admin/pre-vendas
+- [ ] Admin.tsx: link para o painel de pré-vendas
