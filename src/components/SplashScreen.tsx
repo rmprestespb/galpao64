@@ -293,25 +293,33 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
           }}
         />
 
-        {/* Expanding ring anchored over the painted CTA in the artwork */}
+        {/* Expanding ring anchored over the CTA button */}
         {pressed && (
           <div
             aria-hidden="true"
-            className="absolute left-1/2 top-[72%] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            className="absolute left-1/2 top-[86%] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
           >
             <span className="splash-cta-ring block rounded-full border-2 border-[#F5D896]" />
           </div>
         )}
 
-        {/* The garage artwork already shows the CTA painted on it; the
-            entire splash is clickable to enter the showroom. */}
+        {/* The garage artwork doesn't have the CTA text painted on it, so
+            it's rendered as a real HTML label sitting over the artwork.
+            The entire splash stays clickable to enter the showroom. */}
         <button
           type="button"
           onClick={handleEnter}
           disabled={pressed}
           aria-label="Clique para entrar no showroom Galpão 64"
           className="absolute inset-0 h-full w-full cursor-pointer bg-transparent focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-[#F5D896] disabled:cursor-default"
-        />
+        >
+          <span
+            className="absolute left-1/2 top-[86%] -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-white px-6 py-3 text-sm font-black uppercase tracking-[0.12em] text-black shadow-[0_0_30px_rgba(245,216,150,0.7)] transition-transform duration-300 sm:px-9 sm:py-4 sm:text-base"
+            style={{ transform: `translate(-50%, -50%) scale(${pressed ? 0.94 : 1})` }}
+          >
+            Clique para entrar no showroom
+          </span>
+        </button>
       </div>
     </div>
   );
