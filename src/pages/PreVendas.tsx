@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  Loader2,
   ShieldCheck,
   Warehouse,
   Radar,
@@ -11,20 +12,9 @@ import {
   Instagram,
 } from "lucide-react";
 import Header from "@/components/Header";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
-import carPorsche from "@/assets/car-porsche-green.jpg";
-import carSkyline from "@/assets/car-skyline-white.jpg";
-import carGtr from "@/assets/car-gtr-grey.jpg";
-import carDatsun from "@/assets/car-datsun-blue.jpg";
-import carMustang from "@/assets/car-mustang-orange.jpg";
-import carLambo from "@/assets/car-lambo-black.jpg";
-import carMclaren from "@/assets/car-mclaren-silver.jpg";
-import carFerrari from "@/assets/car-ferrari-redline.jpg";
-import carCamaro from "@/assets/car-camaro-purple.jpg";
-import carKombi from "@/assets/car-kombi-red.jpg";
-import carBumblebee from "@/assets/car-bumblebee.jpg";
-import carFerrariVintage from "@/assets/car-ferrari-vintage.jpg";
 import garageBg from "@/assets/luxury-garage-bg.jpg";
 import cineFrame from "@/assets/diecast-destaque.jpg";
 
@@ -47,74 +37,45 @@ type PreOrder = {
   specs: string[];
 };
 
-const PRODUCTS: PreOrder[] = [
-  {
-    id: "mgt-01", brand: "Mini GT", ref: "Mini GT #642", name: "Porsche 911 GT3 RS Weissach",
-    lot: "LOTE Q4 2026", eta: "NOV-2026", full: "R$ 189,90", deposit: "R$ 55,00",
-    image: carPorsche, hoverImage: carGtr,
-    specs: ["Chassi de Metal", "Pneus de Borracha", "Licença Oficial"],
-  },
-  {
-    id: "mgt-02", brand: "Mini GT", ref: "Mini GT #655", name: "Nissan Skyline GT-R R34 V-Spec",
-    lot: "LOTE Q4 2026", eta: "DEZ-2026", full: "R$ 179,90", deposit: "R$ 52,00",
-    image: carSkyline, hoverImage: carDatsun,
-    specs: ["Chassi de Metal", "Pneus de Borracha", "Licença Oficial"],
-  },
-  {
-    id: "mgt-03", brand: "Mini GT", ref: "Mini GT #661", name: "Lamborghini Countach LPI 800-4",
-    lot: "LOTE Q1 2027", eta: "FEV-2027", full: "R$ 199,90", deposit: "R$ 60,00",
-    image: carLambo, hoverImage: carMclaren,
-    specs: ["Chassi de Metal", "Rodas Aro Real", "Licença Oficial"],
-  },
-  {
-    id: "pop-01", brand: "Pop Race", ref: "Pop Race #001", name: "Toyota GR Yaris Pandem",
-    lot: "LOTE Q4 2026", eta: "OUT-2026", full: "R$ 209,90", deposit: "R$ 63,00",
-    image: carMustang, hoverImage: carBumblebee,
-    specs: ["Chassi de Metal", "Pneus de Borracha", "Widebody Oficial"],
-  },
-  {
-    id: "pop-02", brand: "Pop Race", ref: "Pop Race #014", name: "Nissan Silvia S15 Rocket Bunny",
-    lot: "LOTE Q4 2026", eta: "NOV-2026", full: "R$ 214,90", deposit: "R$ 65,00",
-    image: carDatsun, hoverImage: carSkyline,
-    specs: ["Chassi de Metal", "Pneus de Borracha", "Licença Oficial"],
-  },
-  {
-    id: "pop-03", brand: "Pop Race", ref: "Pop Race #022", name: "Ferrari F40 Liberty Walk",
-    lot: "LOTE Q1 2027", eta: "JAN-2027", full: "R$ 229,90", deposit: "R$ 69,00",
-    image: carFerrari, hoverImage: carFerrariVintage,
-    specs: ["Chassi de Metal", "Interior Detalhado", "Licença Oficial"],
-  },
-  {
-    id: "tw-01", brand: "Tarmac Works", ref: "Tarmac Works T64", name: "McLaren Senna GTR Test Car",
-    lot: "LOTE Q4 2026", eta: "DEZ-2026", full: "R$ 239,90", deposit: "R$ 72,00",
-    image: carMclaren, hoverImage: carLambo,
-    specs: ["Chassi de Metal", "Pneus de Borracha", "Livery Oficial"],
-  },
-  {
-    id: "tw-02", brand: "Tarmac Works", ref: "Tarmac Works T64R", name: "Nissan GT-R R35 Nismo Nürburgring",
-    lot: "LOTE Q1 2027", eta: "MAR-2027", full: "R$ 249,90", deposit: "R$ 75,00",
-    image: carGtr, hoverImage: carPorsche,
-    specs: ["Chassi de Metal", "Rodas Aro Real", "Licença Oficial"],
-  },
-  {
-    id: "kh-01", brand: "Kaido House", ref: "Kaido House x MINI GT", name: "Datsun 510 Wagon Kaido GT",
-    lot: "LOTE Q4 2026", eta: "NOV-2026", full: "R$ 259,90", deposit: "R$ 78,00",
-    image: carKombi, hoverImage: carCamaro,
-    specs: ["Chassi de Metal", "Peças Fotogravadas", "Edição Limitada"],
-  },
-  {
-    id: "kh-02", brand: "Kaido House", ref: "Kaido House V3", name: "Datsun 240Z Kaido Works",
-    lot: "LOTE Q1 2027", eta: "FEV-2027", full: "R$ 269,90", deposit: "R$ 81,00",
-    image: carCamaro, hoverImage: carKombi,
-    specs: ["Chassi de Metal", "Pneus de Borracha", "Edição Limitada"],
-  },
-  {
-    id: "kh-03", brand: "Kaido House", ref: "Kaido House V4", name: "Toyota Hilux Kaido Overland",
-    lot: "LOTE Q2 2027", eta: "ABR-2027", full: "R$ 279,90", deposit: "R$ 84,00",
-    image: carBumblebee, hoverImage: carMustang,
-    specs: ["Chassi de Metal", "Suspensão Detalhada", "Edição Limitada"],
-  },
-];
+type PresaleRow = {
+  id: string;
+  brand: string;
+  ref: string;
+  name: string;
+  specs: string[];
+  image_url: string;
+  hover_image_url: string | null;
+  full_price_cents: number;
+  deposit_price_cents: number;
+  eta_date: string | null;
+  lot_code: string | null;
+};
+
+const brl = (cents: number) =>
+  (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+const MONTHS = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
+
+const formatEta = (etaDate: string | null) => {
+  if (!etaDate) return "A CONFIRMAR";
+  const [year, month] = etaDate.split("-").map(Number);
+  const m = MONTHS[(month || 1) - 1];
+  return m ? `${m}-${year}` : "A CONFIRMAR";
+};
+
+const toPreOrder = (row: PresaleRow): PreOrder => ({
+  id: row.id,
+  brand: row.brand as PreOrder["brand"],
+  ref: row.ref,
+  name: row.name,
+  lot: row.lot_code ?? "LOTE ABERTO",
+  eta: formatEta(row.eta_date),
+  full: brl(row.full_price_cents),
+  deposit: brl(row.deposit_price_cents),
+  image: row.image_url,
+  hoverImage: row.hover_image_url ?? row.image_url,
+  specs: row.specs ?? [],
+});
 
 const PERKS = [
   { icon: ShieldCheck, title: "Preço Trava-Câmbio", desc: "Valor fixo garantido, sem surpresa cambial na chegada." },
