@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
 import Admin from "./pages/Admin.tsx";
@@ -39,7 +38,11 @@ const App = () => {
         <BrowserRouter>
           {!splashDone && <SplashScreen onEnter={handleEnter} />}
           <Routes>
-            <Route path="/" element={<Index />} />
+            {/* "/" entra direto em Pré-vendas (pedido do Robson). A home antiga
+                (Garagem/Sobre, Index.tsx) continua existindo no repo, só não
+                está mais roteada — pra voltar, é só trocar essa linha de volta
+                por <Route path="/" element={<Index />} /> e reimportar Index. */}
+            <Route path="/" element={<Navigate to="/pre-vendas" replace />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/pre-vendas" element={<AdminPreVendas />} />

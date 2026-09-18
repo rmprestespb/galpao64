@@ -10,12 +10,11 @@ import {
   Loader2,
 } from "lucide-react";
 import Header from "@/components/Header";
-import BrandPedestalHero from "@/components/preVendas/BrandPedestalHero";
-import ProductCard from "@/components/preVendas/ProductCard";
+import BrandGrid from "@/components/preVendas/BrandGrid";
 import VipWhatsAppBanner from "@/components/preVendas/VipWhatsAppBanner";
 import FaqSection from "@/components/preVendas/FaqSection";
 import { INSTAGRAM } from "@/data/preVendas";
-import { usePresaleProducts } from "@/hooks/usePresaleProducts";
+import { useBrands } from "@/hooks/useBrands";
 
 import garageBg from "@/assets/luxury-garage-bg.jpg";
 import cineFrame from "@/assets/diecast-destaque.jpg";
@@ -35,7 +34,7 @@ const STEPS = [
 ];
 
 const PreVendas = () => {
-  const { products, loading, error } = usePresaleProducts();
+  const { brands, loading, error } = useBrands();
 
   return (
     <div className="min-h-screen bg-[#09090b] text-white">
@@ -61,19 +60,8 @@ const PreVendas = () => {
             <span className="bg-gradient-to-r from-primary via-[#ff8a3d] to-gold bg-clip-text text-transparent">:</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
-            Reserve os próximos lançamentos mundiais das melhores marcas antes de esgotarem.
+            Escolha a marca e reserve os próximos lançamentos mundiais antes de esgotarem.
           </p>
-
-          {/* Garagem com pedestais — escolhe a marca, vê as miniaturas em cena, reserva */}
-          <div className="mt-10">
-            {loading ? (
-              <div className="flex justify-center py-10">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
-            ) : (
-              <BrandPedestalHero products={products} />
-            )}
-          </div>
 
           {/* Perks */}
           <div className="mt-10 grid gap-3 text-left sm:grid-cols-3">
@@ -93,14 +81,15 @@ const PreVendas = () => {
         </div>
       </section>
 
-      {/* GRID */}
+      {/* PORTAL DE MARCAS — cada card representa uma marca; produtos ficam
+          só dentro da página de cada marca (/pre-vendas/:slug). */}
       <section className="container py-12 md:py-16">
         <div className="mb-6 flex items-end justify-between gap-4">
           <h2 className="text-xl font-black uppercase tracking-[0.14em] text-white md:text-2xl">
-            Vitrine de pré-vendas
+            Escolha a marca
           </h2>
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/40">
-            {products.length} modelo{products.length === 1 ? "" : "s"} em reserva
+            {brands.length} marca{brands.length === 1 ? "" : "s"} em pré-venda
           </span>
         </div>
 
@@ -110,17 +99,15 @@ const PreVendas = () => {
           </div>
         ) : error ? (
           <p className="py-16 text-center text-sm text-white/50">
-            Não foi possível carregar a vitrine agora. Tenta recarregar a página.
+            Não foi possível carregar as marcas agora. Tenta recarregar a página.
           </p>
-        ) : products.length === 0 ? (
+        ) : brands.length === 0 ? (
           <p className="py-16 text-center text-sm text-white/50">
-            Nenhuma pré-venda aberta no momento — volte em breve.
+            Nenhuma marca cadastrada no momento — volte em breve.
           </p>
         ) : (
-          <div className="grid animate-premium-fade-in gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-            {products.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
+          <div className="animate-premium-fade-in">
+            <BrandGrid brands={brands} />
           </div>
         )}
 

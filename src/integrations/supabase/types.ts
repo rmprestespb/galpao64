@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      brands: {
+        Row: {
+          accent_color: string | null
+          card_image_url: string | null
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string | null
+          card_image_url?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string | null
+          card_image_url?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       mystery_boxes: {
         Row: {
           collector_name: string | null
@@ -91,6 +136,7 @@ export type Database = {
       presale_products: {
         Row: {
           brand: string
+          brand_id: string | null
           created_at: string
           deposit_price_cents: number
           display_order: number
@@ -109,6 +155,7 @@ export type Database = {
         }
         Insert: {
           brand: string
+          brand_id?: string | null
           created_at?: string
           deposit_price_cents?: number
           display_order?: number
@@ -127,6 +174,7 @@ export type Database = {
         }
         Update: {
           brand?: string
+          brand_id?: string | null
           created_at?: string
           deposit_price_cents?: number
           display_order?: number
@@ -143,7 +191,15 @@ export type Database = {
           specs?: string[]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "presale_products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
