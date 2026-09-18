@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789760440677,
+      "tag": "0000_create_brands_and_link_presale_products",
+      "breakpoints": true
+    }
+  ]
+}
