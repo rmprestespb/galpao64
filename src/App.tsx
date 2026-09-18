@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
 import Admin from "./pages/Admin.tsx";
+import AdminPreVendas from "./pages/AdminPreVendas.tsx";
 import Aura from "./pages/Aura.tsx";
 import Album from "./pages/Album.tsx";
 import Receipts from "./pages/Receipts.tsx";
@@ -15,7 +15,7 @@ import Diecast from "./pages/Diecast.tsx";
 import Showroom from "./pages/Showroom.tsx";
 import MysteryBox from "./pages/MysteryBox.tsx";
 import PreVendas from "./pages/PreVendas.tsx";
-import AdminPreVendas from "./pages/AdminPreVendas.tsx";
+import PreVendasMarca from "./pages/PreVendasMarca.tsx";
 import SplashScreen from "./components/SplashScreen.tsx";
 
 const queryClient = new QueryClient();
@@ -38,9 +38,14 @@ const App = () => {
         <BrowserRouter>
           {!splashDone && <SplashScreen onEnter={handleEnter} />}
           <Routes>
-            <Route path="/" element={<Index />} />
+            {/* "/" entra direto em Pré-vendas (pedido do Robson). A home antiga
+                (Garagem/Sobre, Index.tsx) continua existindo no repo, só não
+                está mais roteada — pra voltar, é só trocar essa linha de volta
+                por <Route path="/" element={<Index />} /> e reimportar Index. */}
+            <Route path="/" element={<Navigate to="/pre-vendas" replace />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/pre-vendas" element={<AdminPreVendas />} />
             <Route path="/admin/recibos" element={<Receipts />} />
             <Route path="/aura" element={<Aura />} />
             <Route path="/album" element={<Album />} />
@@ -48,7 +53,7 @@ const App = () => {
             <Route path="/showroom" element={<Showroom />} />
             <Route path="/mystery-box" element={<MysteryBox />} />
             <Route path="/pre-vendas" element={<PreVendas />} />
-            <Route path="/admin/pre-vendas" element={<AdminPreVendas />} />
+            <Route path="/pre-vendas/:marca" element={<PreVendasMarca />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
