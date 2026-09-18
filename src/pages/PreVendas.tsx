@@ -1,24 +1,81 @@
+import { useEffect, useMemo, useState } from "react";
 import {
+  Loader2,
   ShieldCheck,
   Warehouse,
   Radar,
   CircleDot,
   Cog,
   Truck,
+  PackageCheck,
   Play,
   Instagram,
-  Loader2,
 } from "lucide-react";
 import Header from "@/components/Header";
-import BrandGrid from "@/components/preVendas/BrandGrid";
-import VipWhatsAppBanner from "@/components/preVendas/VipWhatsAppBanner";
-import FaqSection from "@/components/preVendas/FaqSection";
-import { INSTAGRAM } from "@/data/preVendas";
-import { useBrands } from "@/hooks/useBrands";
+import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 import garageBg from "@/assets/luxury-garage-bg.jpg";
 import cineFrame from "@/assets/diecast-destaque.jpg";
-import galpaoLogo from "@/assets/galpao64-logo.png";
+
+const INSTAGRAM = "https://www.instagram.com/galpao64diecast/";
+
+const BRANDS = ["Todas as Marcas", "Mini GT", "Pop Race", "Tarmac Works", "Kaido House"] as const;
+type Brand = (typeof BRANDS)[number];
+
+type PreOrder = {
+  id: string;
+  brand: Exclude<Brand, "Todas as Marcas">;
+  ref: string;
+  name: string;
+  lot: string;
+  eta: string;
+  full: string;
+  deposit: string;
+  image: string;
+  hoverImage: string;
+  specs: string[];
+};
+
+type PresaleRow = {
+  id: string;
+  brand: string;
+  ref: string;
+  name: string;
+  specs: string[];
+  image_url: string;
+  hover_image_url: string | null;
+  full_price_cents: number;
+  deposit_price_cents: number;
+  eta_date: string | null;
+  lot_code: string | null;
+};
+
+const brl = (cents: number) =>
+  (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+const MONTHS = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
+
+const formatEta = (etaDate: string | null) => {
+  if (!etaDate) return "A CONFIRMAR";
+  const [year, month] = etaDate.split("-").map(Number);
+  const m = MONTHS[(month || 1) - 1];
+  return m ? `${m}-${year}` : "A CONFIRMAR";
+};
+
+const toPreOrder = (row: PresaleRow): PreOrder => ({
+  id: row.id,
+  brand: row.brand as PreOrder["brand"],
+  ref: row.ref,
+  name: row.name,
+  lot: row.lot_code ?? "LOTE ABERTO",
+  eta: formatEta(row.eta_date),
+  full: brl(row.full_price_cents),
+  deposit: brl(row.deposit_price_cents),
+  image: row.image_url,
+  hoverImage: row.hover_image_url ?? row.image_url,
+  specs: row.specs ?? [],
+});
 
 const PERKS = [
   { icon: ShieldCheck, title: "Preço Trava-Câmbio", desc: "Valor fixo garantido, sem surpresa cambial na chegada." },
@@ -33,8 +90,156 @@ const STEPS = [
   { icon: Truck, title: "Envio Consolidado", desc: "Junte múltiplos lotes e pague apenas um frete quando quiser." },
 ];
 
+const PaymentOption = ({
+  active, onClick, label, hint,
+}: { active: boolean; onClick: () => void; label: string; hint: string }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-pressed={active}
+    className={cn(
+      "flex-1 rounded-lg border px-3 py-2 text-left transition-all duration-300",
+      active
+        ? "border-primary/70 bg-primary/10 shadow-[0_0_18px_-4px_hsl(var(--primary)/0.6)]"
+        : "border-white/10 bg-white/[0.03] hover:border-white/25",
+    )}
+  >
+    <span className={cn("block text-[12px] font-extrabold tracking-tight", active ? "text-primary" : "text-white")}>
+      {label}
+    </span>
+    <span className="mt-0.5 block text-[10px] uppercase tracking-widest text-white/45">{hint}</span>
+  </button>
+);
+
+const ProductCard = ({ product }: { product: PreOrder }) => {
+  const [mode, setMode] = useState<"full" | "deposit">("full");
+
+  return (
+    <article
+      className={cn(
+        "group relative flex flex-col overflow-hidden rounded-2xl border border-white/[0.07]",
+        "bg-[#0d0d0f] shadow-[0_20px_60px_-30px_rgba(0,0,0,1)]",
+        "transition-all duration-500 hover:-translate-y-1 hover:border-primary/40",
+        "hover:shadow-[0_30px_70px_-25px_hsl(var(--primary)/0.35)]",
+      )}
+    >
+      {/* Badge */}
+      <div className="flex items-center justify-between gap-2 border-b border-white/[0.06] bg-[#111113] px-3 py-2">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-gold">
+          {product.lot} | PREVISÃO: {product.eta}
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-primary">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+          </span>
+          Reserva aberta
+        </span>
+      </div>
+
+      {/* Stage */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-b from-[#17171a] to-black">
+        <img
+          src={product.image}
+          alt={`${product.brand} ${product.name} em escala 1:64`}
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:opacity-0"
+        />
+        <img
+          src={product.hoverImage}
+          alt=""
+          aria-hidden
+          loading="lazy"
+          className="absolute inset-0 h-full w-full scale-105 object-cover opacity-0 transition-all duration-700 group-hover:opacity-100"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_60%_at_50%_0%,rgba(255,255,255,0.14),transparent_60%)] opacity-60 transition-opacity duration-500 group-hover:opacity-100"
+        />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black to-transparent" />
+      </div>
+
+      {/* Info */}
+      <div className="flex flex-1 flex-col gap-4 p-4">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary/80">{product.ref}</p>
+          <h3 className="mt-1 text-base font-extrabold leading-tight tracking-tight text-white">{product.name}</h3>
+        </div>
+
+        <ul className="flex flex-wrap gap-1.5">
+          {product.specs.map((s) => (
+            <li
+              key={s}
+              className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/60"
+            >
+              {s}
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-auto space-y-3">
+          <div className="flex gap-2">
+            <PaymentOption
+              active={mode === "full"}
+              onClick={() => setMode("full")}
+              label={`Integral: ${product.full}`}
+              hint="-5% off"
+            />
+            <PaymentOption
+              active={mode === "deposit"}
+              onClick={() => setMode("deposit")}
+              label={`Sinal: ${product.deposit}`}
+              hint="30% agora + saldo"
+            />
+          </div>
+
+          <a
+            href={INSTAGRAM}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              "flex w-full items-center justify-center gap-2 rounded-full px-4 py-3",
+              "bg-gradient-to-r from-primary to-[#ff8a3d] text-[11px] font-black uppercase tracking-[0.2em] text-black",
+              "shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.8)] transition-all duration-300",
+              "hover:brightness-110 hover:shadow-[0_14px_40px_-8px_hsl(var(--primary)/1)] active:scale-[0.98]",
+            )}
+          >
+            <PackageCheck className="h-4 w-4" strokeWidth={2.5} />
+            Reservar para minha garagem
+          </a>
+        </div>
+      </div>
+    </article>
+  );
+};
+
 const PreVendas = () => {
-  const { brands, loading, error } = useBrands();
+  const [brand, setBrand] = useState<Brand>("Todas as Marcas");
+  const [products, setProducts] = useState<PreOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("presale_products")
+        .select("id, brand, ref, name, specs, image_url, hover_image_url, full_price_cents, deposit_price_cents, eta_date, lot_code")
+        .eq("is_published", true)
+        .order("display_order", { ascending: true });
+      if (!cancelled) {
+        if (!error && data) setProducts((data as PresaleRow[]).map(toPreOrder));
+        setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filtered = useMemo(
+    () => (brand === "Todas as Marcas" ? products : products.filter((p) => p.brand === brand)),
+    [brand, products],
+  );
 
   return (
     <div className="min-h-screen bg-[#09090b] text-white">
@@ -49,22 +254,46 @@ const PreVendas = () => {
           className="absolute inset-0 h-full w-full object-cover opacity-25"
         />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/70 via-[#09090b]/85 to-[#09090b]" />
-        <div className="container relative py-14 text-center md:py-20">
-          <img
-            src={galpaoLogo}
-            alt="Galpão 64 — A Arte do Diecast"
-            className="mx-auto h-16 w-auto sm:h-20"
-          />
-          <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-black uppercase leading-[1.05] tracking-tight md:text-6xl">
-            Pré Vendas
-            <span className="bg-gradient-to-r from-primary via-[#ff8a3d] to-gold bg-clip-text text-transparent">:</span>
+        <div className="container relative py-14 md:py-20">
+          <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold">Galpão 64 — A arte do diecast</p>
+          <h1 className="mt-4 max-w-4xl text-3xl font-black uppercase leading-[1.05] tracking-tight md:text-5xl">
+            Lote de reservas globais —{" "}
+            <span className="bg-gradient-to-r from-primary via-[#ff8a3d] to-gold bg-clip-text text-transparent">
+              garanta o inatingível
+            </span>
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
-            Escolha a marca e reserve os próximos lançamentos mundiais antes de esgotarem.
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
+            Reserve os próximos lançamentos mundiais das melhores marcas antes de esgotarem no mercado.
           </p>
 
+          {/* Brand plates */}
+          <div className="mt-8 -mx-4 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0">
+            <div className="flex min-w-max items-center gap-2.5">
+              {BRANDS.map((b) => {
+                const active = b === brand;
+                return (
+                  <button
+                    key={b}
+                    type="button"
+                    onClick={() => setBrand(b)}
+                    aria-pressed={active}
+                    className={cn(
+                      "relative rounded-md border px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.16em] transition-all duration-300",
+                      "bg-gradient-to-b from-[#27272a] to-[#151517]",
+                      active
+                        ? "border-primary/70 text-primary shadow-[0_0_24px_-4px_hsl(var(--primary)/0.85),inset_0_1px_0_rgba(255,255,255,0.15)]"
+                        : "border-white/10 text-white/55 hover:border-gold/40 hover:text-white",
+                    )}
+                  >
+                    {b}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Perks */}
-          <div className="mt-10 grid gap-3 text-left sm:grid-cols-3">
+          <div className="mt-10 grid gap-3 sm:grid-cols-3">
             {PERKS.map(({ icon: Icon, title, desc }) => (
               <div
                 key={title}
@@ -81,37 +310,32 @@ const PreVendas = () => {
         </div>
       </section>
 
-      {/* PORTAL DE MARCAS — cada card representa uma marca; produtos ficam
-          só dentro da página de cada marca (/pre-vendas/:slug). */}
+      {/* GRID */}
       <section className="container py-12 md:py-16">
         <div className="mb-6 flex items-end justify-between gap-4">
           <h2 className="text-xl font-black uppercase tracking-[0.14em] text-white md:text-2xl">
-            Escolha a marca
+            Vitrine de pré-vendas
           </h2>
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/40">
-            {brands.length} marca{brands.length === 1 ? "" : "s"} em pré-venda
+            {filtered.length} modelo{filtered.length === 1 ? "" : "s"} · {brand}
           </span>
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <div className="flex justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
-        ) : error ? (
-          <p className="py-16 text-center text-sm text-white/50">
-            Não foi possível carregar as marcas agora. Tenta recarregar a página.
-          </p>
-        ) : brands.length === 0 ? (
-          <p className="py-16 text-center text-sm text-white/50">
-            Nenhuma marca cadastrada no momento — volte em breve.
+        ) : filtered.length === 0 ? (
+          <p className="py-20 text-center text-sm uppercase tracking-[0.2em] text-white/40">
+            Nenhuma pré-venda aberta nesta marca no momento.
           </p>
         ) : (
-          <div className="animate-premium-fade-in">
-            <BrandGrid brands={brands} />
+          <div key={brand} className="grid animate-premium-fade-in gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            {filtered.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
           </div>
         )}
-
-        <VipWhatsAppBanner />
       </section>
 
       {/* TIMELINE */}
@@ -178,7 +402,7 @@ const PreVendas = () => {
           <div className="mt-8 rounded-xl border border-gold/20 bg-gold/[0.04] p-4 text-center">
             <p className="text-[12px] leading-relaxed text-white/60">
               O site funciona como vitrine e catálogo. Todas as reservas são confirmadas diretamente no Direct do
-              Instagram ou pelo WhatsApp.
+              Instagram.
             </p>
             <a
               href={INSTAGRAM}
@@ -192,8 +416,6 @@ const PreVendas = () => {
           </div>
         </div>
       </section>
-
-      <FaqSection />
     </div>
   );
 };
