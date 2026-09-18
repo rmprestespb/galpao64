@@ -215,10 +215,30 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
 
 const PreVendas = () => {
   const [brand, setBrand] = useState<Brand>("Todas as Marcas");
+  const [products, setProducts] = useState<PreOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("presale_products")
+        .select("id, brand, ref, name, specs, image_url, hover_image_url, full_price_cents, deposit_price_cents, eta_date, lot_code")
+        .eq("is_published", true)
+        .order("display_order", { ascending: true });
+      if (!cancelled) {
+        if (!error && data) setProducts((data as PresaleRow[]).map(toPreOrder));
+        setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filtered = useMemo(
-    () => (brand === "Todas as Marcas" ? PRODUCTS : PRODUCTS.filter((p) => p.brand === brand)),
-    [brand],
+    () => (brand === "Todas as Marcas" ? products : products.filter((p) => p.brand === brand)),
+    [brand, products],
   );
 
   return (
