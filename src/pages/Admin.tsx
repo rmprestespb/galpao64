@@ -416,6 +416,11 @@ const Admin = () => {
                 <FileText className="h-4 w-4" /> Recibos
               </Link>
             </Button>
+            <Button asChild variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10">
+              <Link to="/admin/pre-vendas">
+                <FileText className="h-4 w-4" /> Pré-vendas
+              </Link>
+            </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4" />
               Sair
