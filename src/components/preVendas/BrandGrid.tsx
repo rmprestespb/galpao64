@@ -2,6 +2,25 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import type { BrandWithCount } from "@/hooks/useBrands";
 
+import heroMiniGt from "@/assets/prevendas-hero-mini-gt.jpg";
+import heroPopRace from "@/assets/prevendas-hero-pop-race.jpg";
+import heroTarmacWorks from "@/assets/prevendas-hero-tarmac-works.jpg";
+import heroKaidoHouse from "@/assets/prevendas-hero-kaido-house.jpg";
+
+/**
+ * Fallback local pras fotos de pedestal de cada marca (as mesmas usadas
+ * antes no hero por pills), usado só enquanto a marca não tem
+ * `card_image_url` cadastrado no banco — assim que o painel admin de
+ * marcas existir e alguém subir uma foto própria, ela passa a valer no
+ * lugar desta.
+ */
+const FALLBACK_CARD_IMAGE: Record<string, string> = {
+  "mini-gt": heroMiniGt,
+  "pop-race": heroPopRace,
+  "tarmac-works": heroTarmacWorks,
+  "kaido-house": heroKaidoHouse,
+};
+
 /**
  * Portal de marcas da pré-venda: um card grande e clicável por marca
  * cadastrada no painel (/admin/marcas — ainda não existe, chega numa
@@ -12,7 +31,7 @@ import type { BrandWithCount } from "@/hooks/useBrands";
 const BrandGrid = ({ brands }: { brands: BrandWithCount[] }) => (
   <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
     {brands.map((brand) => {
-      const hasImage = Boolean(brand.card_image_url);
+      const imageSrc = brand.card_image_url ?? FALLBACK_CARD_IMAGE[brand.slug] ?? null;
       return (
         <Link
           key={brand.id}
@@ -22,24 +41,18 @@ const BrandGrid = ({ brands }: { brands: BrandWithCount[] }) => (
           <div className="relative flex h-48 items-center justify-center overflow-hidden bg-black md:h-56">
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 opacity-70 transition-opacity duration-300 group-hover:opacity-100"
+              className="pointer-events-none absolute inset-0 z-10 opacity-60 transition-opacity duration-300 group-hover:opacity-80"
               style={{
-                background: `radial-gradient(65% 60% at 50% 48%, ${brand.accent_color ?? "hsl(var(--primary)/0.22)"}, transparent 72%)`,
+                background: `linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.85) 100%), radial-gradient(65% 60% at 50% 30%, ${brand.accent_color ?? "hsl(var(--primary)/0.18)"}, transparent 72%)`,
               }}
             />
-            {hasImage ? (
-              <>
-                <div
-                  aria-hidden
-                  className="absolute bottom-9 left-[14%] right-[14%] h-3.5 rounded-full bg-black/70 blur-[3px]"
-                />
-                <img
-                  src={brand.card_image_url!}
-                  alt={brand.name}
-                  loading="lazy"
-                  className="relative h-[80%] w-[86%] object-contain drop-shadow-[0_16px_16px_rgba(0,0,0,0.65)] transition-transform duration-500 group-hover:scale-[1.05]"
-                />
-              </>
+            {imageSrc ? (
+              <img
+                src={imageSrc}
+                alt={brand.name}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.06]"
+              />
             ) : (
               <span className="relative px-6 text-center text-2xl font-black uppercase leading-tight tracking-tight text-white/25 transition-colors duration-300 group-hover:text-white/40 md:text-3xl">
                 {brand.name}
@@ -51,7 +64,7 @@ const BrandGrid = ({ brands }: { brands: BrandWithCount[] }) => (
                 alt=""
                 aria-hidden
                 loading="lazy"
-                className="absolute left-3 top-3 h-8 w-auto drop-shadow-[0_4px_10px_rgba(0,0,0,0.7)]"
+                className="absolute left-3 top-3 z-20 h-8 w-auto drop-shadow-[0_4px_10px_rgba(0,0,0,0.7)]"
               />
             )}
           </div>
