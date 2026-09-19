@@ -27,9 +27,15 @@ const FALLBACK_CARD_IMAGE: Record<string, string> = {
  * próxima etapa; por ora as marcas vêm da migração inicial). Nenhuma
  * miniatura aparece aqui — só a contagem de quantas estão publicadas em
  * cada marca. Clicar em qualquer card leva pra /pre-vendas/:slug.
+ *
+ * As fotos de pedestal (fallback) são painéis bem panorâmicos — 1736×576,
+ * ~3:1 — com as 3 miniaturas da marca lado a lado. Por isso o card usa essa
+ * MESMA proporção (aspect-[1736/576]) em vez de uma altura fixa: encaixando
+ * a foto exatamente na proporção em que ela foi composta, nada é cortado
+ * nas bordas e as 3 miniaturas aparecem inteiras, como no hero original.
  */
 const BrandGrid = ({ brands }: { brands: BrandWithCount[] }) => (
-  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+  <div className="grid gap-5 sm:grid-cols-2">
     {brands.map((brand) => {
       const imageSrc = brand.card_image_url ?? FALLBACK_CARD_IMAGE[brand.slug] ?? null;
       return (
@@ -38,7 +44,7 @@ const BrandGrid = ({ brands }: { brands: BrandWithCount[] }) => (
           to={`/pre-vendas/${brand.slug}`}
           className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-[#1c1c1f] to-black shadow-[0_24px_60px_-30px_rgba(0,0,0,0.9)] transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/60 hover:shadow-[0_30px_70px_-25px_hsl(var(--primary)/0.35)]"
         >
-          <div className="relative flex h-48 items-center justify-center overflow-hidden bg-black md:h-56">
+          <div className="relative flex aspect-[1736/576] items-center justify-center overflow-hidden bg-black">
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 z-10 opacity-60 transition-opacity duration-300 group-hover:opacity-80"

@@ -1,19 +1,34 @@
 import { Link, Navigate, useParams } from "react-router-dom";
-import { ArrowLeft, CalendarClock, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarClock, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import ProductCard from "@/components/preVendas/ProductCard";
 import VipWhatsAppBanner from "@/components/preVendas/VipWhatsAppBanner";
 import FaqSection from "@/components/preVendas/FaqSection";
 import { SLUG_TO_BRAND, formatEta } from "@/data/preVendas";
 import { usePresaleProducts } from "@/hooks/usePresaleProducts";
+import { useBrands } from "@/hooks/useBrands";
+import { cn } from "@/lib/utils";
 
-import garageBg from "@/assets/luxury-garage-bg.jpg";
 import galpaoLogo from "@/assets/galpao64-logo.png";
+import heroMiniGt from "@/assets/prevendas-hero-mini-gt.jpg";
+import heroPopRace from "@/assets/prevendas-hero-pop-race.jpg";
+import heroTarmacWorks from "@/assets/prevendas-hero-tarmac-works.jpg";
+import heroKaidoHouse from "@/assets/prevendas-hero-kaido-house.jpg";
+
+/** Mesmo fallback de foto de pedestal usado nos cards de /pre-vendas (BrandGrid),
+ * usado aqui enquanto a marca não tem `card_image_url` cadastrado no banco. */
+const FALLBACK_HERO_IMAGE: Record<string, string> = {
+  "mini-gt": heroMiniGt,
+  "pop-race": heroPopRace,
+  "tarmac-works": heroTarmacWorks,
+  "kaido-house": heroKaidoHouse,
+};
 
 const PreVendasMarca = () => {
   const { marca } = useParams<{ marca: string }>();
   const brand = marca ? SLUG_TO_BRAND[marca] : undefined;
   const { products, loading } = usePresaleProducts();
+  const { brands } = useBrands();
 
   // Slug desconhecido — volta para a vitrine geral de pré-vendas.
   if (!brand) {
@@ -22,38 +37,81 @@ const PreVendasMarca = () => {
 
   const items = products.filter((p) => p.brand === brand);
   const earliestEta = items[0]?.etaDate;
+  const heroImage = FALLBACK_HERO_IMAGE[marca ?? ""] ?? null;
 
   return (
     <div className="min-h-screen bg-[#09090b] text-white">
       <Header />
 
-      {/* HERO da marca */}
-      <section className="relative overflow-hidden border-b border-white/[0.06]">
-        <img
-          src={garageBg}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 h-full w-full object-cover opacity-25"
-        />
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/70 via-[#09090b]/85 to-[#09090b]" />
-        <div className="container relative py-12 text-center md:py-16">
-          <img src={galpaoLogo} alt="Galpão 64 — A Arte do Diecast" className="mx-auto h-14 w-auto sm:h-16" />
+      {/* HERO da marca: mesma cena de pedestais usada no card de /pre-vendas,
+          com os pills de marca pra trocar de página sem precisar voltar. */}
+      <section className="relative overflow-hidden border-b border-white/[0.06] bg-black">
+        <div className="container relative py-10 text-center md:py-14">
+          <img src={galpaoLogo} alt="Galpão 64 — A Arte do Diecast" className="mx-auto h-12 w-auto sm:h-14" />
 
           <Link
             to="/pre-vendas"
-            className="mt-6 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-white/50 transition-colors hover:text-primary"
+            className="mt-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-white/50 transition-colors hover:text-primary"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Todas as pré-vendas
           </Link>
 
-          <h1 className="mx-auto mt-4 max-w-3xl text-3xl font-black uppercase leading-[1.05] tracking-tight md:text-5xl">
-            Pré-vendas{" "}
-            <span className="bg-gradient-to-r from-primary via-[#ff8a3d] to-gold bg-clip-text text-transparent">
-              {brand}
-            </span>
+          <h1 className="mx-auto mt-3 max-w-3xl text-2xl font-black uppercase leading-[1.05] tracking-tight md:text-4xl">
+            Pré-vendas:
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
+
+          {/* Pills de marca — a marca da página atual fica ativa; as outras levam
+              direto pra própria página, sem passar pela vitrine geral. */}
+          <div className="mx-auto mt-5 flex max-w-3xl flex-wrap items-center justify-center gap-2.5">
+            {brands.map((b) => {
+              const active = b.slug === marca;
+              return (
+                <Link
+                  key={b.id}
+                  to={`/pre-vendas/${b.slug}`}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "rounded-lg border px-4 py-2 text-xs font-black uppercase tracking-wide transition-all sm:px-5 sm:text-sm",
+                    active
+                      ? "border-primary bg-black text-primary shadow-[0_0_18px_hsl(var(--primary)/0.55)]"
+                      : "border-white/15 bg-black/60 text-white/70 hover:border-white/30 hover:text-white",
+                  )}
+                >
+                  {b.name}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Cena da garagem com os pedestais dessa marca */}
+          {heroImage && (
+            <div
+              className="relative mx-auto mt-6 max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-black"
+              style={{ aspectRatio: "1736 / 576" }}
+            >
+              <img
+                key={marca}
+                src={heroImage}
+                alt={`Miniaturas ${brand} em pré-venda`}
+                className="absolute inset-0 h-full w-full animate-premium-fade-in object-cover"
+              />
+            </div>
+          )}
+
+          {/* CTA logo abaixo das miniaturas — leva direto pras pré-vendas
+              abertas dessa marca, mais abaixo nesta mesma página. */}
+          <div className="mt-7 flex justify-center">
+            <a
+              href="#produtos-marca"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-9 py-3.5 text-sm font-black uppercase tracking-[0.14em] text-black shadow-[0_16px_40px_-14px_hsl(var(--primary)/0.8)] transition-transform hover:scale-[1.03]"
+            >
+              Ver pré-vendas {brand}
+              <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
+
+          <p className="mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
             {loading
               ? "Carregando reservas abertas…"
               : `${items.length} modelo${items.length === 1 ? "" : "s"} em reserva aberta — garanta o seu antes que o lote feche.`}
@@ -71,7 +129,7 @@ const PreVendasMarca = () => {
       </section>
 
       {/* GRID da marca */}
-      <section className="container py-12 md:py-16">
+      <section id="produtos-marca" className="container py-12 md:py-16 scroll-mt-20">
         {loading ? (
           <div className="flex justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
