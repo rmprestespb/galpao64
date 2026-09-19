@@ -84,10 +84,14 @@ const PreVendasMarca = () => {
             })}
           </div>
 
-          {/* Cena da garagem com os pedestais dessa marca */}
+          {/* Cena da garagem com os pedestais dessa marca — a própria foto é
+              clicável e leva direto pras pré-vendas abertas, mais abaixo
+              nesta mesma página (sem precisar de um botão separado). */}
           {heroImage && (
-            <div
-              className="relative mx-auto mt-6 max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-black"
+            <a
+              href="#produtos-marca"
+              aria-label={`Ver pré-vendas ${brand}`}
+              className="group relative mx-auto mt-6 block max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-black transition-transform duration-300 hover:scale-[1.01]"
               style={{ aspectRatio: "1736 / 576" }}
             >
               <img
@@ -96,20 +100,17 @@ const PreVendasMarca = () => {
                 alt={`Miniaturas ${brand} em pré-venda`}
                 className="absolute inset-0 h-full w-full animate-premium-fade-in object-cover"
               />
-            </div>
-          )}
-
-          {/* CTA logo abaixo das miniaturas — leva direto pras pré-vendas
-              abertas dessa marca, mais abaixo nesta mesma página. */}
-          <div className="mt-7 flex justify-center">
-            <a
-              href="#produtos-marca"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-9 py-3.5 text-sm font-black uppercase tracking-[0.14em] text-black shadow-[0_16px_40px_-14px_hsl(var(--primary)/0.8)] transition-transform hover:scale-[1.03]"
-            >
-              Ver pré-vendas {brand}
-              <ArrowRight className="h-4 w-4" />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/80 via-transparent to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              >
+                <span className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-xs font-black uppercase tracking-[0.14em] text-black sm:text-sm">
+                  Ver pré-vendas {brand}
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </div>
             </a>
-          </div>
+          )}
 
           <p className="mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
             {loading
