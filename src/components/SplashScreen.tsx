@@ -200,11 +200,64 @@ const playEngineSound = () => {
   }
 };
 
+// Posição da placa "GALPÃO 64 — A ARTE DO DIECAST" dentro da arte original
+// (frações de 0 a 1 sobre os 1831×859px da imagem), medida recortando a foto.
+// Usada pra acender um brilho exatamente em cima da placa, não importa o
+// tamanho da tela — já que a imagem usa object-contain (nunca é cortada), a
+// posição renderizada dela muda conforme a proporção da janela.
+const IMAGE_RATIO = 1831 / 859;
+const SIGN_BOX = { left: 0.322, top: 0.006, width: 0.365, height: 0.275 };
+
 const SplashScreen = ({ onEnter }: SplashScreenProps) => {
   const [opening, setOpening] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [pressed, setPressed] = useState(false);
   const triggered = useRef(false);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [signRect, setSignRect] = useState<{ left: number; top: number; width: number; height: number } | null>(
+    null,
+  );
+
+  // Recalcula onde a placa cai na tela sempre que o tamanho da janela muda —
+  // reproduz manualmente a matemática do object-contain pra saber o retângulo
+  // real da imagem (ela pode sobrar preto nas laterais ou em cima/embaixo).
+  useEffect(() => {
+    const recompute = () => {
+      const stage = stageRef.current;
+      if (!stage) return;
+      const { width: cw, height: ch } = stage.getBoundingClientRect();
+      if (!cw || !ch) return;
+
+      const containerRatio = cw / ch;
+      let renderedW: number;
+      let renderedH: number;
+      let offsetX: number;
+      let offsetY: number;
+
+      if (containerRatio > IMAGE_RATIO) {
+        renderedH = ch;
+        renderedW = ch * IMAGE_RATIO;
+        offsetX = (cw - renderedW) / 2;
+        offsetY = 0;
+      } else {
+        renderedW = cw;
+        renderedH = cw / IMAGE_RATIO;
+        offsetX = 0;
+        offsetY = (ch - renderedH) / 2;
+      }
+
+      setSignRect({
+        left: offsetX + renderedW * SIGN_BOX.left,
+        top: offsetY + renderedH * SIGN_BOX.top,
+        width: renderedW * SIGN_BOX.width,
+        height: renderedH * SIGN_BOX.height,
+      });
+    };
+
+    recompute();
+    window.addEventListener("resize", recompute);
+    return () => window.removeEventListener("resize", recompute);
+  }, []);
 
   const handleEnter = () => {
     if (triggered.current) return;
@@ -262,6 +315,7 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
 
       {/* Centered content (sits above doors but disappears as they slide) */}
       <div
+        ref={stageRef}
         className={`absolute inset-0 flex flex-col items-center justify-center gap-6 px-4 py-6 pointer-events-auto transition-opacity duration-500 ${
           opening ? "opacity-0" : "opacity-100"
         }`}
@@ -299,33 +353,52 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
           }}
         />
 
-        {/* Expanding ring anchored over the CTA button */}
-        {pressed && (
+        {/* Brilho pulsante em cima da própria placa "GALPÃO 64" — é o convite
+            visual pra clicar, no lugar do botão branco separado. A posição é
+            calculada em cima da imagem real (ver useEffect acima), então
+            acompanha a placa em qualquer proporção de tela. */}
+        {signRect && (
           <div
             aria-hidden="true"
-            className="absolute left-1/2 top-[86%] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            className="pointer-events-none absolute rounded-xl transition-all duration-300"
+            style={{
+              left: signRect.left,
+              top: signRect.top,
+              width: signRect.width,
+              height: signRect.height,
+              boxShadow: pressed
+                ? "0 0 0 3px rgba(245,216,150,0.9), 0 0 55px 18px rgba(245,216,150,0.55)"
+                : "0 0 0 2px rgba(245,216,150,0.45), 0 0 30px 8px rgba(245,216,150,0.25)",
+              animation: pressed ? undefined : "splash-sign-glow 2.2s ease-in-out infinite",
+            }}
+          />
+        )}
+
+        {/* Anel de clique expandindo a partir da placa */}
+        {pressed && signRect && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+            style={{
+              left: signRect.left + signRect.width / 2,
+              top: signRect.top + signRect.height / 2,
+            }}
           >
             <span className="splash-cta-ring block rounded-full border-2 border-[#F5D896]" />
           </div>
         )}
 
-        {/* The garage artwork doesn't have the CTA text painted on it, so
-            it's rendered as a real HTML label sitting over the artwork.
-            The entire splash stays clickable to enter the showroom. */}
+        {/* A arte não tem nenhum texto de "clique aqui" — o próprio brilho na
+            placa já indica que ali é clicável. O clique continua funcionando
+            em qualquer ponto da tela (mantém a área fácil de acertar), só não
+            existe mais a etiqueta branca separada embaixo. */}
         <button
           type="button"
           onClick={handleEnter}
           disabled={pressed}
           aria-label="Clique para entrar no showroom Galpão 64"
           className="absolute inset-0 h-full w-full cursor-pointer bg-transparent focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-[#F5D896] disabled:cursor-default"
-        >
-          <span
-            className="absolute left-1/2 top-[86%] -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-md bg-white px-6 py-3 text-sm font-black uppercase tracking-[0.12em] text-black shadow-[0_0_30px_rgba(245,216,150,0.7)] transition-transform duration-300 sm:px-9 sm:py-4 sm:text-base"
-            style={{ transform: `translate(-50%, -50%) scale(${pressed ? 0.94 : 1})` }}
-          >
-            Clique para entrar no showroom
-          </span>
-        </button>
+        />
       </div>
     </div>
   );
