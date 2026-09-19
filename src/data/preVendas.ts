@@ -74,6 +74,27 @@ export const mapPresaleRow = (row: PresaleProductRow): PreOrder => ({
   lotClosesAt: row.lot_closes_at,
 });
 
+/**
+ * Status de disponibilidade da reserva, derivado só do prazo do lote
+ * (lot_closes_at) — não depende de nenhum campo novo no banco:
+ * - "aberta": sem prazo, ou prazo a mais de 7 dias.
+ * - "fechando": prazo dentro dos próximos 7 dias (ainda dá pra reservar).
+ * - "encerrada": prazo já passou.
+ */
+export type AvailabilityStatus = "aberta" | "fechando" | "encerrada";
+
+export const FECHANDO_EM_BREVE_DIAS = 7;
+
+export const getAvailabilityStatus = (lotClosesAt: string | null): AvailabilityStatus => {
+  if (!lotClosesAt) return "aberta";
+  const closesAt = new Date(lotClosesAt).getTime();
+  const now = Date.now();
+  if (closesAt <= now) return "encerrada";
+  const msAteFechar = closesAt - now;
+  const seteDiasEmMs = FECHANDO_EM_BREVE_DIAS * 24 * 60 * 60 * 1000;
+  return msAteFechar <= seteDiasEmMs ? "fechando" : "aberta";
+};
+
 export const formatEta = (etaDate: string | null) => {
   if (!etaDate) return "Em breve";
   const label = format(parseISO(etaDate), "MMMM/yyyy", { locale: ptBR });

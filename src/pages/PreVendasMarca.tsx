@@ -1,13 +1,23 @@
+import { useMemo, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CalendarClock, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import ProductCard from "@/components/preVendas/ProductCard";
 import VipWhatsAppBanner from "@/components/preVendas/VipWhatsAppBanner";
 import FaqSection from "@/components/preVendas/FaqSection";
-import { SLUG_TO_BRAND, formatEta } from "@/data/preVendas";
+import { SLUG_TO_BRAND, formatEta, getAvailabilityStatus, type AvailabilityStatus } from "@/data/preVendas";
 import { usePresaleProducts } from "@/hooks/usePresaleProducts";
 import { useBrands } from "@/hooks/useBrands";
 import { cn } from "@/lib/utils";
+
+/** Filtro de disponibilidade da grade de produtos — "Todas" mostra tudo,
+ * as outras opções batem com o status calculado em getAvailabilityStatus. */
+const AVAILABILITY_FILTERS: { key: "todas" | AvailabilityStatus; label: string }[] = [
+  { key: "todas", label: "Todas" },
+  { key: "aberta", label: "Reserva aberta" },
+  { key: "fechando", label: "Fechando em breve" },
+  { key: "encerrada", label: "Encerradas" },
+];
 
 import galpaoLogo from "@/assets/galpao64-logo.png";
 import heroMiniGt from "@/assets/prevendas-hero-mini-gt.jpg";
@@ -29,14 +39,31 @@ const PreVendasMarca = () => {
   const brand = marca ? SLUG_TO_BRAND[marca] : undefined;
   const { products, loading } = usePresaleProducts();
   const { brands } = useBrands();
+  const [availabilityFilter, setAvailabilityFilter] = useState<"todas" | AvailabilityStatus>("todas");
+
+  // Todos os hooks precisam rodar antes de qualquer "return" condicional —
+  // por isso o cálculo dos itens/contagens fica aqui em cima, mesmo que
+  // "brand" ainda esteja indefinido (slug inválido); nesse caso dá tudo vazio
+  // e a página redireciona logo abaixo antes de renderizar qualquer coisa.
+  const items = useMemo(() => (brand ? products.filter((p) => p.brand === brand) : []), [products, brand]);
+  const earliestEta = items[0]?.etaDate;
+
+  // Conta quantos itens caem em cada status, pra mostrar ao lado do nome do
+  // filtro (e pra já esconder filtros sem nenhum item, tipo "Encerradas"
+  // quando não tem nenhuma pré-venda encerrada dessa marca).
+  const countsByStatus = useMemo(() => {
+    const counts: Record<AvailabilityStatus, number> = { aberta: 0, fechando: 0, encerrada: 0 };
+    for (const p of items) counts[getAvailabilityStatus(p.lotClosesAt)]++;
+    return counts;
+  }, [items]);
 
   // Slug desconhecido — volta para a vitrine geral de pré-vendas.
   if (!brand) {
     return <Navigate to="/pre-vendas" replace />;
   }
 
-  const items = products.filter((p) => p.brand === brand);
-  const earliestEta = items[0]?.etaDate;
+  const filteredItems =
+    availabilityFilter === "todas" ? items : items.filter((p) => getAvailabilityStatus(p.lotClosesAt) === availabilityFilter);
   const heroImage = FALLBACK_HERO_IMAGE[marca ?? ""] ?? null;
 
   return (
@@ -131,6 +158,33 @@ const PreVendasMarca = () => {
 
       {/* GRID da marca */}
       <section id="produtos-marca" className="container py-12 md:py-16 scroll-mt-20">
+        {!loading && items.length > 0 && (
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            {AVAILABILITY_FILTERS.map(({ key, label }) => {
+              const count = key === "todas" ? items.length : countsByStatus[key];
+              // Some filtro sem nenhum item (ex.: "Encerradas" quando não tem
+              // nenhuma), menos "Todas" que sempre aparece.
+              if (key !== "todas" && count === 0) return null;
+              const active = availabilityFilter === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setAvailabilityFilter(key)}
+                  className={cn(
+                    "rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] transition-colors",
+                    active
+                      ? "border-primary bg-primary text-black"
+                      : "border-white/15 bg-black/40 text-white/60 hover:border-white/30 hover:text-white",
+                  )}
+                >
+                  {label} ({count})
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {loading ? (
           <div className="flex justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -143,9 +197,13 @@ const PreVendasMarca = () => {
             </Link>
             .
           </p>
+        ) : filteredItems.length === 0 ? (
+          <p className="py-16 text-center text-sm text-white/50">
+            Nenhuma miniatura nesse filtro no momento.
+          </p>
         ) : (
           <div className="grid animate-premium-fade-in gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-            {items.map((p) => (
+            {filteredItems.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
