@@ -19,6 +19,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import galpaoLogo from "@/assets/galpao64-logo.png";
+import Footer from "@/components/Footer";
 
 type ReservationStatus = "na_garagem" | "aguardando_envio";
 
@@ -327,6 +328,8 @@ const Album = () => {
           </div>
         </section>
       </main>
+
+      <Footer />
 
       {/* Garage detail */}
       <Dialog open={!!active} onOpenChange={(o) => !o && setActive(null)}>

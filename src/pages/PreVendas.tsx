@@ -1,5 +1,6 @@
 import { Warehouse, CircleDot, Cog, Truck, Play, Instagram, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import BrandGrid from "@/components/preVendas/BrandGrid";
 import VipWhatsAppBanner from "@/components/preVendas/VipWhatsAppBanner";
 import FaqSection from "@/components/preVendas/FaqSection";
@@ -133,6 +134,7 @@ const PreVendas = () => {
       </section>
 
       <FaqSection />
+      <Footer />
     </div>
   );
 };

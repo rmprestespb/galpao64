@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CalendarClock, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import ProductCard from "@/components/preVendas/ProductCard";
 import VipWhatsAppBanner from "@/components/preVendas/VipWhatsAppBanner";
 import FaqSection from "@/components/preVendas/FaqSection";
@@ -213,6 +214,7 @@ const PreVendasMarca = () => {
       </section>
 
       <FaqSection />
+      <Footer />
     </div>
   );
 };

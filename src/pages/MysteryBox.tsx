@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import mysterySilhouette from "@/assets/mystery-box-silhouette.jpg";
+import Footer from "@/components/Footer";
 
 type Lot = {
   id: string;
@@ -141,6 +142,7 @@ export default function MysteryBox() {
         }));
 
   return (
+    <>
     <main className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/60 bg-gradient-to-b from-background to-background/60">
         <div className="container mx-auto px-4 py-10">
@@ -312,6 +314,8 @@ export default function MysteryBox() {
         </div>
       </section>
     </main>
+    <Footer />
+    </>
   );
 }
 
