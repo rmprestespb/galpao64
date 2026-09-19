@@ -21,12 +21,15 @@ import SplashScreen from "./components/SplashScreen.tsx";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [splashDone, setSplashDone] = useState(
-    () => typeof window !== "undefined" && sessionStorage.getItem("g64_splash") === "1",
-  );
+  // Sempre começa mostrando o splash: cada carregamento novo da página (digitar
+  // o endereço, dar F5, abrir um link direto) é uma "chegada" na garagem, então
+  // ele deve aparecer de novo — só fica escondido durante a navegação interna do
+  // site (SPA), porque o App não remonta nesse caso. Antes isso ficava salvo no
+  // navegador (sessionStorage) e só aparecia uma vez por aba, o que confundia
+  // quem testava digitando o site de novo na mesma aba esperando ver o splash.
+  const [splashDone, setSplashDone] = useState(false);
 
   const handleEnter = () => {
-    sessionStorage.setItem("g64_splash", "1");
     setSplashDone(true);
   };
 

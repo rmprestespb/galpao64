@@ -266,16 +266,22 @@ const SplashScreen = ({ onEnter }: SplashScreenProps) => {
           opening ? "opacity-0" : "opacity-100"
         }`}
       >
-        {/* Full-bleed showroom artwork: rustic wooden garage at night with
-            the doors open revealing legendary 1:64 diecast classics inside.
-            The 'GALPÃO 64 — A ARTE DO DIECAST' metal sign is part of the
-            artwork itself, integrated above the garage doors. */}
+        {/* Fundo escuro atrás da arte — aparece nas laterais/topo quando a
+            proporção da tela não bate com a da foto (object-contain, ver
+            abaixo), em vez de cortar a cena. */}
+        <div aria-hidden className="absolute inset-0 bg-black" />
+
+        {/* Arte do showroom: galpão de madeira visto de fora, portas abertas,
+            com a coleção de miniaturas diecast 1:64 exposta lá dentro. A placa
+            'GALPÃO 64 — A ARTE DO DIECAST' faz parte da própria arte, acima
+            das portas. Usa object-contain (em vez de cover) pra SEMPRE mostrar
+            a cena inteira — foto é bem panorâmica (2.13:1) e um "cover" numa
+            tela estreita de celular cortava as laterais, sobrando só o miolo. */}
         <img
           src={showroomSplash}
           alt="Galpão 64 — galpão de madeira com portas abertas exibindo coleção de miniaturas diecast 1:64 lendárias: Ford Mustang verde, Chevrolet Opala vermelho e Porsche 911 preto"
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1400ms] ease-out"
+          className="absolute inset-0 h-full w-full object-contain transition-transform duration-[1400ms] ease-out"
           style={{
-            objectPosition: "center 40%",
             transform: pressed ? "scale(1.08)" : "scale(1)",
             filter: pressed ? "brightness(1.15) saturate(1.1)" : "brightness(1)",
           }}
