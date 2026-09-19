@@ -1,14 +1,4 @@
-import {
-  ShieldCheck,
-  Warehouse,
-  Radar,
-  CircleDot,
-  Cog,
-  Truck,
-  Play,
-  Instagram,
-  Loader2,
-} from "lucide-react";
+import { Warehouse, CircleDot, Cog, Truck, Play, Instagram, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import BrandGrid from "@/components/preVendas/BrandGrid";
 import VipWhatsAppBanner from "@/components/preVendas/VipWhatsAppBanner";
@@ -16,15 +6,7 @@ import FaqSection from "@/components/preVendas/FaqSection";
 import { INSTAGRAM } from "@/data/preVendas";
 import { useBrands } from "@/hooks/useBrands";
 
-import garageBg from "@/assets/luxury-garage-bg.jpg";
 import cineFrame from "@/assets/diecast-destaque.jpg";
-import galpaoLogo from "@/assets/galpao64-logo.png";
-
-const PERKS = [
-  { icon: ShieldCheck, title: "Preço Trava-Câmbio", desc: "Valor fixo garantido, sem surpresa cambial na chegada." },
-  { icon: Warehouse, title: "Garagem Virtual", desc: "Consolide seus envios e pague um único frete." },
-  { icon: Radar, title: "Status em Tempo Real", desc: "Acompanhe cada etapa do lote de importação." },
-];
 
 const STEPS = [
   { icon: CircleDot, title: "Reserve o Modelo", desc: "Garanta sua vaga com preço protegido contra variação cambial." },
@@ -40,58 +22,15 @@ const PreVendas = () => {
     <div className="min-h-screen bg-[#09090b] text-white">
       <Header />
 
-      {/* HERO */}
-      <section className="relative overflow-hidden border-b border-white/[0.06]">
-        <img
-          src={garageBg}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 h-full w-full object-cover opacity-25"
-        />
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/70 via-[#09090b]/85 to-[#09090b]" />
-        <div className="container relative py-14 text-center md:py-20">
-          <img
-            src={galpaoLogo}
-            alt="Galpão 64 — A Arte do Diecast"
-            className="mx-auto h-16 w-auto sm:h-20"
-          />
-          <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-black uppercase leading-[1.05] tracking-tight md:text-6xl">
-            Pré Vendas
-            <span className="bg-gradient-to-r from-primary via-[#ff8a3d] to-gold bg-clip-text text-transparent">:</span>
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-white/60 md:text-base">
-            Escolha a marca e reserve os próximos lançamentos mundiais antes de esgotarem.
-          </p>
-
-          {/* Perks */}
-          <div className="mt-10 grid gap-3 text-left sm:grid-cols-3">
-            {PERKS.map(({ icon: Icon, title, desc }) => (
-              <div
-                key={title}
-                className="flex items-start gap-3 rounded-xl border border-white/[0.07] bg-white/[0.03] p-4 backdrop-blur-sm transition-colors hover:border-gold/30"
-              >
-                <Icon className="mt-0.5 h-5 w-5 shrink-0 text-gold" />
-                <div>
-                  <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-white">{title}</p>
-                  <p className="mt-1 text-[11px] leading-relaxed text-white/50">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PORTAL DE MARCAS — cada card representa uma marca; produtos ficam
-          só dentro da página de cada marca (/pre-vendas/:slug). */}
-      <section className="container py-12 md:py-16">
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <h2 className="text-xl font-black uppercase tracking-[0.14em] text-white md:text-2xl">
-            Escolha a marca
-          </h2>
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/40">
-            {brands.length} marca{brands.length === 1 ? "" : "s"} em pré-venda
-          </span>
-        </div>
+      {/* PORTAL DE MARCAS — primeira coisa que aparece ao entrar na página:
+          só o título "PRÉ VENDAS:" em cima dos cards, sem logo/subtítulo/perks
+          antes. Cada card representa uma marca; produtos ficam só dentro da
+          página de cada marca (/pre-vendas/:slug). */}
+      <section className="container py-10 md:py-14">
+        <h1 className="mb-8 text-center text-3xl font-black uppercase leading-none tracking-tight text-white md:text-5xl">
+          Pré Vendas
+          <span className="bg-gradient-to-r from-primary via-[#ff8a3d] to-gold bg-clip-text text-transparent">:</span>
+        </h1>
 
         {loading ? (
           <div className="flex justify-center py-16">
