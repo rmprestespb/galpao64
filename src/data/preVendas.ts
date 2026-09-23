@@ -103,7 +103,7 @@ export const formatEta = (etaDate: string | null) => {
 
 export const buildReserveMessage = (p: PreOrder, mode: "full" | "deposit") => {
   const valor = mode === "full" ? p.full : p.deposit;
-  const modoLabel = mode === "full" ? "Pagamento integral (com desconto)" : "Sinal de reserva (30%)";
+  const modoLabel = mode === "full" ? "Pagamento integral (com desconto)" : "Sinal de reserva";
   return (
     `Olá! Quero *garantir minha pré-venda* no Galpão 64 🚗\n\n` +
     `*Modelo:* ${p.name}\n` +
