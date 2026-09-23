@@ -56,6 +56,14 @@ export default function Header() {
           Pré-Vendas
         </Link>
 
+        <Link
+          to="/no-galpao"
+          className={`text-xs md:text-sm font-semibold tracking-wider uppercase transition-colors ${
+            isActive('/no-galpao') ? 'text-orange-500' : 'text-zinc-400 hover:text-white'
+          }`}
+        >
+          No Galpão
+        </Link>
 
         {/* Botão Premium Mystery Box — escondido do público, só aparece pra
             quem está logado como admin (a página em si também é protegida). */}
