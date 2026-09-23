@@ -54,7 +54,7 @@ const PreVendasMarca = () => {
   // quando não tem nenhuma pré-venda encerrada dessa marca).
   const countsByStatus = useMemo(() => {
     const counts: Record<AvailabilityStatus, number> = { aberta: 0, fechando: 0, encerrada: 0 };
-    for (const p of items) counts[getAvailabilityStatus(p.lotClosesAt)]++;
+    for (const p of items) counts[getAvailabilityStatus(p.lotClosesAt, p.unitsReserved, p.lotSize)]++;
     return counts;
   }, [items]);
 
@@ -64,7 +64,9 @@ const PreVendasMarca = () => {
   }
 
   const filteredItems =
-    availabilityFilter === "todas" ? items : items.filter((p) => getAvailabilityStatus(p.lotClosesAt) === availabilityFilter);
+    availabilityFilter === "todas"
+      ? items
+      : items.filter((p) => getAvailabilityStatus(p.lotClosesAt, p.unitsReserved, p.lotSize) === availabilityFilter);
   const heroImage = FALLBACK_HERO_IMAGE[marca ?? ""] ?? null;
 
   return (
