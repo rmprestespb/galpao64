@@ -59,36 +59,6 @@ export type Database = {
         }
         Relationships: []
       }
-      galpao_photos: {
-        Row: {
-          caption: string | null
-          created_at: string
-          display_order: number
-          id: string
-          image_url: string
-          is_published: boolean
-          updated_at: string
-        }
-        Insert: {
-          caption?: string | null
-          created_at?: string
-          display_order?: number
-          id?: string
-          image_url: string
-          is_published?: boolean
-          updated_at?: string
-        }
-        Update: {
-          caption?: string | null
-          created_at?: string
-          display_order?: number
-          id?: string
-          image_url?: string
-          is_published?: boolean
-          updated_at?: string
-        }
-        Relationships: []
-      }
       mystery_boxes: {
         Row: {
           collector_name: string | null
@@ -169,10 +139,8 @@ export type Database = {
           brand_id: string | null
           created_at: string
           deposit_price_cents: number
-          description: string | null
           display_order: number
           eta_date: string | null
-          extra_image_url: string | null
           full_price_cents: number
           hover_image_url: string | null
           id: string
@@ -180,11 +148,9 @@ export type Database = {
           is_published: boolean
           lot_closes_at: string | null
           lot_code: string | null
-          lot_size: number
           name: string
           ref: string
           specs: string[]
-          units_reserved: number
           updated_at: string
         }
         Insert: {
@@ -192,10 +158,8 @@ export type Database = {
           brand_id?: string | null
           created_at?: string
           deposit_price_cents?: number
-          description?: string | null
           display_order?: number
           eta_date?: string | null
-          extra_image_url?: string | null
           full_price_cents?: number
           hover_image_url?: string | null
           id?: string
@@ -203,11 +167,9 @@ export type Database = {
           is_published?: boolean
           lot_closes_at?: string | null
           lot_code?: string | null
-          lot_size?: number
           name: string
           ref: string
           specs?: string[]
-          units_reserved?: number
           updated_at?: string
         }
         Update: {
@@ -215,10 +177,8 @@ export type Database = {
           brand_id?: string | null
           created_at?: string
           deposit_price_cents?: number
-          description?: string | null
           display_order?: number
           eta_date?: string | null
-          extra_image_url?: string | null
           full_price_cents?: number
           hover_image_url?: string | null
           id?: string
@@ -226,11 +186,9 @@ export type Database = {
           is_published?: boolean
           lot_closes_at?: string | null
           lot_code?: string | null
-          lot_size?: number
           name?: string
           ref?: string
           specs?: string[]
-          units_reserved?: number
           updated_at?: string
         }
         Relationships: [
