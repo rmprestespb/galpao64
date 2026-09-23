@@ -120,7 +120,7 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
               active={mode === "deposit"}
               onClick={() => setMode("deposit")}
               label={`Sinal: ${product.deposit}`}
-              hint="30% agora + saldo"
+              hint="restante na chegada ao Brasil"
             />
           </div>
 
