@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +25,7 @@ type Box = {
 };
 
 export default function MysteryBox() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, loading: authLoading } = useAuth();
   const [lot, setLot] = useState<Lot | null>(null);
   const [boxes, setBoxes] = useState<Box[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,6 +108,21 @@ export default function MysteryBox() {
     }
     loadAll();
   };
+
+  // Página escondida do público por enquanto — só quem está logado como admin
+  // consegue ver o Mystery Box; qualquer outra pessoa que acessar o link é
+  // mandada de volta pras pré-vendas, sem nem carregar os dados do lote.
+  if (authLoading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">
+        Carregando...
+      </main>
+    );
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/pre-vendas" replace />;
+  }
 
   if (loading) {
     return (
