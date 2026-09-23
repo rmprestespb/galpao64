@@ -18,6 +18,10 @@ import Showroom from "./pages/Showroom.tsx";
 import MysteryBox from "./pages/MysteryBox.tsx";
 import PreVendas from "./pages/PreVendas.tsx";
 import PreVendasMarca from "./pages/PreVendasMarca.tsx";
+import Empresa from "./pages/Empresa.tsx";
+import PoliticaPrivacidade from "./pages/PoliticaPrivacidade.tsx";
+import TermosUso from "./pages/TermosUso.tsx";
+import TermosCompra from "./pages/TermosCompra.tsx";
 import SplashScreen from "./components/SplashScreen.tsx";
 
 const queryClient = new QueryClient();
@@ -61,6 +65,10 @@ const App = () => {
             <Route path="/pre-vendas" element={<PreVendas />} />
             <Route path="/pre-vendas/:marca" element={<PreVendasMarca />} />
             <Route path="/no-galpao" element={<NoGalpao />} />
+            <Route path="/empresa" element={<Empresa />} />
+            <Route path="/politica-de-privacidade" element={<PoliticaPrivacidade />} />
+            <Route path="/termos-de-uso" element={<TermosUso />} />
+            <Route path="/termos-de-compra" element={<TermosCompra />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
