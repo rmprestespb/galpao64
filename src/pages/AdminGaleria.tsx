@@ -20,6 +20,25 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { GalpaoPhotoRow } from "@/hooks/useGalpaoPhotos";
 
+/** Extrai uma mensagem legível de qualquer formato de erro (Error nativo,
+ * PostgrestError/StorageError do Supabase, que são objetos simples e não
+ * "instanceof Error", ou qualquer outra coisa) — sem isso, erros que não são
+ * Error nativo caem no "[object Object]" do String() padrão. */
+const errorMessage = (err: unknown): string => {
+  if (err instanceof Error) return err.message;
+  if (err && typeof err === "object") {
+    const anyErr = err as Record<string, unknown>;
+    if (typeof anyErr.message === "string" && anyErr.message) return anyErr.message;
+    if (typeof anyErr.error_description === "string" && anyErr.error_description) return anyErr.error_description;
+    try {
+      return JSON.stringify(err);
+    } catch {
+      /* segue pro fallback abaixo */
+    }
+  }
+  return String(err);
+};
+
 /**
  * Admin da galeria "No Galpão" (/no-galpao) — upload de fotos reais do espaço
  * e do estoque, com legenda opcional, ordem de exibição e publicar/ocultar.
@@ -104,8 +123,7 @@ const AdminGaleria = () => {
       toast.success(files.length > 1 ? `${files.length} fotos enviadas` : "Foto enviada");
       fetchPhotos();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      toast.error("Falha no upload", { description: msg, duration: 8000 });
+      toast.error("Falha no upload", { description: errorMessage(err), duration: 8000 });
     } finally {
       setUploading(false);
       e.target.value = "";
