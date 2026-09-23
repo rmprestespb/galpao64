@@ -59,6 +59,36 @@ export type Database = {
         }
         Relationships: []
       }
+      galpao_photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          display_order: number
+          id: string
+          image_url: string
+          is_published: boolean
+          updated_at: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url: string
+          is_published?: boolean
+          updated_at?: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string
+          is_published?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       mystery_boxes: {
         Row: {
           collector_name: string | null

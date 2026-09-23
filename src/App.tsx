@@ -8,6 +8,8 @@ import NotFound from "./pages/NotFound.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
 import Admin from "./pages/Admin.tsx";
 import AdminPreVendas from "./pages/AdminPreVendas.tsx";
+import AdminGaleria from "./pages/AdminGaleria.tsx";
+import NoGalpao from "./pages/NoGalpao.tsx";
 import Aura from "./pages/Aura.tsx";
 import Album from "./pages/Album.tsx";
 import Receipts from "./pages/Receipts.tsx";
@@ -53,6 +55,7 @@ const App = () => {
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/pre-vendas" element={<AdminPreVendas />} />
+            <Route path="/admin/no-galpao" element={<AdminGaleria />} />
             <Route path="/admin/recibos" element={<Receipts />} />
             <Route path="/aura" element={<Aura />} />
             <Route path="/album" element={<Album />} />
@@ -61,6 +64,7 @@ const App = () => {
             <Route path="/mystery-box" element={<MysteryBox />} />
             <Route path="/pre-vendas" element={<PreVendas />} />
             <Route path="/pre-vendas/:marca" element={<PreVendasMarca />} />
+            <Route path="/no-galpao" element={<NoGalpao />} />
             <Route path="/empresa" element={<Empresa />} />
             <Route path="/politica-de-privacidade" element={<PoliticaPrivacidade />} />
             <Route path="/termos-de-uso" element={<TermosUso />} />
