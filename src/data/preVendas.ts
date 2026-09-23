@@ -45,14 +45,26 @@ export type PreOrder = {
   ref: string;
   name: string;
   specs: string[];
+  description: string | null;
   image: string;
   hoverImage: string;
+  extraImage: string | null;
   full: string;
   deposit: string;
   etaDate: string | null;
   lotCode: string | null;
   lotClosesAt: string | null;
+  lotSize: number;
+  unitsReserved: number;
 };
+
+/** Quebra o texto livre de "descrição" em linhas não vazias, pra exibir
+ * uma informação por linha (a admin digita cada fato numa linha do textarea). */
+export const descriptionLines = (description: string | null): string[] =>
+  (description ?? "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
 
 export type PresaleProductRow = Tables<"presale_products">;
 
@@ -65,27 +77,40 @@ export const mapPresaleRow = (row: PresaleProductRow): PreOrder => ({
   ref: row.ref,
   name: row.name,
   specs: row.specs ?? [],
+  description: row.description,
   image: row.image_url,
   hoverImage: row.hover_image_url || row.image_url,
+  extraImage: row.extra_image_url,
   full: formatBRL(row.full_price_cents),
   deposit: formatBRL(row.deposit_price_cents),
   etaDate: row.eta_date,
   lotCode: row.lot_code,
   lotClosesAt: row.lot_closes_at,
+  lotSize: row.lot_size,
+  unitsReserved: row.units_reserved,
 });
 
 /**
- * Status de disponibilidade da reserva, derivado só do prazo do lote
- * (lot_closes_at) — não depende de nenhum campo novo no banco:
- * - "aberta": sem prazo, ou prazo a mais de 7 dias.
- * - "fechando": prazo dentro dos próximos 7 dias (ainda dá pra reservar).
- * - "encerrada": prazo já passou.
+ * Status de disponibilidade da reserva:
+ * - "encerrada": o lote esgotou (unidades reservadas >= tamanho do lote) OU
+ *   o prazo (lot_closes_at) já passou.
+ * - "fechando": ainda tem unidade livre, mas o prazo vence nos próximos 7 dias.
+ * - "aberta": tem unidade livre e não tem prazo, ou o prazo é a mais de 7 dias.
+ *
+ * unitsReserved/lotSize são atualizados manualmente pelo admin (o site não
+ * processa pagamento — a reserva é confirmada no WhatsApp/Instagram), então
+ * esgotar o lote fecha a miniatura mesmo antes do prazo vencer.
  */
 export type AvailabilityStatus = "aberta" | "fechando" | "encerrada";
 
 export const FECHANDO_EM_BREVE_DIAS = 7;
 
-export const getAvailabilityStatus = (lotClosesAt: string | null): AvailabilityStatus => {
+export const getAvailabilityStatus = (
+  lotClosesAt: string | null,
+  unitsReserved: number,
+  lotSize: number,
+): AvailabilityStatus => {
+  if (lotSize > 0 && unitsReserved >= lotSize) return "encerrada";
   if (!lotClosesAt) return "aberta";
   const closesAt = new Date(lotClosesAt).getTime();
   const now = Date.now();

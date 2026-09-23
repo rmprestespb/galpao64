@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
@@ -73,16 +74,22 @@ const emptyForm = {
   ref: "",
   name: "",
   specs: "",
+  description: "",
   imageUrl: "",
   hoverImageUrl: "",
+  extraImageUrl: "",
   fullPrice: "",
   depositPrice: "",
   etaDate: undefined as Date | undefined,
   lotCode: "",
   lotClosesAt: undefined as Date | undefined,
+  lotSize: "12",
+  unitsReserved: "0",
   isPublished: true,
   displayOrder: "0",
 };
+
+const LOT_SIZE_OPTIONS = [6, 12, 24] as const;
 
 const AdminPreVendas = () => {
   const navigate = useNavigate();
@@ -131,13 +138,17 @@ const AdminPreVendas = () => {
       ref: p.ref,
       name: p.name,
       specs: (p.specs ?? []).join(", "),
+      description: p.description ?? "",
       imageUrl: p.image_url,
       hoverImageUrl: p.hover_image_url ?? "",
+      extraImageUrl: p.extra_image_url ?? "",
       fullPrice: centsToInput(p.full_price_cents),
       depositPrice: centsToInput(p.deposit_price_cents),
       etaDate: p.eta_date ? new Date(`${p.eta_date}T00:00:00`) : undefined,
       lotCode: p.lot_code ?? "",
       lotClosesAt: p.lot_closes_at ? new Date(p.lot_closes_at) : undefined,
+      lotSize: String(p.lot_size ?? 12),
+      unitsReserved: String(p.units_reserved ?? 0),
       isPublished: p.is_published,
       displayOrder: String(p.display_order ?? 0),
     });
@@ -169,7 +180,10 @@ const AdminPreVendas = () => {
     return data.publicUrl;
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: "imageUrl" | "hoverImageUrl") => {
+  const handleUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: "imageUrl" | "hoverImageUrl" | "extraImageUrl",
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
@@ -206,18 +220,25 @@ const AdminPreVendas = () => {
         .map((s) => s.trim())
         .filter(Boolean);
 
+      const lotSize = parseInt(form.lotSize, 10) || 12;
+      const unitsReserved = Math.min(Math.max(parseInt(form.unitsReserved, 10) || 0, 0), lotSize);
+
       const payload = {
         brand: parsed.data.brand,
         ref: parsed.data.ref,
         name: parsed.data.name,
         specs,
+        description: form.description.trim() || null,
         image_url: form.imageUrl,
         hover_image_url: form.hoverImageUrl || null,
+        extra_image_url: form.extraImageUrl || null,
         full_price_cents: formatBRLInput(form.fullPrice),
         deposit_price_cents: formatBRLInput(form.depositPrice),
         eta_date: form.etaDate ? format(form.etaDate, "yyyy-MM-dd") : null,
         lot_code: form.lotCode || null,
         lot_closes_at: form.lotClosesAt ? form.lotClosesAt.toISOString() : null,
+        lot_size: lotSize,
+        units_reserved: unitsReserved,
         is_published: form.isPublished,
         display_order: parseInt(form.displayOrder, 10) || 0,
       };
@@ -329,6 +350,13 @@ const AdminPreVendas = () => {
                   <p className="text-primary font-extrabold">
                     {(p.full_price_cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                   </p>
+                  <p className="text-xs text-muted-foreground">
+                    {p.units_reserved >= p.lot_size ? (
+                      <span className="text-destructive font-semibold">Esgotado — {p.lot_size}/{p.lot_size}</span>
+                    ) : (
+                      <>{p.units_reserved}/{p.lot_size} unidades reservadas</>
+                    )}
+                  </p>
                   <div className="flex gap-2 mt-auto pt-3">
                     <Button size="sm" variant="outline" className="flex-1" onClick={() => openEdit(p)}>
                       <Pencil className="h-3.5 w-3.5" /> Editar
@@ -397,6 +425,25 @@ const AdminPreVendas = () => {
               />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="description">Descrição (opcional — uma informação por linha)</Label>
+              <Textarea
+                id="description"
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                placeholder={
+                  "Sinal de R$20 na reserva e o restante na chegada ao Brasil\n" +
+                  "Prazo estimado de entrega: Abril 2027\n" +
+                  "Fechamento dessa pré-venda: 24/09\n" +
+                  "Pode ser pago mensalmente em 3x 4x 5x 6x até a chegada da miniatura!"
+                }
+                rows={4}
+              />
+              <p className="text-xs text-muted-foreground">
+                Cada linha vira uma linha separada na caixinha exibida em /pre-vendas.
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="fullPrice">Valor integral (R$)</Label>
@@ -460,6 +507,28 @@ const AdminPreVendas = () => {
                   {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                   Enviar foto
                   <input type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "hoverImageUrl")} />
+                </label>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Foto extra (opcional — 3ª foto, ex: embalagem/blister)</Label>
+              {form.extraImageUrl ? (
+                <div className="relative aspect-video w-full max-w-xs overflow-hidden rounded bg-black">
+                  <img src={form.extraImageUrl} alt="" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, extraImageUrl: "" })}
+                    className="absolute top-1 right-1 bg-background/90 rounded-full p-1 hover:bg-destructive"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex aspect-video w-full max-w-xs items-center justify-center gap-2 rounded border-2 border-dashed border-border hover:border-accent text-xs text-muted-foreground cursor-pointer transition-colors">
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                  Enviar foto
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "extraImageUrl")} />
                 </label>
               )}
             </div>
@@ -534,6 +603,39 @@ const AdminPreVendas = () => {
                     Remover contagem regressiva
                   </Button>
                 )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="lotSize">Tamanho do lote (unidades)</Label>
+                  <Select value={form.lotSize} onValueChange={(v) => setForm({ ...form, lotSize: v })}>
+                    <SelectTrigger id="lotSize">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LOT_SIZE_OPTIONS.map((n) => (
+                        <SelectItem key={n} value={String(n)}>
+                          {n} unidades
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="unitsReserved">Unidades já reservadas</Label>
+                  <Input
+                    id="unitsReserved"
+                    type="number"
+                    min={0}
+                    max={form.lotSize}
+                    value={form.unitsReserved}
+                    onChange={(e) => setForm({ ...form, unitsReserved: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Atualize aqui conforme fechar reservas no WhatsApp/Instagram. Ao bater no tamanho do lote, a
+                    miniatura aparece como "Encerrada" em /pre-vendas.
+                  </p>
+                </div>
               </div>
             </div>
 

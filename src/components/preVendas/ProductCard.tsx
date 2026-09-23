@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { PackageCheck } from "lucide-react";
+import { PackageCheck, PackageX } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PreOrder, formatEta, openReserveWhatsApp } from "@/data/preVendas";
+import { PreOrder, descriptionLines, formatEta, openReserveWhatsApp } from "@/data/preVendas";
 import LotCountdown from "./LotCountdown";
 
 const PaymentOption = ({
@@ -28,6 +28,18 @@ const PaymentOption = ({
 const ProductCard = ({ product }: { product: PreOrder }) => {
   const [mode, setMode] = useState<"full" | "deposit">("full");
 
+  const remaining = Math.max(product.lotSize - product.unitsReserved, 0);
+  const soldOut = product.lotSize > 0 && remaining <= 0;
+
+  const gallery = Array.from(
+    new Set([product.image, product.hoverImage, product.extraImage].filter((u): u is string => Boolean(u))),
+  );
+  const [activeIdx, setActiveIdx] = useState(0);
+  const activeImage = gallery[activeIdx] ?? product.image;
+  const showHoverPreview = activeIdx === 0 && gallery.length > 1;
+
+  const descLines = descriptionLines(product.description);
+
   return (
     <article
       className={cn(
@@ -47,30 +59,42 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
             [ {product.lotCode} - RESERVA ]
           </span>
         )}
-        <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-primary">
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+        {soldOut ? (
+          <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.06] px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-white/60">
+            <PackageX className="h-2.5 w-2.5" />
+            Lote esgotado
           </span>
-          Reserva aberta
-        </span>
+        ) : (
+          <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-primary">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+            </span>
+            Reserva aberta
+          </span>
+        )}
       </div>
 
       {/* Stage */}
       <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-b from-[#17171a] to-black">
         <img
-          src={product.image}
+          src={activeImage}
           alt={`${product.brand} ${product.name} em escala 1:64`}
           loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:opacity-0"
+          className={cn(
+            "absolute inset-0 h-full w-full object-cover transition-all duration-700",
+            showHoverPreview && "group-hover:scale-105 group-hover:opacity-0",
+          )}
         />
-        <img
-          src={product.hoverImage}
-          alt=""
-          aria-hidden
-          loading="lazy"
-          className="absolute inset-0 h-full w-full scale-105 object-cover opacity-0 transition-all duration-700 group-hover:opacity-100"
-        />
+        {showHoverPreview && (
+          <img
+            src={gallery[1]}
+            alt=""
+            aria-hidden
+            loading="lazy"
+            className="absolute inset-0 h-full w-full scale-105 object-cover opacity-0 transition-all duration-700 group-hover:opacity-100"
+          />
+        )}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_60%_at_50%_0%,rgba(255,255,255,0.14),transparent_60%)] opacity-60 transition-opacity duration-500 group-hover:opacity-100"
@@ -79,6 +103,23 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
         {product.lotClosesAt && (
           <div className="absolute bottom-2 left-2 z-10">
             <LotCountdown closesAt={product.lotClosesAt} />
+          </div>
+        )}
+        {gallery.length > 1 && (
+          <div className="absolute bottom-2 right-2 z-10 flex gap-1">
+            {gallery.map((src, i) => (
+              <button
+                key={src}
+                type="button"
+                onClick={() => setActiveIdx(i)}
+                aria-label={`Ver foto ${i + 1} de ${gallery.length}`}
+                aria-pressed={i === activeIdx}
+                className={cn(
+                  "h-2 rounded-full border border-white/50 transition-all duration-300",
+                  i === activeIdx ? "w-4 border-primary bg-primary" : "w-2 bg-black/50 hover:bg-white/70",
+                )}
+              />
+            ))}
           </div>
         )}
       </div>
@@ -101,11 +142,34 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
           ))}
         </ul>
 
+        {/* Descrição livre cadastrada pelo admin — uma informação por linha */}
+        {descLines.length > 0 && (
+          <div className="space-y-1.5 rounded-lg border border-white/[0.07] bg-white/[0.02] p-3 text-[11px] leading-relaxed text-white/70">
+            {descLines.map((line, i) => (
+              <p key={i} className="flex gap-1.5">
+                <span className="text-primary">•</span>
+                <span>{line}</span>
+              </p>
+            ))}
+          </div>
+        )}
+
         {/* Caixa informativa da pré-venda */}
         <div className="space-y-1.5 rounded-lg border border-white/[0.07] bg-white/[0.02] p-3 text-[11px] leading-relaxed text-white/70">
           <p>📅 <span className="text-white/90 font-semibold">Data estimada de chegada:</span> {formatEta(product.etaDate)}</p>
           <p>📦 <span className="text-white/90 font-semibold">Envio do lote:</span> despachado assim que o lote físico der entrada no Galpão 64.</p>
           <p>🛡️ <span className="text-white/90 font-semibold">Garantia de reserva:</span> item 100% garantido com fornecedores oficiais.</p>
+          <p>
+            🔢 <span className="text-white/90 font-semibold">Unidades do lote:</span>{" "}
+            {soldOut ? (
+              <span className="text-white/60">{product.lotSize} de {product.lotSize} reservadas — esgotado</span>
+            ) : (
+              <span>
+                {product.unitsReserved} de {product.lotSize} reservadas{" "}
+                <span className="text-primary font-semibold">({remaining} {remaining === 1 ? "restante" : "restantes"})</span>
+              </span>
+            )}
+          </p>
         </div>
 
         <div className="mt-auto space-y-3">
