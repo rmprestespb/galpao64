@@ -67,6 +67,7 @@ export type Database = {
           id: string
           image_url: string
           is_published: boolean
+          presale_product_id: string | null
           updated_at: string
         }
         Insert: {
@@ -76,6 +77,7 @@ export type Database = {
           id?: string
           image_url: string
           is_published?: boolean
+          presale_product_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -85,9 +87,18 @@ export type Database = {
           id?: string
           image_url?: string
           is_published?: boolean
+          presale_product_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "galpao_photos_presale_product_id_fkey"
+            columns: ["presale_product_id"]
+            isOneToOne: false
+            referencedRelation: "presale_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mystery_boxes: {
         Row: {

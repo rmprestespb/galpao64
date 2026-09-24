@@ -9,6 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -19,6 +26,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { GalpaoPhotoRow } from "@/hooks/useGalpaoPhotos";
+
+/** Opção de pré-venda pra vincular a uma foto — usada só pro texto do select,
+ * não precisa de todas as colunas de presale_products. */
+type PresaleOption = { id: string; name: string; ref: string; brand: string };
+
+const NONE_VALUE = "none";
 
 /** Extrai uma mensagem legível de qualquer formato de erro (Error nativo,
  * PostgrestError/StorageError do Supabase, que são objetos simples e não
@@ -49,9 +62,11 @@ const AdminGaleria = () => {
   const navigate = useNavigate();
   const { user, isAdmin, loading: authLoading } = useAuth();
   const [photos, setPhotos] = useState<GalpaoPhotoRow[]>([]);
+  const [presaleOptions, setPresaleOptions] = useState<PresaleOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [linkingId, setLinkingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [captionDrafts, setCaptionDrafts] = useState<Record<string, string>>({});
 
@@ -77,8 +92,20 @@ const AdminGaleria = () => {
     setLoading(false);
   };
 
+  const fetchPresaleOptions = async () => {
+    const { data, error } = await supabase
+      .from("presale_products")
+      .select("id, name, ref, brand")
+      .order("brand", { ascending: true })
+      .order("name", { ascending: true });
+    if (!error) setPresaleOptions(data ?? []);
+  };
+
   useEffect(() => {
-    if (user && isAdmin) fetchPhotos();
+    if (user && isAdmin) {
+      fetchPhotos();
+      fetchPresaleOptions();
+    }
   }, [user, isAdmin]);
 
   const uploadImage = async (file: File): Promise<string> => {
@@ -139,6 +166,20 @@ const AdminGaleria = () => {
     setSavingId(null);
     if (error) toast.error("Erro ao salvar legenda", { description: error.message });
     else setPhotos((ps) => ps.map((p) => (p.id === id ? { ...p, caption: captionDrafts[id]?.trim() || null } : p)));
+  };
+
+  const linkPresale = async (photoId: string, presaleProductId: string | null) => {
+    setLinkingId(photoId);
+    const { error } = await supabase
+      .from("galpao_photos")
+      .update({ presale_product_id: presaleProductId })
+      .eq("id", photoId);
+    setLinkingId(null);
+    if (error) {
+      toast.error("Erro ao vincular pré-venda", { description: errorMessage(error) });
+      return;
+    }
+    setPhotos((ps) => ps.map((p) => (p.id === photoId ? { ...p, presale_product_id: presaleProductId } : p)));
   };
 
   const togglePublished = async (photo: GalpaoPhotoRow) => {
@@ -266,6 +307,30 @@ const AdminGaleria = () => {
                     placeholder="Ex: Estoque de Mini GT recém-chegado"
                     disabled={savingId === photo.id}
                   />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Vincular a uma pré-venda (opcional)</Label>
+                  <Select
+                    value={photo.presale_product_id ?? NONE_VALUE}
+                    onValueChange={(v) => linkPresale(photo.id, v === NONE_VALUE ? null : v)}
+                    disabled={linkingId === photo.id}
+                  >
+                    <SelectTrigger className="h-9 text-xs">
+                      <SelectValue placeholder="Nenhuma" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NONE_VALUE}>Nenhuma</SelectItem>
+                      {presaleOptions.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.brand} — {p.ref} — {p.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-[11px] text-muted-foreground">
+                    Quando o lote encerrar (prazo ou esgotar), a previsão de chegada aparece nessa foto em /no-galpao.
+                  </p>
                 </div>
 
                 <div className="flex items-center justify-between gap-2">

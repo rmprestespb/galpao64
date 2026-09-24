@@ -1,8 +1,26 @@
 import { useState } from "react";
-import { Loader2, Warehouse, X } from "lucide-react";
+import { Loader2, PackageCheck, Warehouse, X } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useGalpaoPhotos, type GalpaoPhotoRow } from "@/hooks/useGalpaoPhotos";
+import { useGalpaoPhotos, type GalpaoPhotoWithPresale } from "@/hooks/useGalpaoPhotos";
+import { formatEta, getAvailabilityStatus } from "@/data/preVendas";
+
+/** Quando a foto está vinculada a uma pré-venda e o lote dela já encerrou
+ * (prazo vencido ou esgotado), mostra a previsão de chegada por cima da
+ * foto — sinaliza que aquele modelo já não está mais em reserva, só
+ * aguardando chegar fisicamente no Galpão. */
+const arrivalBadge = (photo: GalpaoPhotoWithPresale) => {
+  const p = photo.linkedPresale;
+  if (!p) return null;
+  const status = getAvailabilityStatus(p.lot_closes_at, p.units_reserved, p.lot_size);
+  if (status !== "encerrada") return null;
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/50 bg-black/75 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-gold backdrop-blur-sm">
+      <PackageCheck className="h-3 w-3" />
+      Chegando: {formatEta(p.eta_date)}
+    </span>
+  );
+};
 
 /**
  * Galeria "No Galpão" — fotos reais do espaço e do estoque do Galpão 64,
@@ -12,7 +30,7 @@ import { useGalpaoPhotos, type GalpaoPhotoRow } from "@/hooks/useGalpaoPhotos";
  */
 const NoGalpao = () => {
   const { photos, loading, error } = useGalpaoPhotos();
-  const [selected, setSelected] = useState<GalpaoPhotoRow | null>(null);
+  const [selected, setSelected] = useState<GalpaoPhotoWithPresale | null>(null);
 
   return (
     <div className="min-h-screen bg-[#09090b] text-white">
@@ -60,6 +78,9 @@ const NoGalpao = () => {
                   loading="lazy"
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
+                {arrivalBadge(photo) && (
+                  <div className="absolute left-2 top-2 z-10">{arrivalBadge(photo)}</div>
+                )}
                 {photo.caption && (
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent p-3">
                     <p className="line-clamp-2 text-left text-[12px] font-medium text-white/90">
@@ -89,12 +110,15 @@ const NoGalpao = () => {
           >
             <X className="h-5 w-5" />
           </button>
-          <div className="max-h-[85vh] max-w-4xl" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-h-[85vh] max-w-4xl" onClick={(e) => e.stopPropagation()}>
             <img
               src={selected.image_url}
               alt={selected.caption ?? "Foto do Galpão 64"}
               className="max-h-[85vh] w-full rounded-xl object-contain"
             />
+            {arrivalBadge(selected) && (
+              <div className="absolute left-2 top-2">{arrivalBadge(selected)}</div>
+            )}
             {selected.caption && (
               <p className="mt-3 text-center text-sm text-white/70">{selected.caption}</p>
             )}
