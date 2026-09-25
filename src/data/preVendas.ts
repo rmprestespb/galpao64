@@ -51,6 +51,7 @@ export type PreOrder = {
   extraImage: string | null;
   full: string;
   deposit: string;
+  balance: string;
   etaDate: string | null;
   lotCode: string | null;
   lotClosesAt: string | null;
@@ -83,6 +84,7 @@ export const mapPresaleRow = (row: PresaleProductRow): PreOrder => ({
   extraImage: row.extra_image_url,
   full: formatBRL(row.full_price_cents),
   deposit: formatBRL(row.deposit_price_cents),
+  balance: formatBRL(Math.max(row.full_price_cents - row.deposit_price_cents, 0)),
   etaDate: row.eta_date,
   lotCode: row.lot_code,
   lotClosesAt: row.lot_closes_at,
@@ -124,6 +126,14 @@ export const formatEta = (etaDate: string | null) => {
   if (!etaDate) return "Em breve";
   const label = format(parseISO(etaDate), "MMMM/yyyy", { locale: ptBR });
   return label.charAt(0).toUpperCase() + label.slice(1);
+};
+
+/** Data curta de encerramento da reserva (separada do contador regressivo,
+ * que já mostra "faltam Xd Yh" em cima da foto) — pensada pra uma linha
+ * curta tipo "Reserva encerra em 28/09 às 23:59". */
+export const formatDeadline = (lotClosesAt: string | null) => {
+  if (!lotClosesAt) return null;
+  return format(new Date(lotClosesAt), "dd/MM 'às' HH:mm", { locale: ptBR });
 };
 
 export const buildReserveMessage = (p: PreOrder, mode: "full" | "deposit") => {

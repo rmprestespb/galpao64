@@ -1,7 +1,15 @@
 import { useState } from "react";
-import { PackageCheck, PackageX } from "lucide-react";
+import { ChevronDown, PackageCheck, PackageX, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PreOrder, descriptionLines, formatEta, openReserveWhatsApp } from "@/data/preVendas";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  PreOrder,
+  descriptionLines,
+  formatDeadline,
+  formatEta,
+  getAvailabilityStatus,
+  openReserveWhatsApp,
+} from "@/data/preVendas";
 import LotCountdown from "./LotCountdown";
 
 const PaymentOption = ({
@@ -18,7 +26,7 @@ const PaymentOption = ({
         : "border-white/10 bg-white/[0.03] hover:border-white/25",
     )}
   >
-    <span className={cn("block text-[12px] font-extrabold tracking-tight", active ? "text-primary" : "text-white")}>
+    <span className={cn("block text-xs font-extrabold tracking-tight", active ? "text-primary" : "text-white")}>
       {label}
     </span>
     <span className="mt-0.5 block text-[10px] uppercase tracking-widest text-white/45">{hint}</span>
@@ -26,10 +34,13 @@ const PaymentOption = ({
 );
 
 const ProductCard = ({ product }: { product: PreOrder }) => {
-  const [mode, setMode] = useState<"full" | "deposit">("full");
+  const [mode, setMode] = useState<"full" | "deposit">("deposit");
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
+  const status = getAvailabilityStatus(product.lotClosesAt, product.unitsReserved, product.lotSize);
+  const closed = status === "encerrada";
   const remaining = Math.max(product.lotSize - product.unitsReserved, 0);
-  const soldOut = product.lotSize > 0 && remaining <= 0;
+  const deadlineLabel = formatDeadline(product.lotClosesAt);
 
   const gallery = Array.from(
     new Set([product.image, product.hoverImage, product.extraImage].filter((u): u is string => Boolean(u))),
@@ -49,23 +60,28 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
         "hover:shadow-[0_30px_70px_-25px_hsl(var(--primary)/0.35)]",
       )}
     >
-      {/* Badges */}
+      {/* 1a. Etiquetas de status */}
       <div className="flex flex-wrap items-center gap-1.5 border-b border-white/[0.06] bg-[#111113] px-3 py-2">
-        <span className="inline-flex items-center rounded-full border border-primary/50 bg-primary/10 px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.14em] text-primary">
+        <span className="inline-flex items-center rounded-full border border-primary/50 bg-primary/10 px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-[0.14em] text-primary">
           [ PRÉ-VENDA ]
         </span>
         {product.lotCode && (
-          <span className="inline-flex items-center rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-[0.14em] text-gold">
+          <span className="inline-flex items-center rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 font-mono text-[10px] font-black uppercase tracking-[0.14em] text-gold">
             [ {product.lotCode} - RESERVA ]
           </span>
         )}
-        {soldOut ? (
-          <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.06] px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-white/60">
-            <PackageX className="h-2.5 w-2.5" />
-            Lote esgotado
+        {status === "encerrada" ? (
+          <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.06] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/60">
+            <PackageX className="h-3 w-3" />
+            Reserva encerrada
+          </span>
+        ) : status === "fechando" ? (
+          <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-gold/50 bg-gold/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-gold">
+            <Timer className="h-3 w-3" />
+            Fechando em breve
           </span>
         ) : (
-          <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-primary">
+          <span className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-primary">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
@@ -75,7 +91,7 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
         )}
       </div>
 
-      {/* Stage */}
+      {/* 1b. Foto grande + contador atual */}
       <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-b from-[#17171a] to-black">
         <img
           src={activeImage}
@@ -125,83 +141,152 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
       </div>
 
       {/* Info */}
-      <div className="flex flex-1 flex-col gap-4 p-4">
+      <div className="flex flex-1 flex-col gap-3.5 p-4 md:p-5">
+        {/* 2. Código e nome */}
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary/80">{product.ref}</p>
-          <h3 className="mt-1 text-base font-extrabold leading-tight tracking-tight text-white">{product.name}</h3>
+          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary/80">{product.ref}</p>
+          <h3 className="mt-1 text-lg font-extrabold leading-tight tracking-tight text-white">{product.name}</h3>
         </div>
 
-        <ul className="flex flex-wrap gap-1.5">
-          {product.specs.map((s) => (
-            <li
-              key={s}
-              className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/60"
-            >
-              {s}
-            </li>
-          ))}
-        </ul>
-
-        {/* Descrição livre cadastrada pelo admin — uma informação por linha */}
-        {descLines.length > 0 && (
-          <div className="space-y-1.5 rounded-lg border border-white/[0.07] bg-white/[0.02] p-3 text-[11px] leading-relaxed text-white/70">
-            {descLines.map((line, i) => (
-              <p key={i} className="flex gap-1.5">
-                <span className="text-primary">•</span>
-                <span>{line}</span>
-              </p>
-            ))}
+        {/* 3. Bloco de preço em destaque */}
+        <div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/[0.09] to-transparent p-3.5">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">Reserve por</p>
+          <p className="mt-0.5 text-[28px] font-black leading-none tracking-tight text-primary md:text-3xl">
+            {product.deposit}
+          </p>
+          <div className="mt-2.5 flex flex-wrap gap-x-5 gap-y-1 border-t border-white/10 pt-2.5 text-xs text-white/60">
+            <span>
+              Preço total: <strong className="font-bold text-white">{product.full}</strong>
+            </span>
+            <span>
+              Saldo na chegada: <strong className="font-bold text-white">{product.balance}</strong>
+            </span>
           </div>
-        )}
+        </div>
 
-        {/* Caixa informativa da pré-venda */}
-        <div className="space-y-1.5 rounded-lg border border-white/[0.07] bg-white/[0.02] p-3 text-[11px] leading-relaxed text-white/70">
-          <p>📅 <span className="text-white/90 font-semibold">Data estimada de chegada:</span> {formatEta(product.etaDate)}</p>
-          <p>📦 <span className="text-white/90 font-semibold">Envio do lote:</span> despachado assim que o lote físico der entrada no Galpão 64.</p>
-          <p>🛡️ <span className="text-white/90 font-semibold">Garantia de reserva:</span> item 100% garantido com fornecedores oficiais.</p>
+        {/* 4. Previsão de chegada e encerramento */}
+        <div className="space-y-1 text-xs leading-relaxed text-white/70">
           <p>
-            🔢 <span className="text-white/90 font-semibold">Unidades do lote:</span>{" "}
-            {soldOut ? (
-              <span className="text-white/60">{product.lotSize} de {product.lotSize} reservadas — esgotado</span>
+            📅 Previsão de chegada: <strong className="font-semibold text-white">{formatEta(product.etaDate)}</strong>
+          </p>
+          <p>
+            ⏳{" "}
+            {closed ? (
+              <strong className="font-semibold text-white/80">Reserva já encerrada</strong>
+            ) : deadlineLabel ? (
+              <>
+                Reserva encerra em <strong className="font-semibold text-white">{deadlineLabel}</strong>
+              </>
             ) : (
-              <span>
-                {product.unitsReserved} de {product.lotSize} reservadas{" "}
-                <span className="text-primary font-semibold">({remaining} {remaining === 1 ? "restante" : "restantes"})</span>
-              </span>
+              <strong className="font-semibold text-white">Sem prazo definido</strong>
             )}
           </p>
         </div>
 
-        <div className="mt-auto space-y-3">
-          <div className="flex gap-2">
-            <PaymentOption
-              active={mode === "full"}
-              onClick={() => setMode("full")}
-              label={`Integral: ${product.full}`}
-              hint="-5% off"
-            />
-            <PaymentOption
-              active={mode === "deposit"}
-              onClick={() => setMode("deposit")}
-              label={`Sinal: ${product.deposit}`}
-              hint="restante na chegada ao Brasil"
-            />
-          </div>
+        {/* 5. Botão principal */}
+        <button
+          type="button"
+          disabled={closed}
+          onClick={() => !closed && openReserveWhatsApp(product, mode)}
+          className={cn(
+            "flex w-full items-center justify-center gap-2 rounded-full px-4 py-3.5",
+            "font-mono text-xs font-black uppercase tracking-[0.16em] transition-all duration-300",
+            closed
+              ? "cursor-not-allowed bg-white/[0.06] text-white/40"
+              : cn(
+                  "bg-gradient-to-r from-primary to-[#ff8a3d] text-black",
+                  "shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.8)]",
+                  "hover:brightness-110 hover:shadow-[0_14px_40px_-8px_hsl(var(--primary)/1)] active:scale-[0.98]",
+                ),
+          )}
+        >
+          {closed ? (
+            <PackageX className="h-4 w-4" strokeWidth={2.5} />
+          ) : (
+            <PackageCheck className="h-4 w-4" strokeWidth={2.5} />
+          )}
+          {closed ? "Reserva encerrada" : "Reservar esta miniatura"}
+        </button>
 
-          <button
-            type="button"
-            onClick={() => openReserveWhatsApp(product, mode)}
+        {/* 6. Ver detalhes da pré-venda */}
+        <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen} className="mt-auto">
+          <CollapsibleTrigger
             className={cn(
-              "flex w-full items-center justify-center gap-2 rounded-full px-4 py-3",
-              "bg-gradient-to-r from-primary to-[#ff8a3d] font-mono text-[11px] font-black uppercase tracking-[0.18em] text-black",
-              "shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.8)] transition-all duration-300",
-              "hover:brightness-110 hover:shadow-[0_14px_40px_-8px_hsl(var(--primary)/1)] active:scale-[0.98]",
+              "flex w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.02] py-2.5",
+              "text-[11px] font-bold uppercase tracking-[0.14em] text-white/60 transition-colors hover:border-white/25 hover:text-white",
             )}
           >
-            <PackageCheck className="h-4 w-4" strokeWidth={2.5} />
-            [ GARANTIR NA PRÉ-VENDA ]
-          </button>
-        </div>
+            Ver detalhes da pré-venda
+            <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-300", detailsOpen && "rotate-180")} />
+          </CollapsibleTrigger>
+
+          <CollapsibleContent className="space-y-3 pt-3">
+            {product.specs.length > 0 && (
+              <ul className="flex flex-wrap gap-1.5">
+                {product.specs.map((s) => (
+                  <li
+                    key={s}
+                    className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-white/60"
+                  >
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* Descrição livre cadastrada pelo admin — uma informação por linha */}
+            {descLines.length > 0 && (
+              <div className="space-y-1.5 rounded-lg border border-white/[0.07] bg-white/[0.02] p-3 text-xs leading-relaxed text-white/70">
+                {descLines.map((line, i) => (
+                  <p key={i} className="flex gap-1.5">
+                    <span className="text-primary">•</span>
+                    <span>{line}</span>
+                  </p>
+                ))}
+              </div>
+            )}
+
+            {/* Caixa informativa da pré-venda */}
+            <div className="space-y-1.5 rounded-lg border border-white/[0.07] bg-white/[0.02] p-3 text-xs leading-relaxed text-white/70">
+              <p>📦 <span className="font-semibold text-white/90">Envio do lote:</span> despachado assim que o lote físico der entrada no Galpão 64.</p>
+              <p>🛡️ <span className="font-semibold text-white/90">Garantia de reserva:</span> item 100% garantido com fornecedores oficiais.</p>
+              <p>
+                🔢 <span className="font-semibold text-white/90">Unidades do lote:</span>{" "}
+                {closed ? (
+                  <span className="text-white/60">{product.unitsReserved} de {product.lotSize} reservadas — encerrado</span>
+                ) : (
+                  <span>
+                    {product.unitsReserved} de {product.lotSize} reservadas{" "}
+                    <span className="font-semibold text-primary">({remaining} {remaining === 1 ? "restante" : "restantes"})</span>
+                  </span>
+                )}
+              </p>
+            </div>
+
+            {/* Forma de pagamento — muda o valor/mensagem do botão de reserva acima */}
+            {!closed && (
+              <div>
+                <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">
+                  Forma de pagamento da reserva
+                </p>
+                <div className="flex gap-2">
+                  <PaymentOption
+                    active={mode === "deposit"}
+                    onClick={() => setMode("deposit")}
+                    label={`Sinal: ${product.deposit}`}
+                    hint="restante na chegada ao Brasil"
+                  />
+                  <PaymentOption
+                    active={mode === "full"}
+                    onClick={() => setMode("full")}
+                    label={`Integral: ${product.full}`}
+                    hint="-5% off"
+                  />
+                </div>
+              </div>
+            )}
+          </CollapsibleContent>
+        </Collapsible>
       </div>
     </article>
   );
