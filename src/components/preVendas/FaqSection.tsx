@@ -9,7 +9,7 @@ import {
 const FAQ_ITEMS = [
   {
     q: "Como funciona o pagamento do sinal?",
-    a: "Você garante sua vaga no lote pagando um sinal de reserva (normalmente 30% do valor) via PIX. O saldo restante só é cobrado quando o lote físico chega ao Galpão 64, antes do envio da sua miniatura. Se preferir resolver tudo de uma vez, também dá para pagar o valor integral e ainda garantir um desconto exclusivo.",
+    a: "Você garante sua vaga no lote pagando um sinal de reserva via PIX. O saldo restante só é cobrado quando o lote físico chega ao Galpão 64, antes do envio da sua miniatura. Se preferir resolver tudo de uma vez, também dá para pagar o valor integral com 5% de desconto.",
   },
   {
     q: "O que acontece quando o lote de miniaturas chegar ao Brasil?",

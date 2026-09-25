@@ -50,6 +50,7 @@ export type PreOrder = {
   hoverImage: string;
   extraImage: string | null;
   full: string;
+  fullDiscounted: string;
   deposit: string;
   balance: string;
   etaDate: string | null;
@@ -72,6 +73,14 @@ export type PresaleProductRow = Tables<"presale_products">;
 const formatBRL = (cents: number) =>
   (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+/** Desconto aplicado a quem opta por pagar o valor integral de uma vez só
+ * (em vez de sinal + saldo na chegada). Calculado sempre a partir do preço
+ * total real de cada produto — nunca um valor fixo igual pra todos. */
+export const INTEGRAL_DISCOUNT_PCT = 5;
+
+const applyIntegralDiscount = (fullPriceCents: number) =>
+  Math.round(fullPriceCents * (1 - INTEGRAL_DISCOUNT_PCT / 100));
+
 export const mapPresaleRow = (row: PresaleProductRow): PreOrder => ({
   id: row.id,
   brand: row.brand as SingleBrand,
@@ -83,6 +92,7 @@ export const mapPresaleRow = (row: PresaleProductRow): PreOrder => ({
   hoverImage: row.hover_image_url || row.image_url,
   extraImage: row.extra_image_url,
   full: formatBRL(row.full_price_cents),
+  fullDiscounted: formatBRL(applyIntegralDiscount(row.full_price_cents)),
   deposit: formatBRL(row.deposit_price_cents),
   balance: formatBRL(Math.max(row.full_price_cents - row.deposit_price_cents, 0)),
   etaDate: row.eta_date,
@@ -137,8 +147,8 @@ export const formatDeadline = (lotClosesAt: string | null) => {
 };
 
 export const buildReserveMessage = (p: PreOrder, mode: "full" | "deposit") => {
-  const valor = mode === "full" ? p.full : p.deposit;
-  const modoLabel = mode === "full" ? "Pagamento integral (com desconto)" : "Sinal de reserva";
+  const valor = mode === "full" ? p.fullDiscounted : p.deposit;
+  const modoLabel = mode === "full" ? `Pagamento integral (${INTEGRAL_DISCOUNT_PCT}% off)` : "Sinal de reserva";
   return (
     `Olá! Quero *garantir minha pré-venda* no Galpão 64 🚗\n\n` +
     `*Modelo:* ${p.name}\n` +

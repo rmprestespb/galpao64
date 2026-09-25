@@ -3,6 +3,7 @@ import { ChevronDown, PackageCheck, PackageX, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
+  INTEGRAL_DISCOUNT_PCT,
   PreOrder,
   descriptionLines,
   formatDeadline,
@@ -279,8 +280,8 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
                   <PaymentOption
                     active={mode === "full"}
                     onClick={() => setMode("full")}
-                    label={`Integral: ${product.full}`}
-                    hint="-5% off"
+                    label={`Integral: ${product.fullDiscounted}`}
+                    hint={`${INTEGRAL_DISCOUNT_PCT}% off, pagamento único`}
                   />
                 </div>
               </div>
