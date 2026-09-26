@@ -95,7 +95,21 @@ const OrderDialog = ({ product, initialMode }: { product: PreOrder; initialMode:
         },
       });
       if (error || data?.error) {
-        toast.error(data?.error || "Não foi possível enviar o pedido — tenta de novo em instantes");
+        // Quando a função responde com erro (4xx/5xx), o cliente do Supabase não
+        // devolve o corpo JSON em `data` — só um erro genérico em `error`. Por
+        // isso lemos a mensagem real direto da resposta (error.context), senão
+        // toda falha aparecia com o mesmo aviso vago, mesmo quando o motivo era
+        // bem específico (ex.: "pedido duplicado, aguarde 2 minutos").
+        let message = data?.error as string | undefined;
+        if (!message && error && "context" in error) {
+          try {
+            const body = await (error as { context: Response }).context.json();
+            message = body?.error;
+          } catch {
+            // resposta não veio em JSON — mantém o fallback genérico abaixo.
+          }
+        }
+        toast.error(message || "Não foi possível enviar o pedido — tenta de novo em instantes");
         return;
       }
       setStep("success");
