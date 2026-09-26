@@ -174,6 +174,59 @@ export type Database = {
         }
         Relationships: []
       }
+      presale_orders: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          customer_confirmed_payment: boolean
+          customer_email: string | null
+          customer_name: string
+          customer_whatsapp: string
+          id: string
+          notes: string | null
+          payment_mode: string
+          presale_product_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          customer_confirmed_payment?: boolean
+          customer_email?: string | null
+          customer_name: string
+          customer_whatsapp: string
+          id?: string
+          notes?: string | null
+          payment_mode: string
+          presale_product_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          customer_confirmed_payment?: boolean
+          customer_email?: string | null
+          customer_name?: string
+          customer_whatsapp?: string
+          id?: string
+          notes?: string | null
+          payment_mode?: string
+          presale_product_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presale_orders_presale_product_id_fkey"
+            columns: ["presale_product_id"]
+            isOneToOne: false
+            referencedRelation: "presale_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       presale_products: {
         Row: {
           brand: string
@@ -384,6 +437,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      site_settings: {
+        Row: {
+          id: string
+          pix_city: string | null
+          pix_key: string | null
+          pix_merchant_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          pix_city?: string | null
+          pix_key?: string | null
+          pix_merchant_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          pix_city?: string | null
+          pix_key?: string | null
+          pix_merchant_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
