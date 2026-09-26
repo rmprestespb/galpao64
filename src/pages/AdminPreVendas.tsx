@@ -50,7 +50,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { BRAND_SLUGS, INTEGRAL_DISCOUNT_PCT, SingleBrand, formatDeadline, formatEta } from "@/data/preVendas";
+import { BRAND_SLUGS, SingleBrand, formatDeadline, formatEta } from "@/data/preVendas";
 import type { PresaleProductRow } from "@/data/preVendas";
 
 const BRAND_OPTIONS = Object.keys(BRAND_SLUGS) as SingleBrand[];
@@ -61,19 +61,24 @@ const formatBRL = (cents: number) =>
 /** Mensagem de divulgação pro admin mandar no WhatsApp (grupo, status, contato
  * avulso) — não confundir com a mensagem de reserva do cliente. Abre o
  * WhatsApp sem número fixo (o admin escolhe pra quem manda) com o texto já
- * pronto e o link direto pra página da marca no site. */
+ * pronto. O desconto de pagamento integral não aparece aqui de propósito —
+ * a ênfase da divulgação é o valor do sinal; quem quiser ver o 5% à vista
+ * confere direto no site. */
 const buildPromoMessage = (p: PresaleProductRow) => {
-  const fullDiscountedCents = Math.round(p.full_price_cents * (1 - INTEGRAL_DISCOUNT_PCT / 100));
-  const link = `${window.location.origin}/pre-vendas/${BRAND_SLUGS[p.brand as SingleBrand] ?? ""}`;
   return (
     `🔥 *Pré-venda aberta — Galpão 64* 🔥\n\n` +
     `*${p.brand} — ${p.name}*\n` +
     `Referência: ${p.ref}\n\n` +
-    `💰 Sinal: ${formatBRL(p.deposit_price_cents)}\n` +
-    `💵 Ou à vista: ${formatBRL(fullDiscountedCents)} (${INTEGRAL_DISCOUNT_PCT}% off)\n` +
+    `💵 Valor: ${formatBRL(p.full_price_cents)}\n` +
+    `💰 Sinal: ${formatBRL(p.deposit_price_cents)} de reserva + restante na chegada\n` +
     `📦 Previsão de chegada: ${formatEta(p.eta_date)}\n` +
     (formatDeadline(p.lot_closes_at) ? `⏳ Reserva até: ${formatDeadline(p.lot_closes_at)}\n` : "") +
-    `\nGaranta a sua: ${link}`
+    `📆 Pode ser pago mensalmente em 3x 4x 5x 6x até a chegada da miniatura!\n` +
+    `💳 Parcelamos no cartão em até 12x (com taxas da maquininha)\n\n` +
+    // Link em texto puro (sem a sintaxe [texto](url) do Markdown) — o WhatsApp
+    // não interpreta Markdown em mensagens de texto, só transforma uma URL
+    // "crua" em link clicável de verdade.
+    `🌐 https://www.galpao64.com.br`
   );
 };
 
