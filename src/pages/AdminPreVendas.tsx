@@ -6,6 +6,7 @@ import {
   Loader2,
   Pencil,
   Plus,
+  Share2,
   Trash2,
   Upload,
   X,
@@ -49,10 +50,37 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { BRAND_SLUGS, SingleBrand } from "@/data/preVendas";
+import { BRAND_SLUGS, INTEGRAL_DISCOUNT_PCT, SingleBrand, formatDeadline, formatEta } from "@/data/preVendas";
 import type { PresaleProductRow } from "@/data/preVendas";
 
 const BRAND_OPTIONS = Object.keys(BRAND_SLUGS) as SingleBrand[];
+
+const formatBRL = (cents: number) =>
+  (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+/** Mensagem de divulgação pro admin mandar no WhatsApp (grupo, status, contato
+ * avulso) — não confundir com a mensagem de reserva do cliente. Abre o
+ * WhatsApp sem número fixo (o admin escolhe pra quem manda) com o texto já
+ * pronto e o link direto pra página da marca no site. */
+const buildPromoMessage = (p: PresaleProductRow) => {
+  const fullDiscountedCents = Math.round(p.full_price_cents * (1 - INTEGRAL_DISCOUNT_PCT / 100));
+  const link = `${window.location.origin}/pre-vendas/${BRAND_SLUGS[p.brand as SingleBrand] ?? ""}`;
+  return (
+    `🔥 *Pré-venda aberta — Galpão 64* 🔥\n\n` +
+    `*${p.brand} — ${p.name}*\n` +
+    `Referência: ${p.ref}\n\n` +
+    `💰 Sinal: ${formatBRL(p.deposit_price_cents)}\n` +
+    `💵 Ou à vista: ${formatBRL(fullDiscountedCents)} (${INTEGRAL_DISCOUNT_PCT}% off)\n` +
+    `📦 Previsão de chegada: ${formatEta(p.eta_date)}\n` +
+    (formatDeadline(p.lot_closes_at) ? `⏳ Reserva até: ${formatDeadline(p.lot_closes_at)}\n` : "") +
+    `\nGaranta a sua: ${link}`
+  );
+};
+
+const shareOnWhatsApp = (p: PresaleProductRow) => {
+  const msg = buildPromoMessage(p);
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank", "noopener,noreferrer");
+};
 
 const presaleSchema = z.object({
   brand: z.enum(["Mini GT", "Pop Race", "Tarmac Works", "Kaido House"]),
@@ -357,12 +385,22 @@ const AdminPreVendas = () => {
                       <>{p.units_reserved}/{p.lot_size} unidades reservadas</>
                     )}
                   </p>
-                  <div className="flex gap-2 mt-auto pt-3">
-                    <Button size="sm" variant="outline" className="flex-1" onClick={() => openEdit(p)}>
-                      <Pencil className="h-3.5 w-3.5" /> Editar
-                    </Button>
-                    <Button size="sm" variant="destructive" onClick={() => setDeleteId(p.id)}>
-                      <Trash2 className="h-3.5 w-3.5" />
+                  <div className="mt-auto flex flex-col gap-2 pt-3">
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" className="flex-1" onClick={() => openEdit(p)}>
+                        <Pencil className="h-3.5 w-3.5" /> Editar
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={() => setDeleteId(p.id)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full border-primary/40 text-primary hover:bg-primary/10"
+                      onClick={() => shareOnWhatsApp(p)}
+                    >
+                      <Share2 className="h-3.5 w-3.5" /> Divulgar no WhatsApp
                     </Button>
                   </div>
                 </div>
