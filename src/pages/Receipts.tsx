@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Flame, Loader2, LogOut, Plus, Trash2, Printer, FileText, ArrowLeft, MessageCircle, QrCode } from "lucide-react";
 import { toast } from "sonner";
@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
 import logo from "@/assets/galpao64-logo.png";
 
 type Item = {
@@ -18,6 +20,103 @@ type Item = {
   quantity: number;
   unit: number; // reais
   code: string;
+};
+
+/** Resumo de um produto de pré-venda, só com o necessário pra sugerir e
+ * auto-preencher um item do recibo a partir da Referência cadastrada em
+ * /admin/pre-vendas. */
+type PresaleRefOption = {
+  id: string;
+  ref: string;
+  name: string;
+  brand: string;
+  full_price_cents: number;
+};
+
+/** Campo "Código" de um item do recibo — funciona como texto livre (pra quem
+ * não é de pré-venda), mas sugere as Referências cadastradas conforme
+ * digita. Escolher uma sugestão já preenche descrição e valor unitário. */
+const ItemCodeField = ({
+  value,
+  options,
+  onChange,
+  onPick,
+}: {
+  value: string;
+  options: PresaleRefOption[];
+  onChange: (value: string) => void;
+  onPick: (option: PresaleRefOption) => void;
+}) => {
+  const [open, setOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const query = value.trim().toLowerCase();
+  const matches = query
+    ? options.filter(
+        (o) => o.ref.toLowerCase().includes(query) || o.name.toLowerCase().includes(query),
+      )
+    : options;
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      {/* PopoverAnchor (não Trigger): o Radix Popover.Trigger já vem com seu
+          próprio "abre/fecha ao clicar", que briga com o nosso onFocus/onChange
+          abrindo a lista — o campo abria e fechava sozinho no mesmo clique.
+          Anchor só posiciona a lista, sem esse comportamento próprio. */}
+      <PopoverAnchor asChild>
+        <Input
+          ref={inputRef}
+          placeholder="Código"
+          value={value}
+          onChange={(e) => {
+            onChange(e.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          autoComplete="off"
+        />
+      </PopoverAnchor>
+      <PopoverContent
+        className="w-80 p-0"
+        align="start"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onInteractOutside={(e) => {
+          // Sem Trigger, o Radix trata até o clique que abriu a lista (no
+          // próprio input) como "clique de fora" e fecha na hora — ignoramos
+          // só quando o alvo é o input; clicar em qualquer outro lugar
+          // continua fechando normalmente.
+          if (e.target === inputRef.current) e.preventDefault();
+        }}
+      >
+        <Command shouldFilter={false}>
+          <CommandList>
+            <CommandEmpty>
+              {options.length === 0
+                ? "Nenhuma pré-venda cadastrada ainda."
+                : "Nenhuma referência bate com isso — pode digitar um código manual."}
+            </CommandEmpty>
+            <CommandGroup heading="Referências de pré-venda">
+              {matches.slice(0, 8).map((o) => (
+                <CommandItem
+                  key={o.id}
+                  value={o.id}
+                  onSelect={() => {
+                    onPick(o);
+                    setOpen(false);
+                  }}
+                  className="flex flex-col items-start gap-0.5"
+                >
+                  <span className="font-mono text-xs font-bold text-primary">{o.ref}</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {o.brand} — {o.name}
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
 };
 
 type Payment = "Dinheiro" | "PIX" | "Cartão Débito" | "Cartão Crédito" | "Outro";
@@ -120,12 +219,25 @@ const Receipts = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [notes, setNotes] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [presaleOptions, setPresaleOptions] = useState<PresaleRefOption[]>([]);
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
       navigate("/admin/login", { replace: true });
     }
   }, [authLoading, user, isAdmin, navigate]);
+
+  // Carrega as referências de pré-venda cadastradas em /admin/pre-vendas pra
+  // sugerir no campo "Código" de cada item — não trava o recibo se falhar.
+  useEffect(() => {
+    supabase
+      .from("presale_products")
+      .select("id, ref, name, brand, full_price_cents")
+      .order("ref", { ascending: true })
+      .then(({ data, error }) => {
+        if (!error && data) setPresaleOptions(data);
+      });
+  }, []);
 
   const subtotal = useMemo(
     () => items.reduce((acc, i) => acc + i.quantity * i.unit, 0),
@@ -421,10 +533,17 @@ const Receipts = () => {
                     />
                   </div>
                   <div className="text-primary font-bold tabular-nums">{formatBRL(lineTotal)}</div>
-                  <Input
-                    placeholder="Código"
+                  <ItemCodeField
                     value={item.code}
-                    onChange={(e) => updateItem(item.id, { code: e.target.value })}
+                    options={presaleOptions}
+                    onChange={(value) => updateItem(item.id, { code: value })}
+                    onPick={(option) =>
+                      updateItem(item.id, {
+                        code: option.ref,
+                        description: `${option.brand} — ${option.name}`,
+                        unit: option.full_price_cents / 100,
+                      })
+                    }
                   />
                   <Button
                     variant="ghost"
