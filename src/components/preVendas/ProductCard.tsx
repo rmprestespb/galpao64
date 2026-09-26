@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, PackageCheck, PackageX, Timer } from "lucide-react";
+import { ChevronDown, MessageCircle, PackageCheck, PackageX, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -12,6 +12,7 @@ import {
   openReserveWhatsApp,
 } from "@/data/preVendas";
 import LotCountdown from "./LotCountdown";
+import OrderDialog from "./OrderDialog";
 
 const PaymentOption = ({
   active, onClick, label, hint,
@@ -184,30 +185,33 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
           </p>
         </div>
 
-        {/* 5. Botão principal */}
-        <button
-          type="button"
-          disabled={closed}
-          onClick={() => !closed && openReserveWhatsApp(product, mode)}
-          className={cn(
-            "flex w-full items-center justify-center gap-2 rounded-full px-4 py-3.5",
-            "font-mono text-xs font-black uppercase tracking-[0.16em] transition-all duration-300",
-            closed
-              ? "cursor-not-allowed bg-white/[0.06] text-white/40"
-              : cn(
-                  "bg-gradient-to-r from-primary to-[#ff8a3d] text-black",
-                  "shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.8)]",
-                  "hover:brightness-110 hover:shadow-[0_14px_40px_-8px_hsl(var(--primary)/1)] active:scale-[0.98]",
-                ),
-          )}
-        >
-          {closed ? (
+        {/* 5. Botões principais: pedido direto (PIX + formulário) ou WhatsApp */}
+        {closed ? (
+          <button
+            type="button"
+            disabled
+            className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-full bg-white/[0.06] px-4 py-3.5 font-mono text-xs font-black uppercase tracking-[0.16em] text-white/40"
+          >
             <PackageX className="h-4 w-4" strokeWidth={2.5} />
-          ) : (
-            <PackageCheck className="h-4 w-4" strokeWidth={2.5} />
-          )}
-          {closed ? "Reserva encerrada" : "Reservar esta miniatura"}
-        </button>
+            Reserva encerrada
+          </button>
+        ) : (
+          <div className="flex gap-2">
+            <OrderDialog product={product} initialMode={mode} />
+            <button
+              type="button"
+              onClick={() => openReserveWhatsApp(product, mode)}
+              className={cn(
+                "flex flex-1 items-center justify-center gap-1.5 rounded-full border border-white/15 px-3 py-3.5",
+                "font-mono text-[10px] font-black uppercase tracking-[0.12em] text-white/70 transition-colors",
+                "hover:border-primary/40 hover:text-white",
+              )}
+            >
+              <MessageCircle className="h-3.5 w-3.5" strokeWidth={2.5} />
+              WhatsApp
+            </button>
+          </div>
+        )}
 
         {/* 6. Ver detalhes da pré-venda */}
         <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen} className="mt-auto">

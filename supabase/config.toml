@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.notify-product-saved]
 verify_jwt = true
+
+[functions.submit-presale-order]
+verify_jwt = false
