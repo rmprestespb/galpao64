@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { ChevronDown, MessageCircle, PackageCheck, PackageX, Timer } from "lucide-react";
+import { ChevronDown, MessageCircle, PackageCheck, PackageX, Timer, ZoomIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   INTEGRAL_DISCOUNT_PCT,
   PreOrder,
@@ -50,6 +51,7 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const activeImage = gallery[activeIdx] ?? product.image;
   const showHoverPreview = activeIdx === 0 && gallery.length > 1;
+  const [zoomOpen, setZoomOpen] = useState(false);
 
   const descLines = descriptionLines(product.description);
 
@@ -93,8 +95,20 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
         )}
       </div>
 
-      {/* 1b. Foto grande + contador atual */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-b from-[#17171a] to-black">
+      {/* 1b. Foto grande + contador atual — clicar na foto abre ela ampliada */}
+      <div
+        className="relative aspect-[4/3] cursor-zoom-in overflow-hidden bg-gradient-to-b from-[#17171a] to-black"
+        onClick={() => setZoomOpen(true)}
+        role="button"
+        tabIndex={0}
+        aria-label="Ampliar foto"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setZoomOpen(true);
+          }
+        }}
+      >
         <img
           src={activeImage}
           alt={`${product.brand} ${product.name} em escala 1:64`}
@@ -118,18 +132,27 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_60%_at_50%_0%,rgba(255,255,255,0.14),transparent_60%)] opacity-60 transition-opacity duration-500 group-hover:opacity-100"
         />
         <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black to-transparent" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/50 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100"
+        >
+          <ZoomIn className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
+        </div>
         {product.lotClosesAt && (
           <div className="absolute bottom-2 left-2 z-10">
             <LotCountdown closesAt={product.lotClosesAt} />
           </div>
         )}
         {gallery.length > 1 && (
-          <div className="absolute bottom-2 right-2 z-10 flex gap-1">
+          <div className="absolute bottom-2 right-2 z-10 flex gap-1" onClick={(e) => e.stopPropagation()}>
             {gallery.map((src, i) => (
               <button
                 key={src}
                 type="button"
-                onClick={() => setActiveIdx(i)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveIdx(i);
+                }}
                 aria-label={`Ver foto ${i + 1} de ${gallery.length}`}
                 aria-pressed={i === activeIdx}
                 className={cn(
@@ -293,6 +316,20 @@ const ProductCard = ({ product }: { product: PreOrder }) => {
           </CollapsibleContent>
         </Collapsible>
       </div>
+
+      {/* Foto ampliada — abre ao clicar na imagem do card */}
+      <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
+        <DialogContent className="max-w-3xl border-white/10 bg-black/95 p-2 sm:p-3">
+          <DialogTitle className="sr-only">
+            {product.brand} {product.name} — foto ampliada
+          </DialogTitle>
+          <img
+            src={activeImage}
+            alt={`${product.brand} ${product.name} em escala 1:64 — foto ampliada`}
+            className="max-h-[80vh] w-full rounded-lg object-contain"
+          />
+        </DialogContent>
+      </Dialog>
     </article>
   );
 };
