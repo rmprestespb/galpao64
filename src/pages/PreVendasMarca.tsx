@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CalendarClock, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/preVendas/ProductCard";
@@ -41,6 +42,23 @@ const PreVendasMarca = () => {
   const { products, loading } = usePresaleProducts();
   const { brands } = useBrands();
   const [availabilityFilter, setAvailabilityFilter] = useState<"todas" | AvailabilityStatus>("todas");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Volta da InfinitePay depois do pagamento (redirect_url leva de volta pra
+  // cá com ?pedido=<id>). A confirmação de verdade já rolou por webhook antes
+  // do cliente nem voltar — isso aqui é só o aviso na tela.
+  useEffect(() => {
+    const pedido = searchParams.get("pedido");
+    if (!pedido) return;
+    toast.success("Pagamento recebido! Sua reserva já está confirmada.", {
+      description: "A gente também manda a confirmação pelo WhatsApp.",
+      duration: 8000,
+    });
+    const next = new URLSearchParams(searchParams);
+    next.delete("pedido");
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Todos os hooks precisam rodar antes de qualquer "return" condicional —
   // por isso o cálculo dos itens/contagens fica aqui em cima, mesmo que
