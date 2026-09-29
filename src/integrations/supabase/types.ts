@@ -177,44 +177,65 @@ export type Database = {
       presale_orders: {
         Row: {
           amount_cents: number
+          checkout_slug: string | null
+          checkout_url: string | null
           created_at: string
           customer_confirmed_payment: boolean
           customer_email: string | null
           customer_name: string
           customer_whatsapp: string
           id: string
+          installments: number | null
           notes: string | null
+          paid_amount_cents: number | null
+          payment_method: string | null
           payment_mode: string
           presale_product_id: string
+          receipt_url: string | null
           status: string
+          transaction_nsu: string | null
           updated_at: string
         }
         Insert: {
           amount_cents: number
+          checkout_slug?: string | null
+          checkout_url?: string | null
           created_at?: string
           customer_confirmed_payment?: boolean
           customer_email?: string | null
           customer_name: string
           customer_whatsapp: string
           id?: string
+          installments?: number | null
           notes?: string | null
+          paid_amount_cents?: number | null
+          payment_method?: string | null
           payment_mode: string
           presale_product_id: string
+          receipt_url?: string | null
           status?: string
+          transaction_nsu?: string | null
           updated_at?: string
         }
         Update: {
           amount_cents?: number
+          checkout_slug?: string | null
+          checkout_url?: string | null
           created_at?: string
           customer_confirmed_payment?: boolean
           customer_email?: string | null
           customer_name?: string
           customer_whatsapp?: string
           id?: string
+          installments?: number | null
           notes?: string | null
+          paid_amount_cents?: number | null
+          payment_method?: string | null
           payment_mode?: string
           presale_product_id?: string
+          receipt_url?: string | null
           status?: string
+          transaction_nsu?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -441,6 +462,7 @@ export type Database = {
       site_settings: {
         Row: {
           id: string
+          infinitepay_handle: string | null
           pix_city: string | null
           pix_key: string | null
           pix_merchant_name: string | null
@@ -448,6 +470,7 @@ export type Database = {
         }
         Insert: {
           id?: string
+          infinitepay_handle?: string | null
           pix_city?: string | null
           pix_key?: string | null
           pix_merchant_name?: string | null
@@ -455,6 +478,7 @@ export type Database = {
         }
         Update: {
           id?: string
+          infinitepay_handle?: string | null
           pix_city?: string | null
           pix_key?: string | null
           pix_merchant_name?: string | null

@@ -28,24 +28,40 @@ type OrderRow = {
   customer_email: string | null;
   customer_confirmed_payment: boolean;
   status: string;
+  payment_method: string | null;
+  installments: number | null;
+  paid_amount_cents: number | null;
   created_at: string;
   presale_products: { name: string; ref: string; brand: string } | null;
 };
 
 const STATUS_LABEL: Record<string, string> = {
+  aguardando_pagamento: "Aguardando pagamento",
   novo: "Novo",
   confirmado: "Confirmado",
   cancelado: "Cancelado",
 };
 
 const STATUS_STYLE: Record<string, string> = {
+  aguardando_pagamento: "border-gold/50 bg-gold/10 text-gold",
   novo: "border-gold/50 bg-gold/10 text-gold",
   confirmado: "border-primary/50 bg-primary/10 text-primary",
   cancelado: "border-white/20 bg-white/[0.06] text-white/50",
 };
 
+const PAYMENT_METHOD_LABEL: Record<string, string> = {
+  pix: "Pix",
+  credit_card: "Cartão",
+};
+
 const formatBRL = (cents: number) =>
   (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+const paymentMethodLabel = (o: OrderRow) => {
+  if (!o.payment_method) return null;
+  const base = PAYMENT_METHOD_LABEL[o.payment_method] ?? o.payment_method;
+  return o.payment_method === "credit_card" && (o.installments ?? 1) > 1 ? `${base} ${o.installments}x` : base;
+};
 
 const whatsappLink = (raw: string) => {
   const digits = raw.replace(/\D/g, "");
@@ -62,7 +78,9 @@ const AdminPedidos = () => {
   const [pixKey, setPixKey] = useState("");
   const [pixMerchantName, setPixMerchantName] = useState("");
   const [pixCity, setPixCity] = useState("");
+  const [infinitepayHandle, setInfinitepayHandle] = useState("");
   const [savingSettings, setSavingSettings] = useState(false);
+  const [savingPayment, setSavingPayment] = useState(false);
   const [loadingSettings, setLoadingSettings] = useState(true);
 
   useEffect(() => {
@@ -86,13 +104,14 @@ const AdminPedidos = () => {
     setLoadingSettings(true);
     const { data, error } = await supabase
       .from("site_settings")
-      .select("pix_key, pix_merchant_name, pix_city")
+      .select("pix_key, pix_merchant_name, pix_city, infinitepay_handle")
       .eq("id", "default")
       .maybeSingle();
     if (!error && data) {
       setPixKey(data.pix_key ?? "");
       setPixMerchantName(data.pix_merchant_name ?? "");
       setPixCity(data.pix_city ?? "");
+      setInfinitepayHandle(data.infinitepay_handle ?? "");
     }
     setLoadingSettings(false);
   };
@@ -128,6 +147,23 @@ const AdminPedidos = () => {
     else toast.success("Configuração de PIX salva");
   };
 
+  const savePayment = async () => {
+    setSavingPayment(true);
+    // Tira o "$" caso a pessoa cole a InfiniteTag igual aparece no app — a API
+    // da InfinitePay espera o handle sem o símbolo.
+    const handle = infinitepayHandle.trim().replace(/^\$/, "");
+    const { error } = await supabase
+      .from("site_settings")
+      .update({ infinitepay_handle: handle || null })
+      .eq("id", "default");
+    setSavingPayment(false);
+    if (error) toast.error("Erro ao salvar", { description: error.message });
+    else {
+      setInfinitepayHandle(handle);
+      toast.success("InfiniteTag salva");
+    }
+  };
+
   if (authLoading || (user && !isAdmin)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -156,12 +192,38 @@ const AdminPedidos = () => {
       </header>
 
       <main className="container py-10 space-y-10">
-        {/* Configuração da chave PIX usada no QR mostrado pro cliente */}
+        {/* Configuração do checkout InfinitePay — é o que efetivamente cobra o cliente hoje */}
         <section className="rounded-lg border border-border bg-card p-5">
-          <h2 className="text-lg font-display font-black uppercase mb-1">Configuração do PIX</h2>
+          <h2 className="text-lg font-display font-black uppercase mb-1">Configuração de pagamento (InfinitePay)</h2>
           <p className="text-sm text-muted-foreground mb-4">
-            Usada pra gerar o QR Code/copia-e-cola mostrado no formulário de pedido do site. A chave fica visível
-            pra quem faz o pedido (é o próprio QR), então não é um dado secreto.
+            É essa InfiniteTag que gera o link de checkout (Pix ou cartão parcelado) mostrado no botão "Pagar" de
+            cada pré-venda. Sem ela preenchida, o pedido não consegue ser pago no site.
+          </p>
+          {loadingSettings ? (
+            <Loader2 className="h-5 w-5 animate-spin text-accent" />
+          ) : (
+            <div className="max-w-xs space-y-1">
+              <Label>InfiniteTag</Label>
+              <Input
+                value={infinitepayHandle}
+                onChange={(e) => setInfinitepayHandle(e.target.value)}
+                placeholder="seu-usuario (sem o $)"
+              />
+            </div>
+          )}
+          <Button onClick={savePayment} disabled={savingPayment || loadingSettings} className="mt-4 font-bold tracking-wider">
+            {savingPayment ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            Salvar
+          </Button>
+        </section>
+
+        {/* Chave PIX antiga — não é mais usada pelo checkout (que já aceita Pix
+            direto pela InfinitePay), deixada aqui só por segurança/histórico. */}
+        <section className="rounded-lg border border-border bg-card p-5">
+          <h2 className="text-lg font-display font-black uppercase mb-1">PIX manual (legado)</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Não é mais usada no formulário de pedido do site (o pagamento agora passa pelo checkout da InfinitePay
+            acima, que já aceita Pix). Mantida aqui só caso precise de um QR manual pra alguma combinação avulsa.
           </p>
           {loadingSettings ? (
             <Loader2 className="h-5 w-5 animate-spin text-accent" />
@@ -240,7 +302,7 @@ const AdminPedidos = () => {
                       <strong className="text-primary">{formatBRL(o.amount_cents)}</strong>{" "}
                       <span className="text-muted-foreground">
                         ({o.payment_mode === "full" ? "Integral" : "Sinal"}
-                        {o.customer_confirmed_payment ? " — cliente confirmou o PIX" : ""})
+                        {paymentMethodLabel(o) ? ` — ${paymentMethodLabel(o)}` : ""})
                       </span>
                     </p>
                   </div>
@@ -256,7 +318,7 @@ const AdminPedidos = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="novo">Novo</SelectItem>
+                        <SelectItem value="aguardando_pagamento">Aguardando pagamento</SelectItem>
                         <SelectItem value="confirmado">Confirmado</SelectItem>
                         <SelectItem value="cancelado">Cancelado</SelectItem>
                       </SelectContent>
