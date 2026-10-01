@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/preVendas/ProductCard";
 import VipWhatsAppBanner from "@/components/preVendas/VipWhatsAppBanner";
 import FaqSection from "@/components/preVendas/FaqSection";
-import { SLUG_TO_BRAND, formatEta, getAvailabilityStatus, type AvailabilityStatus } from "@/data/preVendas";
+import { formatEta, getAvailabilityStatus, type AvailabilityStatus } from "@/data/preVendas";
 import { usePresaleProducts } from "@/hooks/usePresaleProducts";
 import { useBrands } from "@/hooks/useBrands";
 import { cn } from "@/lib/utils";
@@ -38,9 +38,12 @@ const FALLBACK_HERO_IMAGE: Record<string, string> = {
 
 const PreVendasMarca = () => {
   const { marca } = useParams<{ marca: string }>();
-  const brand = marca ? SLUG_TO_BRAND[marca] : undefined;
   const { products, loading } = usePresaleProducts();
-  const { brands } = useBrands();
+  // Marca resolvida pela tabela `brands` (não mais por um mapa fixo no
+  // código) — assim qualquer marca cadastrada pelo admin (inclusive as
+  // criadas pelo "+" no formulário de pré-venda) já funciona aqui também.
+  const { brands, loading: brandsLoading } = useBrands();
+  const brand = marca ? brands.find((b) => b.slug === marca)?.name : undefined;
   const [availabilityFilter, setAvailabilityFilter] = useState<"todas" | AvailabilityStatus>("todas");
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -75,6 +78,17 @@ const PreVendasMarca = () => {
     for (const p of items) counts[getAvailabilityStatus(p.lotClosesAt, p.unitsReserved, p.lotSize)]++;
     return counts;
   }, [items]);
+
+  // Ainda carregando a lista de marcas — espera antes de decidir se o slug
+  // da URL é válido, senão redirecionaria pra fora por engano enquanto a
+  // tabela `brands` ainda não respondeu.
+  if (brandsLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#09090b]">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   // Slug desconhecido — volta para a vitrine geral de pré-vendas.
   if (!brand) {

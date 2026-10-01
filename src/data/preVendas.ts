@@ -14,9 +14,13 @@ export const WHATSAPP_NUMBER = "5546999350070";
 
 export const BRANDS = ["Todas as Marcas", "Mini GT", "Pop Race", "Tarmac Works", "Kaido House"] as const;
 export type Brand = (typeof BRANDS)[number];
-export type SingleBrand = Exclude<Brand, "Todas as Marcas">;
+// Antes era só um dos 4 valores fixos acima. Agora marcas são cadastradas
+// livremente pelo admin (tabela `brands`), então qualquer nome é válido.
+export type SingleBrand = string;
 
-// Slug de URL para cada marca (usado na rota /pre-vendas/:marca) e o mapa inverso.
+// Mapa fixo mantido só pra não quebrar o componente legado BrandPedestalHero
+// (atualmente sem uso em nenhuma rota). Código novo não deve depender dele —
+// use slugifyBrand() ou os slugs reais da tabela `brands` (via useBrands()).
 export const BRAND_SLUGS: Record<SingleBrand, string> = {
   "Mini GT": "mini-gt",
   "Pop Race": "pop-race",
@@ -27,6 +31,20 @@ export const BRAND_SLUGS: Record<SingleBrand, string> = {
 export const SLUG_TO_BRAND: Record<string, SingleBrand> = Object.fromEntries(
   (Object.entries(BRAND_SLUGS) as [SingleBrand, string][]).map(([brand, slug]) => [slug, brand]),
 ) as Record<string, SingleBrand>;
+
+/** Gera o slug de URL de uma marca a partir do nome (acentos, maiúsculas,
+ * espaços e símbolos tratados) — usado pra qualquer marca cadastrada
+ * dinamicamente na tabela `brands`, sem depender de um mapa fixo no código.
+ * Pros nomes das 4 marcas originais o resultado é idêntico ao de BRAND_SLUGS
+ * (ex.: "Mini GT" -> "mini-gt"). */
+export const slugifyBrand = (name: string): string =>
+  name
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
 // Arte de destaque de cada marca no showroom (/pre-vendas) — recorte real do miniatura,
 // usado só como vitrine visual da marca; os preços e specs reais ficam no banco (presale_products).

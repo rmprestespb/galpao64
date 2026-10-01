@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { BRAND_SLUGS, PreOrder, openReserveWhatsApp } from "@/data/preVendas";
+import { PreOrder, openReserveWhatsApp, slugifyBrand } from "@/data/preVendas";
 
 const OrderDialog = ({ product, initialMode }: { product: PreOrder; initialMode: "full" | "deposit" }) => {
   const [open, setOpen] = useState(false);
@@ -42,7 +42,7 @@ const OrderDialog = ({ product, initialMode }: { product: PreOrder; initialMode:
     try {
       // Volta pro card dessa marca depois de pagar (sem query string —
       // a função adiciona ?pedido=<id> sozinha).
-      const returnUrl = `${window.location.origin}/pre-vendas/${BRAND_SLUGS[product.brand]}`;
+      const returnUrl = `${window.location.origin}/pre-vendas/${slugifyBrand(product.brand)}`;
       const { data, error } = await supabase.functions.invoke("create-presale-checkout", {
         body: {
           presaleProductId: product.id,
