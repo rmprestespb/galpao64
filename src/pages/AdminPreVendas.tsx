@@ -50,10 +50,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { BRAND_SLUGS, SingleBrand, formatDeadline, formatEta } from "@/data/preVendas";
+import { SingleBrand, formatDeadline, formatEta, slugifyBrand } from "@/data/preVendas";
 import type { PresaleProductRow } from "@/data/preVendas";
-
-const BRAND_OPTIONS = Object.keys(BRAND_SLUGS) as SingleBrand[];
+import { useBrands } from "@/hooks/useBrands";
 
 const formatBRL = (cents: number) =>
   (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -88,7 +87,7 @@ const shareOnWhatsApp = (p: PresaleProductRow) => {
 };
 
 const presaleSchema = z.object({
-  brand: z.enum(["Mini GT", "Pop Race", "Tarmac Works", "Kaido House"]),
+  brand: z.string().trim().min(1, "Selecione ou crie uma marca"),
   ref: z.string().trim().min(1, "Referência obrigatória").max(80),
   name: z.string().trim().min(1, "Nome do modelo obrigatório").max(120),
 });
@@ -135,6 +134,50 @@ const AdminPreVendas = () => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const { brands, refetch: refetchBrands } = useBrands();
+  const [newBrandOpen, setNewBrandOpen] = useState(false);
+  const [newBrandName, setNewBrandName] = useState("");
+  const [creatingBrand, setCreatingBrand] = useState(false);
+
+  // Opções do dropdown de marca: as cadastradas no banco + a marca atual do
+  // formulário (garante que editar uma pré-venda antiga continue mostrando a
+  // marca dela mesmo se, por algum motivo, ela não estiver na tabela `brands`).
+  const brandOptions = Array.from(new Set([...brands.map((b) => b.name), form.brand].filter(Boolean)));
+
+  const handleCreateBrand = async () => {
+    const name = newBrandName.trim();
+    if (!name) {
+      toast.error("Digite o nome da marca");
+      return;
+    }
+    const existing = brands.find((b) => b.name.toLowerCase() === name.toLowerCase());
+    if (existing) {
+      // Já existe — só seleciona, não cria duplicata.
+      setForm((f) => ({ ...f, brand: existing.name }));
+      setNewBrandName("");
+      setNewBrandOpen(false);
+      return;
+    }
+    setCreatingBrand(true);
+    try {
+      const { data, error } = await supabase
+        .from("brands")
+        .insert({ name, slug: slugifyBrand(name), display_order: brands.length })
+        .select("name")
+        .single();
+      if (error) throw error;
+      toast.success(`Marca "${name}" criada`);
+      setForm((f) => ({ ...f, brand: data.name }));
+      setNewBrandName("");
+      setNewBrandOpen(false);
+      await refetchBrands();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error("Erro ao criar marca", { description: msg, duration: 8000 });
+    } finally {
+      setCreatingBrand(false);
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
@@ -424,18 +467,52 @@ const AdminPreVendas = () => {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="brand">Marca *</Label>
-                <Select value={form.brand} onValueChange={(v: SingleBrand) => setForm({ ...form, brand: v })}>
-                  <SelectTrigger id="brand">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BRAND_OPTIONS.map((b) => (
-                      <SelectItem key={b} value={b}>
-                        {b}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  <Select value={form.brand} onValueChange={(v: SingleBrand) => setForm({ ...form, brand: v })}>
+                    <SelectTrigger id="brand" className="flex-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {brandOptions.map((b) => (
+                        <SelectItem key={b} value={b}>
+                          {b}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {/* "+" pra cadastrar uma marca nova sem sair daqui — grava
+                      direto na tabela `brands` e já seleciona no formulário. */}
+                  <Popover open={newBrandOpen} onOpenChange={setNewBrandOpen}>
+                    <PopoverTrigger asChild>
+                      <Button type="button" variant="outline" size="icon" title="Adicionar nova marca">
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72" align="end">
+                      <Label htmlFor="new-brand-name" className="text-xs">
+                        Nova marca
+                      </Label>
+                      <div className="mt-1.5 flex gap-2">
+                        <Input
+                          id="new-brand-name"
+                          value={newBrandName}
+                          onChange={(e) => setNewBrandName(e.target.value)}
+                          placeholder="Ex: Hobby Japan"
+                          autoComplete="off"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleCreateBrand();
+                            }
+                          }}
+                        />
+                        <Button type="button" size="sm" onClick={handleCreateBrand} disabled={creatingBrand}>
+                          {creatingBrand ? <Loader2 className="h-4 w-4 animate-spin" /> : "Criar"}
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="ref">Referência *</Label>
