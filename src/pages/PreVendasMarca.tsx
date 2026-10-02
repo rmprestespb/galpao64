@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, CalendarClock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SideBannerLayout from "@/components/banners/SideBannerLayout";
 import ProductCard from "@/components/preVendas/ProductCard";
 import VipWhatsAppBanner from "@/components/preVendas/VipWhatsAppBanner";
 import FaqSection from "@/components/preVendas/FaqSection";
@@ -102,6 +103,7 @@ const PreVendasMarca = () => {
   const heroImage = FALLBACK_HERO_IMAGE[marca ?? ""] ?? null;
 
   return (
+    <SideBannerLayout page="pre-vendas">
     <div className="min-h-screen bg-[#09090b] text-white">
       <Header />
 
@@ -250,6 +252,7 @@ const PreVendasMarca = () => {
       <FaqSection />
       <Footer />
     </div>
+    </SideBannerLayout>
   );
 };
 

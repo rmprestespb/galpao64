@@ -1,6 +1,7 @@
 import { Warehouse, CircleDot, Cog, Truck, Play, Instagram, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SideBannerLayout from "@/components/banners/SideBannerLayout";
 import BrandGrid from "@/components/preVendas/BrandGrid";
 import VipWhatsAppBanner from "@/components/preVendas/VipWhatsAppBanner";
 import FaqSection from "@/components/preVendas/FaqSection";
@@ -20,6 +21,7 @@ const PreVendas = () => {
   const { brands, loading, error } = useBrands();
 
   return (
+    <SideBannerLayout page="pre-vendas">
     <div className="min-h-screen bg-[#09090b] text-white">
       <Header />
 
@@ -136,6 +138,7 @@ const PreVendas = () => {
       <FaqSection />
       <Footer />
     </div>
+    </SideBannerLayout>
   );
 };
 

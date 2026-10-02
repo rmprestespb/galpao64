@@ -13,6 +13,12 @@ export default {
       },
     },
     extend: {
+      // Breakpoint extra só pra decidir quando os banners laterais (ver
+      // SideBannerLayout) têm espaço garantido ao lado do conteúdo (que trava
+      // em 1400px) sem espremer nada — abaixo disso eles ficam ocultos.
+      screens: {
+        "3xl": "1800px",
+      },
       fontFamily: {
         sans: ["Montserrat", "system-ui", "sans-serif"],
         display: ["Montserrat", "system-ui", "sans-serif"],
