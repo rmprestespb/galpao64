@@ -18,7 +18,7 @@ const BannerSlide = ({ banner }: { banner: BannerRow }) => {
           alt=""
           aria-hidden
           loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-[1.04]"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
         />
       ) : (
         <div
@@ -30,12 +30,13 @@ const BannerSlide = ({ banner }: { banner: BannerRow }) => {
           }}
         />
       )}
+      {/* Vinheta bem sutil só no topo (brilho de marca) — não escurece o resto
+          da foto, que agora fica nítida do jeito que foi cadastrada. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
-          background:
-            "linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.92) 100%), radial-gradient(70% 50% at 50% 0%, hsl(var(--primary)/0.16), transparent 70%)",
+          background: "radial-gradient(70% 45% at 50% 0%, hsl(var(--primary)/0.1), transparent 70%)",
         }}
       />
 
@@ -46,8 +47,9 @@ const BannerSlide = ({ banner }: { banner: BannerRow }) => {
         </span>
       )}
 
-      {/* Texto + CTA */}
-      <div className="relative z-10 flex flex-col gap-2 p-4">
+      {/* Texto + CTA — fundo escuro só atrás dessa faixa (não a foto inteira),
+          pra não brigar visualmente com arte/texto que já vem na própria foto. */}
+      <div className="relative z-10 flex flex-col gap-2 bg-gradient-to-t from-black from-55% via-black/85 to-transparent px-4 pb-4 pt-10">
         <h3 className="text-base font-black uppercase leading-[1.1] tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
           {banner.titulo}
         </h3>
