@@ -397,7 +397,7 @@ const AdminBanners = () => {
             <div className="space-y-2">
               <Label>Foto</Label>
               {form.imagemUrl ? (
-                <div className="relative aspect-[3/4] w-32 overflow-hidden rounded bg-black">
+                <div className="relative aspect-[2/7] w-24 overflow-hidden rounded bg-black">
                   <img src={form.imagemUrl} alt="" className="h-full w-full object-cover" />
                   <button
                     type="button"
@@ -409,15 +409,18 @@ const AdminBanners = () => {
                   </button>
                 </div>
               ) : (
-                <label className="flex aspect-[3/4] w-32 cursor-pointer flex-col items-center justify-center gap-1 rounded border-2 border-dashed border-border text-xs text-muted-foreground transition-colors hover:border-accent">
+                <label className="flex aspect-[2/7] w-24 cursor-pointer flex-col items-center justify-center gap-1 rounded border-2 border-dashed border-border text-xs text-muted-foreground transition-colors hover:border-accent">
                   {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                   Adicionar
                   <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
                 </label>
               )}
               <p className="text-[11px] text-muted-foreground">
-                Sem foto, o banner mostra um fundo texturizado escuro com o título — funciona, mas uma foto de
-                campanha fica melhor.
+                O espaço do banner no site é fixo: bem estreito e alto (parecido com o formato clássico de banner
+                publicitário "Skyscraper"). A foto que você subir é sempre cortada automaticamente pra preencher essa
+                caixa — fica mais bonito com uma foto vertical já nessa proporção. Tamanho sugerido: algo em torno de{" "}
+                <strong className="text-foreground">300×1050px</strong> (proporção aproximada 2:7). Sem foto, o
+                banner mostra um fundo texturizado escuro com o título.
               </p>
             </div>
 
