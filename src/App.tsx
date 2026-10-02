@@ -10,6 +10,7 @@ import Admin from "./pages/Admin.tsx";
 import AdminPreVendas from "./pages/AdminPreVendas.tsx";
 import AdminPedidos from "./pages/AdminPedidos.tsx";
 import AdminGaleria from "./pages/AdminGaleria.tsx";
+import AdminBanners from "./pages/AdminBanners.tsx";
 import NoGalpao from "./pages/NoGalpao.tsx";
 import Aura from "./pages/Aura.tsx";
 import Album from "./pages/Album.tsx";
@@ -56,6 +57,7 @@ const App = () => {
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/pre-vendas" element={<AdminPreVendas />} />
+            <Route path="/admin/banners" element={<AdminBanners />} />
             <Route path="/admin/pedidos" element={<AdminPedidos />} />
             <Route path="/admin/no-galpao" element={<AdminGaleria />} />
             <Route path="/admin/recibos" element={<Receipts />} />

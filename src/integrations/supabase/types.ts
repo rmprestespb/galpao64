@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      banners: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          cta_label: string | null
+          data_fim: string | null
+          data_inicio: string | null
+          descricao: string | null
+          id: string
+          imagem_url: string | null
+          link: string | null
+          ordem: number
+          pagina: string | null
+          posicao: string
+          selo: string | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          cta_label?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
+          id?: string
+          imagem_url?: string | null
+          link?: string | null
+          ordem?: number
+          pagina?: string | null
+          posicao: string
+          selo?: string | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          cta_label?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
+          id?: string
+          imagem_url?: string | null
+          link?: string | null
+          ordem?: number
+          pagina?: string | null
+          posicao?: string
+          selo?: string | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       brands: {
         Row: {
           accent_color: string | null

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { CalendarIcon, Flame, Images, Loader2, Lock, LogOut, Pencil, Plus, Trash2, Upload, X, Film, FileText, Package, ClipboardList } from "lucide-react";
+import { CalendarIcon, Flame, Images, Loader2, Lock, LogOut, Pencil, Plus, Trash2, Upload, X, Film, FileText, Package, ClipboardList, GalleryHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -424,6 +424,11 @@ const Admin = () => {
             <Button asChild variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10">
               <Link to="/admin/no-galpao">
                 <Images className="h-4 w-4" /> No Galpão
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10">
+              <Link to="/admin/banners">
+                <GalleryHorizontal className="h-4 w-4" /> Banners
               </Link>
             </Button>
             <Button asChild variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10">
