@@ -273,7 +273,10 @@ const AdminBanners = () => {
 
       {items.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
-          Nenhum banner cadastrado nesse lado ainda.
+          <p>Nenhum banner cadastrado nesse lado ainda.</p>
+          <p className="mt-1 font-bold text-primary">
+            Tamanho ideal da foto: 300×1050px (proporção aproximada 1:3,5)
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
