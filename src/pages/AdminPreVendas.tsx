@@ -11,6 +11,7 @@ import {
   Upload,
   X,
   ArrowLeft,
+  Wand2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -257,6 +258,72 @@ const AdminPreVendas = () => {
     return data.publicUrl;
   };
 
+  // Padroniza as fotos JÁ cadastradas (cadastradas antes do redimensionamento
+  // automático). Baixa cada foto, e se não estiver em 1200×900 recorta/redimensiona,
+  // sobe a versão nova e troca o endereço no cadastro. As fotos originais
+  // continuam guardadas no storage (nada é apagado). Rodar de novo é seguro:
+  // fotos que já estão no padrão são puladas.
+  const [normalizing, setNormalizing] = useState(false);
+  const [normalizeConfirmOpen, setNormalizeConfirmOpen] = useState(false);
+  const [normalizeProgress, setNormalizeProgress] = useState("");
+
+  const handleNormalizeExisting = async () => {
+    setNormalizeConfirmOpen(false);
+    setNormalizing(true);
+    let changed = 0;
+    let skipped = 0;
+    let failed = 0;
+    try {
+      for (let i = 0; i < products.length; i++) {
+        const p = products[i];
+        setNormalizeProgress(`${i + 1}/${products.length}`);
+        const fields = [
+          ["image_url", p.image_url],
+          ["hover_image_url", p.hover_image_url],
+          ["extra_image_url", p.extra_image_url],
+        ] as const;
+        const updates: Record<string, string> = {};
+        for (const [col, url] of fields) {
+          if (!url) continue;
+          try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const blob = await res.blob();
+            const bmp = await createImageBitmap(blob);
+            const already = bmp.width === 1200 && bmp.height === 900;
+            bmp.close();
+            if (already) {
+              skipped++;
+              continue;
+            }
+            const ext = blob.type.split("/")[1] || "jpg";
+            const file = new File([blob], `foto.${ext}`, { type: blob.type || "image/jpeg" });
+            updates[col] = await uploadImage(file);
+            changed++;
+          } catch (err) {
+            failed++;
+            console.error("Falha ao padronizar foto", p.id, col, err);
+          }
+        }
+        if (Object.keys(updates).length > 0) {
+          const { error } = await supabase.from("presale_products").update(updates).eq("id", p.id);
+          if (error) {
+            failed++;
+            console.error("Falha ao salvar fotos novas", p.id, error);
+          }
+        }
+      }
+      await fetchProducts();
+      toast.success("Fotos padronizadas", {
+        description: `${changed} ajustada(s), ${skipped} já estavam no padrão${failed ? `, ${failed} com falha` : ""}.`,
+        duration: 8000,
+      });
+    } finally {
+      setNormalizing(false);
+      setNormalizeProgress("");
+    }
+  };
+
   const handleUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     field: "imageUrl" | "hoverImageUrl" | "extraImageUrl",
@@ -387,10 +454,38 @@ const AdminPreVendas = () => {
               Miniaturas exibidas em /pre-vendas e nas páginas de cada marca
             </p>
           </div>
-          <Button onClick={openCreate} className="font-bold tracking-wider">
-            <Plus className="h-4 w-4" /> NOVA PRÉ-VENDA
-          </Button>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setNormalizeConfirmOpen(true)}
+              disabled={normalizing || products.length === 0}
+              className="font-bold tracking-wider"
+            >
+              {normalizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+              {normalizing ? `PADRONIZANDO ${normalizeProgress}` : "PADRONIZAR FOTOS ANTIGAS"}
+            </Button>
+            <Button onClick={openCreate} className="font-bold tracking-wider">
+              <Plus className="h-4 w-4" /> NOVA PRÉ-VENDA
+            </Button>
+          </div>
         </div>
+
+        <AlertDialog open={normalizeConfirmOpen} onOpenChange={setNormalizeConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Padronizar fotos já cadastradas?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Todas as fotos das pré-vendas que não estiverem em 1200×900px (4:3) serão cortadas no centro e
+                redimensionadas. As fotos originais continuam guardadas, nada é apagado. Pode levar alguns minutos —
+                mantenha esta página aberta até terminar.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleNormalizeExisting}>Padronizar</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {loading ? (
           <div className="flex justify-center py-20">
@@ -407,7 +502,7 @@ const AdminPreVendas = () => {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {products.map((p) => (
               <article key={p.id} className="rounded-lg border border-border/60 bg-card overflow-hidden flex flex-col">
-                <div className="aspect-square bg-black relative">
+                <div className="aspect-[4/3] bg-black relative">
                   <img src={p.image_url} alt={p.name} className="h-full w-full object-cover" />
                   {!p.is_published && (
                     <span className="absolute top-2 left-2 text-xs bg-background/90 px-2 py-1 rounded">
