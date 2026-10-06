@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { resizeImage } from "@/lib/resizeImage";
 import {
   Dialog,
   DialogContent,
@@ -151,7 +152,7 @@ const AdminBanners = () => {
   };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    let file = e.target.files?.[0];
     if (!file) return;
     const MAX_BYTES = 25 * 1024 * 1024;
     if (file.size > MAX_BYTES) {
@@ -162,14 +163,12 @@ const AdminBanners = () => {
     setUploading(true);
     try {
       const rawExt = file.name.includes(".") ? file.name.split(".").pop() ?? "" : "";
-      let ext = rawExt.toLowerCase().replace(/[^a-z0-9]/g, "");
-      if (!ext) {
-        const mimeExt = file.type.split("/")[1]?.toLowerCase();
-        ext = mimeExt && /^[a-z0-9]+$/.test(mimeExt) ? mimeExt : "jpg";
-      }
-      if (ext === "heic" || ext === "heif") {
+      if (/^hei[cf]$/i.test(rawExt)) {
         throw new Error(`"${file.name}" está em formato HEIC (iPhone). Converta para JPG ou PNG antes de enviar.`);
       }
+      // Padroniza qualquer tamanho pra 600×2100 (proporção 2:7, 2x o tamanho exibido — nítido em telas retina).
+      file = await resizeImage(file, { width: 600, height: 2100 });
+      const ext = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
       const path = `banners/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const { error } = await supabase.storage.from("product-media").upload(path, file, {
         contentType: file.type || "image/jpeg",
@@ -420,9 +419,9 @@ const AdminBanners = () => {
               )}
               <p className="text-[11px] text-muted-foreground">
                 O espaço do banner no site é fixo: bem estreito e alto (parecido com o formato clássico de banner
-                publicitário "Skyscraper"). A foto que você subir é sempre cortada automaticamente pra preencher essa
-                caixa — fica mais bonito com uma foto vertical já nessa proporção. Tamanho sugerido: algo em torno de{" "}
-                <strong className="text-foreground">300×1050px</strong> (proporção aproximada 2:7). Sem foto, o
+                publicitário "Skyscraper"). Pode enviar a foto em qualquer tamanho: o site ajusta sozinho pro padrão{" "}
+                <strong className="text-foreground">600×2100px</strong> (proporção 2:7), cortando no centro e mantendo a
+                qualidade — fica mais bonito com uma foto vertical já nessa proporção (ex.: 300×1050px ou maior). Sem foto, o
                 banner mostra um fundo texturizado escuro com o título.
               </p>
             </div>

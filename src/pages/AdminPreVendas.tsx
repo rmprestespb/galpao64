@@ -50,6 +50,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { resizeImage } from "@/lib/resizeImage";
 import { SingleBrand, formatDeadline, formatEta, slugifyBrand } from "@/data/preVendas";
 import type { PresaleProductRow } from "@/data/preVendas";
 import { useBrands } from "@/hooks/useBrands";
@@ -237,14 +238,14 @@ const AdminPreVendas = () => {
       throw new Error(`"${file.name}" tem ${(file.size / 1024 / 1024).toFixed(1)}MB. Máximo 25MB.`);
     }
     const rawExt = file.name.includes(".") ? file.name.split(".").pop() ?? "" : "";
-    let ext = rawExt.toLowerCase().replace(/[^a-z0-9]/g, "");
-    if (!ext) {
-      const mimeExt = file.type.split("/")[1]?.toLowerCase();
-      ext = mimeExt && /^[a-z0-9]+$/.test(mimeExt) ? mimeExt : "jpg";
-    }
-    if (ext === "heic" || ext === "heif") {
+    if (/^hei[cf]$/i.test(rawExt)) {
       throw new Error(`"${file.name}" está em formato HEIC (iPhone). Converta para JPG ou PNG antes de enviar.`);
     }
+    // Padroniza qualquer tamanho enviado pra 1200×900 (4:3), igual à caixa do card.
+    const processed = await resizeImage(file, { width: 1200, height: 900 });
+    file = processed;
+    let ext = processed.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") ?? "";
+    if (!ext) ext = "jpg";
     const path = `presale/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const { error } = await supabase.storage.from("product-media").upload(path, file, {
       contentType: file.type || "image/jpeg",
@@ -589,8 +590,13 @@ const AdminPreVendas = () => {
 
             <div className="space-y-2">
               <Label>Foto principal *</Label>
+              <p className="text-[11px] text-muted-foreground">
+                Pode enviar a foto em qualquer tamanho: o site ajusta sozinho pro padrão{" "}
+                <strong className="text-foreground">1200×900px</strong> (horizontal, 4:3), cortando no centro e mantendo
+                a qualidade. Prefira fotos horizontais com a miniatura centralizada.
+              </p>
               {form.imageUrl ? (
-                <div className="relative aspect-video w-full max-w-xs overflow-hidden rounded bg-black">
+                <div className="relative aspect-[4/3] w-full max-w-xs overflow-hidden rounded bg-black">
                   <img src={form.imageUrl} alt="" className="h-full w-full object-cover" />
                   <button
                     type="button"
@@ -601,7 +607,7 @@ const AdminPreVendas = () => {
                   </button>
                 </div>
               ) : (
-                <label className="flex aspect-video w-full max-w-xs items-center justify-center gap-2 rounded border-2 border-dashed border-border hover:border-accent text-xs text-muted-foreground cursor-pointer transition-colors">
+                <label className="flex aspect-[4/3] w-full max-w-xs items-center justify-center gap-2 rounded border-2 border-dashed border-border hover:border-accent text-xs text-muted-foreground cursor-pointer transition-colors">
                   {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                   Enviar foto
                   <input type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "imageUrl")} />
@@ -611,8 +617,13 @@ const AdminPreVendas = () => {
 
             <div className="space-y-2">
               <Label>Foto de hover (opcional — some ao passar o mouse)</Label>
+              <p className="text-[11px] text-muted-foreground">
+                Pode enviar a foto em qualquer tamanho: o site ajusta sozinho pro padrão{" "}
+                <strong className="text-foreground">1200×900px</strong> (horizontal, 4:3), cortando no centro e mantendo
+                a qualidade. Prefira fotos horizontais com a miniatura centralizada.
+              </p>
               {form.hoverImageUrl ? (
-                <div className="relative aspect-video w-full max-w-xs overflow-hidden rounded bg-black">
+                <div className="relative aspect-[4/3] w-full max-w-xs overflow-hidden rounded bg-black">
                   <img src={form.hoverImageUrl} alt="" className="h-full w-full object-cover" />
                   <button
                     type="button"
@@ -623,7 +634,7 @@ const AdminPreVendas = () => {
                   </button>
                 </div>
               ) : (
-                <label className="flex aspect-video w-full max-w-xs items-center justify-center gap-2 rounded border-2 border-dashed border-border hover:border-accent text-xs text-muted-foreground cursor-pointer transition-colors">
+                <label className="flex aspect-[4/3] w-full max-w-xs items-center justify-center gap-2 rounded border-2 border-dashed border-border hover:border-accent text-xs text-muted-foreground cursor-pointer transition-colors">
                   {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                   Enviar foto
                   <input type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "hoverImageUrl")} />
@@ -633,8 +644,13 @@ const AdminPreVendas = () => {
 
             <div className="space-y-2">
               <Label>Foto extra (opcional — 3ª foto, ex: embalagem/blister)</Label>
+              <p className="text-[11px] text-muted-foreground">
+                Pode enviar a foto em qualquer tamanho: o site ajusta sozinho pro padrão{" "}
+                <strong className="text-foreground">1200×900px</strong> (horizontal, 4:3), cortando no centro e mantendo
+                a qualidade. Prefira fotos horizontais com a miniatura centralizada.
+              </p>
               {form.extraImageUrl ? (
-                <div className="relative aspect-video w-full max-w-xs overflow-hidden rounded bg-black">
+                <div className="relative aspect-[4/3] w-full max-w-xs overflow-hidden rounded bg-black">
                   <img src={form.extraImageUrl} alt="" className="h-full w-full object-cover" />
                   <button
                     type="button"
@@ -645,7 +661,7 @@ const AdminPreVendas = () => {
                   </button>
                 </div>
               ) : (
-                <label className="flex aspect-video w-full max-w-xs items-center justify-center gap-2 rounded border-2 border-dashed border-border hover:border-accent text-xs text-muted-foreground cursor-pointer transition-colors">
+                <label className="flex aspect-[4/3] w-full max-w-xs items-center justify-center gap-2 rounded border-2 border-dashed border-border hover:border-accent text-xs text-muted-foreground cursor-pointer transition-colors">
                   {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                   Enviar foto
                   <input type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, "extraImageUrl")} />
