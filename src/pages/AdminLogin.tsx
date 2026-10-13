@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import PasswordInput from "@/components/PasswordInput";
 
 const schema = z.object({
   email: z.string().trim().email({ message: "Email inválido" }).max(255),
@@ -20,7 +21,7 @@ const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
 
   useEffect(() => {
     if (!authLoading && user && isAdmin) navigate("/admin", { replace: true });
@@ -28,6 +29,26 @@ const AdminLogin = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (mode === "forgot") {
+      const parsedEmail = schema.shape.email.safeParse(email);
+      if (!parsedEmail.success) {
+        toast.error(parsedEmail.error.issues[0].message);
+        return;
+      }
+      setSubmitting(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(parsedEmail.data, {
+        redirectTo: `${window.location.origin}/admin/redefinir-senha`,
+      });
+      setSubmitting(false);
+      if (error) {
+        toast.error("Não foi possível enviar o email", { description: error.message });
+        return;
+      }
+      // Mensagem neutra: não revela se o email existe ou não no sistema.
+      toast.success("Se esse email tiver acesso, enviamos um link pra redefinir a senha.", { duration: 9000 });
+      setMode("signin");
+      return;
+    }
     const parsed = schema.safeParse({ email, password });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
@@ -88,21 +109,36 @@ const AdminLogin = () => {
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          {mode !== "forgot" && (
+            <div className="space-y-2">
+              <Label htmlFor="password">Senha</Label>
+              <PasswordInput
+                id="password"
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+          )}
+          {mode === "forgot" && (
+            <p className="text-xs text-muted-foreground">
+              Digite o email do seu acesso. Vamos enviar um link pra você criar uma senha nova.
+            </p>
+          )}
           <Button type="submit" disabled={submitting} className="w-full font-bold tracking-widest">
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-            {mode === "signup" ? "CRIAR CONTA" : "ENTRAR"}
+            {mode === "signup" ? "CRIAR CONTA" : mode === "forgot" ? "ENVIAR LINK" : "ENTRAR"}
           </Button>
+          {mode === "signin" && (
+            <button
+              type="button"
+              onClick={() => setMode("forgot")}
+              className="w-full text-xs text-muted-foreground hover:text-accent transition-colors"
+            >
+              Esqueci minha senha
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
@@ -110,7 +146,9 @@ const AdminLogin = () => {
           >
             {mode === "signin"
               ? "Primeira vez? Criar conta admin"
-              : "Já tenho conta · Entrar"}
+              : mode === "forgot"
+                ? "Voltar ao login"
+                : "Já tenho conta · Entrar"}
           </button>
         </form>
       </div>
