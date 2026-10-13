@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "./pages/NotFound.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
+import AdminResetPassword from "./pages/AdminResetPassword.tsx";
 import Admin from "./pages/Admin.tsx";
 import AdminPreVendas from "./pages/AdminPreVendas.tsx";
 import AdminPedidos from "./pages/AdminPedidos.tsx";
@@ -55,6 +56,7 @@ const App = () => {
                 por <Route path="/" element={<Index />} /> e reimportar Index. */}
             <Route path="/" element={<Navigate to="/pre-vendas" replace />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/redefinir-senha" element={<AdminResetPassword />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/pre-vendas" element={<AdminPreVendas />} />
             <Route path="/admin/banners" element={<AdminBanners />} />
