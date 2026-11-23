@@ -22,7 +22,7 @@ const AVAILABILITY_FILTERS: { key: "todas" | AvailabilityStatus; label: string }
   { key: "encerrada", label: "Encerradas" },
 ];
 
-import galpaoLogo from "@/assets/galpao64-logo.png";
+import galpaoLogo from "@/assets/galpao64-logo-leve.webp";
 import heroMiniGt from "@/assets/prevendas-hero-mini-gt.jpg";
 import heroPopRace from "@/assets/prevendas-hero-pop-race.jpg";
 import heroTarmacWorks from "@/assets/prevendas-hero-tarmac-works.jpg";

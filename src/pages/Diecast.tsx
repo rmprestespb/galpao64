@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/carousel";
 import LaserScan from "@/components/diecast/LaserScan";
 import XRayMagnifier from "@/components/diecast/XRayMagnifier";
-import galpaoLogo from "@/assets/galpao64-logo.png";
+import galpaoLogo from "@/assets/galpao64-logo-leve.webp";
 import monsterHero from "@/assets/diecast-monster-hero.jpg";
 import salao from "@/assets/diecast-salao.jpg";
 import trocas from "@/assets/diecast-trocas.jpg";

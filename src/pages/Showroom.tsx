@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import galpaoLogo from "@/assets/galpao64-logo.png";
+import galpaoLogo from "@/assets/galpao64-logo-leve.webp";
 import garageBg from "@/assets/luxury-garage-bg.jpg";
 
 const Showroom = () => {

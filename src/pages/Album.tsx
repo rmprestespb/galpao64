@@ -18,7 +18,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import galpaoLogo from "@/assets/galpao64-logo.png";
+import galpaoLogo from "@/assets/galpao64-logo-leve.webp";
 import Footer from "@/components/Footer";
 
 type ReservationStatus = "na_garagem" | "aguardando_envio";
