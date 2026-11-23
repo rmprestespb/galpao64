@@ -1,31 +1,34 @@
-import { useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "./pages/NotFound.tsx";
-import AdminLogin from "./pages/AdminLogin.tsx";
-import AdminResetPassword from "./pages/AdminResetPassword.tsx";
-import Admin from "./pages/Admin.tsx";
-import AdminPreVendas from "./pages/AdminPreVendas.tsx";
-import AdminPedidos from "./pages/AdminPedidos.tsx";
-import AdminGaleria from "./pages/AdminGaleria.tsx";
-import AdminBanners from "./pages/AdminBanners.tsx";
-import NoGalpao from "./pages/NoGalpao.tsx";
-import Aura from "./pages/Aura.tsx";
-import Album from "./pages/Album.tsx";
-import Receipts from "./pages/Receipts.tsx";
-import Diecast from "./pages/Diecast.tsx";
-import Showroom from "./pages/Showroom.tsx";
-import MysteryBox from "./pages/MysteryBox.tsx";
 import PreVendas from "./pages/PreVendas.tsx";
 import PreVendasMarca from "./pages/PreVendasMarca.tsx";
-import Empresa from "./pages/Empresa.tsx";
-import PoliticaPrivacidade from "./pages/PoliticaPrivacidade.tsx";
-import TermosUso from "./pages/TermosUso.tsx";
-import TermosCompra from "./pages/TermosCompra.tsx";
 import SplashScreen from "./components/SplashScreen.tsx";
+// Páginas fora do caminho principal (admin, álbum, institucionais etc.) são
+// carregadas só quando a pessoa entra nelas, pra a primeira visita ficar mais leve.
+// PreVendas/PreVendasMarca (o fluxo principal) e NotFound continuam carregadas direto.
+const AdminLogin = lazy(() => import("./pages/AdminLogin.tsx"));
+const AdminResetPassword = lazy(() => import("./pages/AdminResetPassword.tsx"));
+const Admin = lazy(() => import("./pages/Admin.tsx"));
+const AdminPreVendas = lazy(() => import("./pages/AdminPreVendas.tsx"));
+const AdminPedidos = lazy(() => import("./pages/AdminPedidos.tsx"));
+const AdminGaleria = lazy(() => import("./pages/AdminGaleria.tsx"));
+const AdminBanners = lazy(() => import("./pages/AdminBanners.tsx"));
+const NoGalpao = lazy(() => import("./pages/NoGalpao.tsx"));
+const Aura = lazy(() => import("./pages/Aura.tsx"));
+const Album = lazy(() => import("./pages/Album.tsx"));
+const Receipts = lazy(() => import("./pages/Receipts.tsx"));
+const Diecast = lazy(() => import("./pages/Diecast.tsx"));
+const Showroom = lazy(() => import("./pages/Showroom.tsx"));
+const MysteryBox = lazy(() => import("./pages/MysteryBox.tsx"));
+const Empresa = lazy(() => import("./pages/Empresa.tsx"));
+const PoliticaPrivacidade = lazy(() => import("./pages/PoliticaPrivacidade.tsx"));
+const TermosUso = lazy(() => import("./pages/TermosUso.tsx"));
+const TermosCompra = lazy(() => import("./pages/TermosCompra.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -49,6 +52,13 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           {!splashDone && <SplashScreen onEnter={handleEnter} />}
+          <Suspense
+            fallback={
+              <div className="flex min-h-screen items-center justify-center bg-[#09090b]">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              </div>
+            }
+          >
           <Routes>
             {/* "/" entra direto em Pré-vendas (pedido do Robson). A home antiga
                 (Garagem/Sobre, Index.tsx) continua existindo no repo, só não
@@ -78,6 +88,7 @@ const App = () => {
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

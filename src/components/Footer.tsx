@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Disc3 } from "lucide-react";
-import galpaoLogo from "@/assets/galpao64-logo.png";
+import galpaoLogo from "@/assets/galpao64-logo-leve.webp";
 import { WHATSAPP_NUMBER } from "@/data/preVendas";
 
 /**
